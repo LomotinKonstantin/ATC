@@ -7,11 +7,19 @@ class Config(object):
         self._section = "Settings"
         self._delimiter = ", "
         # Initialising config options
+        self.ID_OPTION = "available_ids"
+        self.PREPROC_OPTION = "preprocessor"
+        self.WE_OPTION = "we_import"
+        self.CLASSIFIER_OPTION = "classifier_import"
+        self.FORMAT_OPTION = "available_formats"
+        self.LANG_OPTION = "available_languages"
         self.options = {
-            "available_ids" : ["SUBJ", "IPV", "GRNTI", "RV"],
-            "preprocessor" : "",
-            "we_import" : "",
-            "classifier_import" : ""
+            self.ID_OPTION : ["SUBJ", "IPV"],
+            self.PREPROC_OPTION : "",
+            self.WE_OPTION : "",
+            self.CLASSIFIER_OPTION : "",
+            self.FORMAT_OPTION : ["plain", "divided"],
+            self.LANG_OPTION : ["ru"]
         }
 
     def save(self):
