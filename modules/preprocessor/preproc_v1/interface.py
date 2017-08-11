@@ -3,10 +3,13 @@ import re
 from pymystem3.mystem import Mystem
 import pandas as pd
 
+from modules.common import Module
 
-class Preprocessor:
+
+class Preprocessor(Module):
 
     def __init__(self, rubr_id, lang):
+        super().__init__()
         if not isinstance(rubr_id, str):
             raise TypeError("Expected parameter rubr_id of type str, got type " + str(type(rubr_id)))
         if not isinstance(lang, str):
