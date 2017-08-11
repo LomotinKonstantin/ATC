@@ -8,7 +8,7 @@ class Config(object):
         self._delimiter = ", "
         # Initialising config options
         self.ID_OPTION = "available_ids"
-        self.PREPROC_OPTION = "preprocessor"
+        self.PREPROC_OPTION = "preprocessor_import"
         self.WE_OPTION = "we_import"
         self.CLASSIFIER_OPTION = "classifier_import"
         self.FORMAT_OPTION = "available_formats"
@@ -42,11 +42,16 @@ class Config(object):
         parser = ConfigParser()
         parser.read(self._filename)
         for name, str_value in dict(parser.items(self._section)).items():
+            # If the value is the list
             if self._delimiter in str_value:
                 value = str_value.split(self._delimiter)
             else:
                 value = str_value
             self.options[name] = value
+        # Checking options that have to be list type,
+        # but initially have only one value
+        if not isinstance(self.options[self.LANG_OPTION], list):
+            self.options[self.LANG_OPTION] = [self.options[self.LANG_OPTION]]
 
     def get(self, option):
         return self.options[option]

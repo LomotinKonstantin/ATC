@@ -1,10 +1,22 @@
 import PyQt5.QtWidgets as qw
+import PyQt5.QtCore as qc
+from PyQt5.QtGui import QIcon
+import sys
 
 
 class UI(qw.QMainWindow):
 
     def __init__(self):
-        pass
+        super().__init__()
+        self.setMinimumSize(qc.QSize(800, 600))
+        self.setWindowTitle("ATC: Automatic Text Classifier")
+        self.setWindowIcon(QIcon("icon.ico"))
 
     def launch(self):
-        pass
+        self.show()
+
+if __name__ == "__main__":
+    app = qw.QApplication(sys.argv)
+    ui = UI()
+    ui.launch()
+    sys.exit(app.exec())
