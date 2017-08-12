@@ -1,12 +1,14 @@
 import PyQt5.QtWidgets as qw
 
 
-class OptionBar(qw.QWidget):
+class OptionBar(qw.QGroupBox):
 
     def __init__(self, config, parent=None):
-        super().__init__(parent)
+        super().__init__("Параметры", parent=parent)
+        self.setMinimumWidth(100)
+        self.setMinimumHeight(100)
         # setting up form layout for parameter specifying
-        layout = qw.QFormLayout(self)
+        layout = qw.QFormLayout()
         self.setLayout(layout)
         # rubricator id
         id_selector = qw.QComboBox(self)

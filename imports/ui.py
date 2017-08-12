@@ -1,7 +1,8 @@
 import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
 from PyQt5.QtGui import QIcon
-import sys
+
+from imports.widgets.MainWidget import MainWidget
 
 
 class UI(qw.QMainWindow):
@@ -12,20 +13,17 @@ class UI(qw.QMainWindow):
         self.setWindowTitle("ATC: Automatic Text Classifier")
         self.setWindowIcon(QIcon("icon.ico"))
         # Setting up the layout
-        layout = qw.QHBoxLayout(self)
-        # opt_bar = OptionBar()
-        # layout.addWidget(opt_bar)
-        # Setting side option bar
-
-
+        self.setCentralWidget(MainWidget(config))
 
 
 
     def launch(self):
         self.show()
 
-if __name__ == "__main__":
-    app = qw.QApplication(sys.argv)
-    ui = UI()
-    ui.launch()
-    sys.exit(app.exec())
+
+# from ATC import ATC
+# if __name__ == "__main__":
+#     app = qw.QApplication(sys.argv)
+#     ui = UI(ATC.config)
+#     ui.launch()
+#     sys.exit(app.exec())
