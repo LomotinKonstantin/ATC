@@ -11,6 +11,13 @@ class UI(qw.QMainWindow):
         self.setMinimumSize(qc.QSize(800, 600))
         self.setWindowTitle("ATC: Automatic Text Classifier")
         self.setWindowIcon(QIcon("icon.ico"))
+        # Setting up the layout
+        layout = qw.QHBoxLayout(self)
+        # Setting side option bar
+
+
+
+
 
     def launch(self):
         self.show()
