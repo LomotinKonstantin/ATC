@@ -10,9 +10,6 @@ class MainWidget(qw.QWidget):
         super().__init__(parent)
         layout = qw.QGridLayout()
         self.setLayout(layout)
-        # Widget with control buttons
-        control = ControlWidget()
-        layout.addWidget(control, 1, 1)
         # Setting side option bar
         opt_bar = OptionBar(config)
         layout.addWidget(opt_bar, 0, 1)
