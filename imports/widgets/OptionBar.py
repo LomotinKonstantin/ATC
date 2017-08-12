@@ -5,8 +5,6 @@ class OptionBar(qw.QGroupBox):
 
     def __init__(self, config, parent=None):
         super().__init__("Параметры", parent=parent)
-        self.setMinimumWidth(100)
-        self.setMinimumHeight(100)
         # setting up form layout for parameter specifying
         layout = qw.QFormLayout()
         self.setLayout(layout)
