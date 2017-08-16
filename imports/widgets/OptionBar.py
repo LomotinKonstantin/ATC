@@ -27,10 +27,3 @@ class OptionBar(qw.QGroupBox):
         threshold.setMaximum(1.0)
         layout.addRow("Порог вероятности", threshold)
 
-# import sys
-# from ATC import ATC
-# if __name__ == "__main__":
-#     app = qw.QApplication(sys.argv)
-#     a = OptionBar(ATC.config)
-#     a.show()
-#     sys.exit(app.exec())

@@ -18,15 +18,5 @@ class UI(qw.QMainWindow):
         self.addToolBar(toolbar)
         self.setCentralWidget(MainWidget(config))
 
-
-
     def launch(self):
         self.show()
-
-
-# from ATC import ATC
-# if __name__ == "__main__":
-#     app = qw.QApplication(sys.argv)
-#     ui = UI(ATC.config)
-#     ui.launch()
-#     sys.exit(app.exec())
