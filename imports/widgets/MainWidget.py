@@ -1,5 +1,4 @@
 import PyQt5.QtWidgets as qw
-import PyQt5.QtGui as qg
 
 from imports.widgets.OptionBar import OptionBar
 from imports.widgets.TextWidget import TextWidget
@@ -12,8 +11,8 @@ class MainWidget(qw.QWidget):
         layout = qw.QHBoxLayout()
         self.setLayout(layout)
         # Setting text widget
-        text_widget = TextWidget()
-        layout.addWidget(text_widget)
+        self.text_widget = TextWidget()
+        layout.addWidget(self.text_widget)
         # Setting side option bar
         opt_bar = OptionBar(config)
         layout.addWidget(opt_bar)

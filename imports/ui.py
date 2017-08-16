@@ -17,6 +17,19 @@ class UI(qw.QMainWindow):
         toolbar = ControlWidget()
         self.addToolBar(toolbar)
         self.setCentralWidget(MainWidget(config))
+        # Menu bar
+        menu = qw.QMenuBar()
+        self.setMenuBar(menu)
+
+        file_menu = menu.addMenu("Файл")
+        file_menu.addAction(toolbar.open_action)
+        toolbar.open_action.triggered.connect(self.open_file)
+        file_menu.addAction(toolbar.export_action)
+
+    def open_file(self):
+        file_dialog = qw.QFileDialog()
+        filename = file_dialog.getOpenFileName()[0]
+
 
     def launch(self):
         self.show()

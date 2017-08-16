@@ -1,5 +1,5 @@
 import PyQt5.QtWidgets as qw
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QKeySequence
 
 import imports.widgets.tool_icons
 
@@ -10,10 +10,13 @@ class ControlWidget(qw.QToolBar):
         super().__init__(parent)
         self.setMovable(False)
         self.analyze_action = qw.QAction(QIcon(":/lamp.png"), "Анализировать", self)
+        self.analyze_action.setShortcut(QKeySequence("CTRL+R"))
         self.addAction(self.analyze_action)
-        self.open_action = qw.QAction(QIcon(":/import.png"), "Открыть файл", self)
+        self.open_action = qw.QAction(QIcon(":/import.png"), "Открыть", self)
+        self.open_action.setShortcut(QKeySequence("CTRL+O"))
         self.addAction(self.open_action)
         self.export_action = qw.QAction(QIcon(":/save.png"), "Экспорт результата", self)
+        self.export_action.setShortcut(QKeySequence("CTRL+S"))
         self.addAction(self.export_action)
         self.config_action = qw.QAction(QIcon(":/settings.png"), "Параметры конфигурации", self)
         self.addAction(self.config_action)
