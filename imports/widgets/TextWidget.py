@@ -15,3 +15,10 @@ class TextWidget(qw.QWidget):
         self.output_widget.setReadOnly(True)
         self.output_widget.setPlaceholderText("Здесь будет результат!")
         layout.addWidget(self.output_widget)
+
+    def indicate_error(self, error_msg="Error!"):
+        self.output_widget.setText(error_msg)
+
+    def show_text(self, text):
+        self.output_widget.setText("")
+        self.input_widget.setText(text)

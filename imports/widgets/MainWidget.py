@@ -21,3 +21,4 @@ class MainWidget(qw.QWidget):
         font = self.font()
         font.setPointSize(self.font_size)
         self.setFont(font)
+
