@@ -8,15 +8,20 @@ from modules.common import Module
 
 class Preprocessor(Module):
 
-    def __init__(self, rubr_id, lang):
+    def __init__(self, format, lang):
         super().__init__()
-        if not isinstance(rubr_id, str):
-            raise TypeError("Expected parameter rubr_id of type str, got type " + str(type(rubr_id)))
+        if not isinstance(format, str):
+            raise TypeError("Expected parameter 'format' of type str, got type " + str(type(format)))
         if not isinstance(lang, str):
             raise TypeError("Expected parameter lang of type str, got type " + str(type(lang)))
-        self.rubr_id = rubr_id
+        self.path = "./modules/preprocessor/preproc_v1/"
+        self.format = format
         self.lang = lang
         self._load_vocabulary()
+        self.email_re = "(^|(?<=\s))([\w._-]+@[a-zA-Z]+\.\w+)(?=\s|$)"
+        self.lemm = Mystem()
+        pac_str = ("(" + ")|(".join(self.stop_words) + ")" + "|(\w{,2})")
+        self.parse_re = re.compile("(^|(?<=\s))(" + pac_str + ")(?=\s|$)")
 
     def _load_vocabulary(self):
         # Loading VINITI alphabet
@@ -44,11 +49,11 @@ class Preprocessor(Module):
         #               "диакр. наезж."], axis=1, inplace=True)
         self.alphabet = [i for j in alph_df.values.flatten() for i in j]
         # Loading stop-words
-        self.stop_words = open(".vocabulary/stop_words.txt", encoding="utf-8").read().split("\n")
+        self.stop_words = open("./vocabulary/stop_words.txt", encoding="utf-8").read().split("\n")
         self.stop_words = list(filter(lambda a: a != "", self.stop_words))
 
     def process(self, text):
-        """ Processing some text. Removes tokens depending on 'mode' selected. Lemmatization included
+        """ Processes text. Removes all tokens except cyrillic and latin words. Lemmatization included
 
             Parameters
             ----------
@@ -57,22 +62,22 @@ class Preprocessor(Module):
             Returns
             -------
             Clear from VINITI`s alphabet and lemmatized text
-
         """
-        fin = "###"
-        s = text.strip()
-        if s.contains("_Ё"):
-            s.remove("_Ё")
+        s = text
+        # Definitely this check is not required
+        # _Ё is already in service characters list and will be removed
+        # if "_Ё" in s:
+        #     s.remove("_Ё")
         s = s.lower()
         s = re.sub(self.email_re, "", s)
-        for i in self.chars:
+        # Removing VINITI alphabet
+        for i in self.alphabet:
             s = s.replace(i, "")
         s = re.sub("\s+", " ", s)
         s = re.sub(self.parse_re, "", s)
-        print("Lemmatization...")
+        # Lemmatization
         s = "".join(self.lemm.lemmatize(s))
-        print("Removing redundant \"-\"")
         s = re.sub("(((?<=^)|(?<=\w))-+((?=\s)|(?=$)))|(((?<=^)|(?<=\s))-+((?=\w)|(?=\s)|(?=$)))", "", s)
-        print("Removing remainings")
         s = re.sub("(^|(?<=\s))\w{,2}(?=\s|$)", "", s)
-        return " ".join(list(filter(lambda a: a != "", s.split())))
+        res_str = " ".join(list(filter(lambda a: a != "", s.split())))
+        return pd.DataFrame(data=[res_str], columns=["text"])
