@@ -1,22 +1,28 @@
 from argparse import ArgumentParser
 import sys
 
+from PyQt5.QtWidgets import QApplication
+
 from imports.config import Config
 from imports.ui import UI
-from PyQt5.QtWidgets import QApplication
+from imports.analyzer import Analyzer
 
 
 class ATC:
     config = Config()
     # Just a stub. Static fields initialize before main code is run
     # So QApplication isn't launched yet and it crashes the app
-    ui = []
+    ui = None
+    analyzer = None
 
     def __init__(self):
         # initialising fields
+        print()
         self.parameters = {}
         # loading config
         self.config.load()
+        # loading core & modules
+        self.analyzer = Analyzer(self.config)
         # selecting mode
         if len(sys.argv) > 1:
             self._parse_args()

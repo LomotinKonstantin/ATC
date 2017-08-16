@@ -1,4 +1,5 @@
 import re
+import os
 
 from pymystem3.mystem import Mystem
 import pandas as pd
@@ -25,7 +26,7 @@ class Preprocessor(Module):
 
     def _load_vocabulary(self):
         # Loading VINITI alphabet
-        alph = open("./vocabulary/viniti_alphabet.txt").read().split("\n")
+        alph = open(os.path.dirname(__file__) + "/vocabulary/viniti_alphabet.txt").read().split("\n")
         alph = list(filter(lambda a: a != "", alph))
         rules = {}
         for i in alph:
@@ -49,7 +50,7 @@ class Preprocessor(Module):
         #               "диакр. наезж."], axis=1, inplace=True)
         self.alphabet = [i for j in alph_df.values.flatten() for i in j]
         # Loading stop-words
-        self.stop_words = open("./vocabulary/stop_words.txt", encoding="utf-8").read().split("\n")
+        self.stop_words = open(os.path.dirname(__file__) + "/vocabulary/stop_words.txt", encoding="utf-8").read().split("\n")
         self.stop_words = list(filter(lambda a: a != "", self.stop_words))
 
     def process(self, text):
