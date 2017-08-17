@@ -27,9 +27,8 @@ class ATC:
         if len(sys.argv) > 1:
             self._parse_args()
         else:
-            self.ui = UI()
+            self.ui = UI(self.config)
             self.ui.launch()
-
 
     def _parse_args(self):
         description = "Automated Text Classifier for VINITI. Чтобы запустить графический сеанс, " \
