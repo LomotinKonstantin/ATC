@@ -17,7 +17,14 @@ class TextWidget(qw.QWidget):
         layout.addWidget(self.output_widget)
 
     def indicate_error(self, error_msg="Error!"):
-        self.output_widget.setText(error_msg)
+        self.output_widget.setHtml("<font color=\"red\">" + error_msg + "</font>")
+
+    def show_output(self, output):
+        if isinstance(output, dict):
+            for i, j in output.items():
+                self.output_widget.append(str(i) + ":" + str(j) + "\n")
+        else:
+            self.output_widget.setText(output)
 
     def show_text(self, text):
         self.output_widget.setText("")

@@ -45,8 +45,8 @@ class Analyzer(QObject):
         try:
             import_module(import_str)
         except TypeError or ImportError:
-            self.import_error_occured.emit(import_str)
+            self.import_error_occured.emit("Не удалось загрузить модуль " + import_str)
 
     def analyze(self, text):
         processed_text = self.preprocessor.process(text)
-        return processed_text
+        return {"result" : processed_text.loc[0, "text"]}

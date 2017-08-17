@@ -37,9 +37,12 @@ class UI(qw.QMainWindow):
         file_menu.addAction(toolbar.export_action)
         # Signals
         toolbar.open_action.triggered.connect(self.read_file)
+        toolbar.analyze_action.triggered.connect(self.analyze)
         self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
         self.file_loaded.connect(self.main_widget.text_widget.show_text)
         self.file_loaded.connect(self.set_status)
+        self.analyzer.import_error_occured.connect(self.main_widget.text_widget.indicate_error)
+        self.analyzed.connect(self.main_widget.text_widget.show_output)
 
     def read_file(self):
         file_dialog = qw.QFileDialog()
@@ -56,8 +59,12 @@ class UI(qw.QMainWindow):
         )
 
     def analyze(self):
-        text = self.main_widget.text_widget.get
-        result = self.analyzer.analyze()
+        text = self.main_widget.text_widget.get_input()
+        if len(text) == 0:
+            return
+        result = self.analyzer.analyze(text)
+        self.analyzed.emit(result)
+        print("huh")
 
     def launch(self):
         self.showMaximized()
