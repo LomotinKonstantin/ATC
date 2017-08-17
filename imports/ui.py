@@ -1,3 +1,5 @@
+import os
+
 import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
 from PyQt5.QtGui import QIcon
@@ -10,13 +12,16 @@ from imports.widgets.ControlWidget import ControlWidget
 class UI(qw.QMainWindow):
 
     error_occurred = pyqtSignal(str)
-    file_loaded = pyqtSignal(str)
+    file_loaded = pyqtSignal(str, str, int)
 
-    def __init__(self, config):
+    def __init__(self, config, analyzer):
         super().__init__()
         self.setMinimumSize(qc.QSize(800, 600))
         self.setWindowTitle("ATC: Automatic Text Classifier")
         self.setWindowIcon(QIcon("icon.ico"))
+        self.analyzer = analyzer
+        self.status_label = qw.QLabel()
+        self.statusBar().addWidget(self.status_label)
         # Toolbar
         toolbar = ControlWidget()
         self.addToolBar(toolbar)
@@ -33,16 +38,22 @@ class UI(qw.QMainWindow):
         toolbar.open_action.triggered.connect(self.read_file)
         self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
         self.file_loaded.connect(self.main_widget.text_widget.show_text)
+        self.file_loaded.connect(self.setStatus)
 
     def read_file(self):
         file_dialog = qw.QFileDialog()
         filename = file_dialog.getOpenFileName()[0]
         try:
-            content = open(filename).read()
-            self.file_loaded.emit(content)
-            return content
+            content = self.analyzer.load_file(filename)
+            self.file_loaded.emit(content, filename, os.path.getsize(filename))
         except:
-            self.error_occurred.emit("Невозможно загрузить файл!")
+            self.error_occurred.emit("Не удалось прочитать текст из файла!")
+
+    def setStatus(self, content, filename, size):
+        self.status_label.setText(
+            filename + "\t" + "(" + str(size) + " байт)\t" + str(len(content)) + " символов"
+        )
+
 
     def launch(self):
         self.showMaximized()

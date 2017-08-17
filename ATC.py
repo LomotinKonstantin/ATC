@@ -27,7 +27,7 @@ class ATC:
         if len(sys.argv) > 1:
             self._parse_args()
         else:
-            self.ui = UI(self.config)
+            self.ui = UI(self.config, self.analyzer)
             self.ui.launch()
 
     def _parse_args(self):
