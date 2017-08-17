@@ -13,6 +13,7 @@ class UI(qw.QMainWindow):
 
     error_occurred = pyqtSignal(str)
     file_loaded = pyqtSignal(str, str, int)
+    analyzed = pyqtSignal(dict)
 
     def __init__(self, config, analyzer):
         super().__init__()
@@ -38,7 +39,7 @@ class UI(qw.QMainWindow):
         toolbar.open_action.triggered.connect(self.read_file)
         self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
         self.file_loaded.connect(self.main_widget.text_widget.show_text)
-        self.file_loaded.connect(self.setStatus)
+        self.file_loaded.connect(self.set_status)
 
     def read_file(self):
         file_dialog = qw.QFileDialog()
@@ -49,11 +50,14 @@ class UI(qw.QMainWindow):
         except:
             self.error_occurred.emit("Не удалось прочитать текст из файла!")
 
-    def setStatus(self, content, filename, size):
+    def set_status(self, content, filename, size):
         self.status_label.setText(
             filename + "\t" + "(" + str(size) + " байт)\t" + str(len(content)) + " символов"
         )
 
+    def analyze(self):
+        text = self.main_widget.text_widget.get
+        result = self.analyzer.analyze()
 
     def launch(self):
         self.showMaximized()
