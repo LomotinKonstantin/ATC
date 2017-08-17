@@ -60,7 +60,6 @@ class UI(qw.QMainWindow):
         self.analyzer.import_error_occured.connect(self.main_widget.text_widget.indicate_error)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
 
-
     def read_file(self):
         filename = self.load_dialog.getOpenFileName()[0]
         if not filename:
@@ -93,7 +92,7 @@ class UI(qw.QMainWindow):
     def export(self):
         result = self.main_widget.text_widget.get_output()
         if not result:
-            return 
-        filename = self.save_dialog.getSaveFileName()[0]
+            return
+        filename = self.save_dialog.getSaveFileName(filter="*.txt")[0]
         self.analyzer.export(result, filename)
 

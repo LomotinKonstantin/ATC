@@ -21,6 +21,7 @@ class TextWidget(qw.QWidget):
 
     def show_output(self, output):
         if isinstance(output, dict):
+            self.output_widget.setText("")
             for i, j in output.items():
                 self.output_widget.append(str(i) + "\t" + str(j) + "\n")
         else:
