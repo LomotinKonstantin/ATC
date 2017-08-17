@@ -18,7 +18,9 @@ class MainWidget(qw.QWidget):
         layout.addWidget(opt_bar)
         # Lets play with fonts!
         self.font_size = 12
-        font = self.font()
-        font.setPointSize(self.font_size)
-        self.setFont(font)
+        self.set_font_size(self.font_size)
 
+    def set_font_size(self, size):
+        font = self.font()
+        font.setPointSize(size)
+        self.setFont(font)

@@ -35,6 +35,18 @@ class UI(qw.QMainWindow):
         file_menu = menu.addMenu("Файл")
         file_menu.addAction(toolbar.open_action)
         file_menu.addAction(toolbar.export_action)
+
+        font_menu = menu.addMenu("Шрифт")
+        group = qw.QActionGroup(self)
+        for i in range(8, 21):
+            action = qw.QAction(QIcon(), str(i), self)
+            action.setCheckable(True)
+            if i == self.main_widget.font_size:
+                action.setChecked(True)
+            action.setActionGroup(group)
+            font_menu.addAction(action)
+            action.triggered.connect(self.font_size_selected)
+
         # Signals
         toolbar.open_action.triggered.connect(self.read_file)
         toolbar.analyze_action.triggered.connect(self.analyze)
@@ -64,7 +76,11 @@ class UI(qw.QMainWindow):
             return
         result = self.analyzer.analyze(text)
         self.analyzed.emit(result)
-        print("huh")
+
+    def font_size_selected(self):
+        size = int(self.sender().text())
+        self.main_widget.set_font_size(size)
+
 
     def launch(self):
         self.showMaximized()
