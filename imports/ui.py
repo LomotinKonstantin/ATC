@@ -23,6 +23,9 @@ class UI(qw.QMainWindow):
         self.analyzer = analyzer
         self.status_label = qw.QLabel()
         self.statusBar().addWidget(self.status_label)
+        # File dialogs
+        self.load_dialog = qw.QFileDialog()
+        self.save_dialog = qw.QFileDialog()
         # Toolbar
         toolbar = ControlWidget()
         self.addToolBar(toolbar)
@@ -50,15 +53,18 @@ class UI(qw.QMainWindow):
         # Signals
         toolbar.open_action.triggered.connect(self.read_file)
         toolbar.analyze_action.triggered.connect(self.analyze)
+        toolbar.export_action.triggered.connect(self.export)
         self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
         self.file_loaded.connect(self.main_widget.text_widget.show_text)
         self.file_loaded.connect(self.set_status)
         self.analyzer.import_error_occured.connect(self.main_widget.text_widget.indicate_error)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
 
+
     def read_file(self):
-        file_dialog = qw.QFileDialog()
-        filename = file_dialog.getOpenFileName()[0]
+        filename = self.load_dialog.getOpenFileName()[0]
+        if not filename:
+            return
         try:
             content = self.analyzer.load_file(filename)
             self.file_loaded.emit(content, filename, os.path.getsize(filename))
@@ -81,6 +87,13 @@ class UI(qw.QMainWindow):
         size = int(self.sender().text())
         self.main_widget.set_font_size(size)
 
-
     def launch(self):
         self.showMaximized()
+
+    def export(self):
+        result = self.main_widget.text_widget.get_output()
+        if not result:
+            return 
+        filename = self.save_dialog.getSaveFileName()[0]
+        self.analyzer.export(result, filename)
+

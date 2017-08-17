@@ -50,3 +50,12 @@ class Analyzer(QObject):
     def analyze(self, text):
         processed_text = self.preprocessor.process(text)
         return {"result" : processed_text.loc[0, "text"]}
+
+    def export(self, result, filename):
+        file = open(filename, "w")
+        if isinstance(result, dict):
+            for i, j in result.items():
+                file.write("{}\t{}".format(i, j))
+        else:
+            file.write(result)
+
