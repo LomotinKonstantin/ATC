@@ -16,8 +16,8 @@ class Analyzer(QObject):
         # loading modules TODO
         preproc_module = config.get(config.PREPROC_OPTION)
         preprocessor = import_module("modules.preprocessor." + preproc_module + ".interface")
-        self.preprocessor_class = getattr(preprocessor, "Preprocessor")
-        print(self.preprocessor_class("plai", "ru"))
+        preprocessor_class = getattr(preprocessor, "Preprocessor")
+        self.preprocessor = preprocessor_class("", "")
 
     def set_parameters(self, params):
         if not isinstance(params, dict):
@@ -46,3 +46,7 @@ class Analyzer(QObject):
             import_module(import_str)
         except TypeError or ImportError:
             self.import_error_occured.emit(import_str)
+
+    def analyze(self, text):
+        processed_text = self.preprocessor.process(text)
+        return processed_text
