@@ -13,18 +13,20 @@ class Config(object):
         self.CLASSIFIER_OPTION = "classifier_import"
         self.FORMAT_OPTION = "available_formats"
         self.LANG_OPTION = "available_languages"
+        self.FONT_OPTION = "font_size"
         self.options = {
             self.ID_OPTION : ["SUBJ", "IPV"],
             self.PREPROC_OPTION : "",
             self.WE_OPTION : "",
             self.CLASSIFIER_OPTION : "",
             self.FORMAT_OPTION : ["plain", "divided"],
-            self.LANG_OPTION : ["ru"]
+            self.LANG_OPTION : ["ru"],
+            self.FONT_OPTION : 12
         }
 
     def save(self):
         """
-        Saves current params to specified file
+        Saves current params to specified in constructor file
         :return: None
         """
         cfg_parser = ConfigParser()
