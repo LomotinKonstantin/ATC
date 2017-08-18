@@ -34,6 +34,8 @@ class Config(object):
         for name, value in self.options.items():
             if isinstance(value, list):
                 str_val = self._delimiter.join(value)
+            elif not isinstance(value, str):
+                str_val = str(value)
             else:
                 str_val = value
             cfg_parser.set(self._section, name, str_val)

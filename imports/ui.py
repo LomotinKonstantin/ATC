@@ -21,6 +21,7 @@ class UI(qw.QMainWindow):
         self.setWindowTitle("ATC: Automatic Text Classifier")
         self.setWindowIcon(QIcon("icon.ico"))
         self.analyzer = analyzer
+        self.config = config
         self.status_label = qw.QLabel()
         self.statusBar().addWidget(self.status_label)
         # File dialogs
@@ -30,6 +31,7 @@ class UI(qw.QMainWindow):
         toolbar = ControlWidget()
         self.addToolBar(toolbar)
         self.main_widget = MainWidget(config)
+        self.main_widget.set_font_size(int(self.config.get(self.config.FONT_OPTION)))
         self.setCentralWidget(self.main_widget)
         # Menu bar
         menu = qw.QMenuBar()
@@ -85,6 +87,8 @@ class UI(qw.QMainWindow):
     def font_size_selected(self):
         size = int(self.sender().text())
         self.main_widget.set_font_size(size)
+        self.config.set(self.config.FONT_OPTION, size)
+        self.config.save()
 
     def launch(self):
         self.showMaximized()

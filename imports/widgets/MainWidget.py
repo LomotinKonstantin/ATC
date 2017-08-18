@@ -22,5 +22,6 @@ class MainWidget(qw.QWidget):
 
     def set_font_size(self, size):
         font = self.font()
+        self.font_size = size
         font.setPointSize(size)
         self.setFont(font)
