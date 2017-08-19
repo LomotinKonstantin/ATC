@@ -5,8 +5,10 @@ from PyQt5.QtCore import pyqtSignal
 
 class Module:
 
+    # Emit this signal with error message when smth goes wrong
     error_occured = pyqtSignal(str)
 
+    # Use self.metadata field to access OrderedDict with metadata
     def __init__(self, filename="./metadata.json"):
         self._load_metadata(filename)
 
