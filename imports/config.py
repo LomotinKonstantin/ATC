@@ -44,14 +44,17 @@ class Config(object):
 
     def load(self):
         parser = ConfigParser()
-        parser.read(self._filename)
-        for name, str_value in dict(parser.items(self._section)).items():
-            # If the value is the list
-            if self._delimiter in str_value:
-                value = str_value.split(self._delimiter)
-            else:
-                value = str_value
-            self.options[name] = value
+        try:
+            parser.read(self._filename)
+            for name, str_value in dict(parser.items(self._section)).items():
+                # If the value is the list
+                if self._delimiter in str_value:
+                    value = str_value.split(self._delimiter)
+                else:
+                    value = str_value
+                self.options[name] = value
+        except:
+            pass
         # Checking options that have to be list type,
         # but initially have only one value
         if not isinstance(self.options[self.LANG_OPTION], list):
