@@ -25,6 +25,7 @@ class ModuleManager(qw.QDialog):
         # Buttons
         self.ok_button = qw.QPushButton("Ок")
         self.ok_button.clicked.connect(self.accept)
+        self.ok_button.clicked.connect(self.update_modules)
         layout.addWidget(self.ok_button, 3, 2)
         self.cancel_button = qw.QPushButton("Отмена")
         self.cancel_button.clicked.connect(self.reject)
@@ -96,13 +97,7 @@ class ModuleManager(qw.QDialog):
         if not module:
             self.metadata_widget.clear()
             return
-        module_type = OrderedDict()
-        if num == 0:
-            module_type = self.available_preprocessors
-        elif num == 1:
-            module_type = self.available_vectorizers
-        elif num == 2:
-            module_type = self.available_classifiers
+        module_type = self.tab_num_to_available_modules(num)
         if module[0].text() in module_type.keys():
             self.display_metadata(module_type.get(module[0].text()))
 
@@ -117,6 +112,11 @@ class ModuleManager(qw.QDialog):
 
     def on_item_clicked(self, item):
         num = self.tab_widget.currentIndex()
+        module_type = self.tab_num_to_available_modules(num)
+        if item.text() in module_type.keys():
+            self.display_metadata(module_type.get(item.text()))
+
+    def tab_num_to_available_modules(self, num):
         module_type = OrderedDict()
         if num == 0:
             module_type = self.available_preprocessors
@@ -124,8 +124,19 @@ class ModuleManager(qw.QDialog):
             module_type = self.available_vectorizers
         elif num == 2:
             module_type = self.available_classifiers
-        if item.text() in module_type.keys():
-            self.display_metadata(module_type.get(item.text()))
+        return module_type
 
-    def selected_modules(self):
-        pass
+    def update_modules(self):
+        preprocessor = self.tab_widget.widget(0)
+        module = preprocessor.selectedItems()
+        if module:
+            self.config.set(self.config.PREPROC_OPTION, module[0].text())
+        vectorizer = self.tab_widget.widget(1)
+        module = vectorizer.selectedItems()
+        if module:
+            self.config.set(self.config.WE_OPTION, module[0].text())
+        classifier = self.tab_widget.widget(2)
+        module = classifier.selectedItems()
+        if module:
+            self.config.set(self.config.CLASSIFIER_OPTION, module[0].text())
+        self.config.save()

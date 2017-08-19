@@ -36,7 +36,6 @@ class UI(qw.QMainWindow):
         self.setCentralWidget(self.main_widget)
         # Module dialog
         self.module_manager = ModuleManager(analyzer, config, self.main_widget)
-        self.module_manager.exec()
         # Menu bar
         menu = qw.QMenuBar()
         self.setMenuBar(menu)
@@ -60,6 +59,7 @@ class UI(qw.QMainWindow):
         self.toolbar.open_action.triggered.connect(self.read_file)
         self.toolbar.analyze_action.triggered.connect(self.analyze)
         self.toolbar.export_action.triggered.connect(self.export)
+        self.toolbar.modules_action.triggered.connect(self.module_manager.exec)
         self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
         self.file_loaded.connect(self.main_widget.text_widget.show_text)
         self.file_loaded.connect(self.set_status)
