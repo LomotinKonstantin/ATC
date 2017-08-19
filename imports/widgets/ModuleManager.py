@@ -33,10 +33,9 @@ class ModuleManager(qw.QDialog):
         # Metadata widget
         groupbox = qw.QGroupBox("Информация")
         layout.addWidget(groupbox, 0, 2, 3, 2)
-        self.metadata_widget = qw.QTextEdit()
-        self.metadata_widget.setReadOnly(True)
-        # self.metadata_widget.setEnabled(False)
-        self.metadata_widget.setFrameStyle(qw.QFrame.NoFrame)
+        self.metadata_widget = qw.QLabel()
+        self.metadata_widget.setWordWrap(True)
+        self.metadata_widget.setAlignment(qc.Qt.AlignTop)
         groupbox_layout = qw.QVBoxLayout()
         groupbox.setLayout(groupbox_layout)
         groupbox_layout.addWidget(self.metadata_widget)
@@ -114,11 +113,10 @@ class ModuleManager(qw.QDialog):
                 metastring += "<b>{}</b>:  {}<br>".format(key, value)
         else:
             metastring = "<b>Информация о модуле недоступна!</b>"
-        self.metadata_widget.setHtml(metastring)
+        self.metadata_widget.setText(metastring)
 
     def on_item_clicked(self, item):
         num = self.tab_widget.currentIndex()
-        print(num, item.text())
         module_type = OrderedDict()
         if num == 0:
             module_type = self.available_preprocessors
