@@ -7,6 +7,7 @@ from PyQt5.QtCore import pyqtSignal
 
 from imports.widgets.MainWidget import MainWidget
 from imports.widgets.ControlWidget import ControlWidget
+from imports.widgets.ModuleManager import ModuleManager
 
 
 class UI(qw.QMainWindow):
@@ -33,6 +34,9 @@ class UI(qw.QMainWindow):
         self.main_widget = MainWidget(config)
         self.main_widget.set_font_size(int(self.config.get(self.config.FONT_OPTION)))
         self.setCentralWidget(self.main_widget)
+        # Module dialog
+        self.module_manager = ModuleManager(analyzer, config, self.main_widget)
+        self.module_manager.exec()
         # Menu bar
         menu = qw.QMenuBar()
         self.setMenuBar(menu)

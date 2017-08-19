@@ -1,5 +1,7 @@
 import os
 from importlib import import_module
+from collections import OrderedDict
+from json import loads
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
@@ -28,12 +30,31 @@ class Analyzer(QObject):
         res = []
         for i in files:
             file = os.path.join(path, i)
-            if os.path.isdir(file):
+            if os.path.isdir(file) and i != "__pycache__":
                 res.append(i)
         return res
 
-    def available_preprocessors(self):
-        return self.dirs(self.preprocessor_path)
+    def available_modules(self, module_path, meta=True):
+        """
+        :param meta: if True, returns OrderedDict with module and metadata
+        :param module_path: one of the Analyzer.preprocessor_path, Analyzer.vectorizer_path or
+                Analyzer.classifier_path
+        :return: list or OrderedDict of available modules
+        """
+        dirs = self.dirs(module_path)
+        if meta:
+            res = OrderedDict()
+            for module in dirs:
+                try:
+                    json_string = open(os.path.join(module_path, module, "metadata.json"),
+                                       encoding="utf-8").read()
+                    metadata = loads(json_string, object_pairs_hook=OrderedDict)
+                except:
+                    metadata = ""
+                res[module] = metadata
+            return res
+        else:
+            return dirs
 
     def load_modules(self, params, error_slot=None):
         preproc_module = self.config.get(self.config.PREPROC_OPTION)
