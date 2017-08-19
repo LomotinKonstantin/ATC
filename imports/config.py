@@ -54,7 +54,7 @@ class Config(object):
                     value = str_value
                 self.options[name] = value
         except:
-            pass
+            self.save()
         # Checking options that have to be list type,
         # but initially have only one value
         if not isinstance(self.options[self.LANG_OPTION], list):

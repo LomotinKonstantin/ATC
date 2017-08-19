@@ -1,8 +1,11 @@
 import json
 from collections import OrderedDict
+from PyQt5.QtCore import pyqtSignal
 
 
 class Module:
+
+    error_occured = pyqtSignal(str)
 
     def __init__(self, filename="./metadata.json"):
         self._load_metadata(filename)

@@ -15,7 +15,7 @@ class UI(qw.QMainWindow):
     file_loaded = pyqtSignal(str, str, int)
     analyzed = pyqtSignal(dict)
 
-    def __init__(self, config, analyzer):
+    def __init__(self, config, analyzer=None):
         super().__init__()
         self.setMinimumSize(qc.QSize(800, 600))
         self.setWindowTitle("ATC: Automatic Text Classifier")
@@ -28,8 +28,8 @@ class UI(qw.QMainWindow):
         self.load_dialog = qw.QFileDialog()
         self.save_dialog = qw.QFileDialog()
         # Toolbar
-        toolbar = ControlWidget()
-        self.addToolBar(toolbar)
+        self.toolbar = ControlWidget()
+        self.addToolBar(self.toolbar)
         self.main_widget = MainWidget(config)
         self.main_widget.set_font_size(int(self.config.get(self.config.FONT_OPTION)))
         self.setCentralWidget(self.main_widget)
@@ -38,8 +38,8 @@ class UI(qw.QMainWindow):
         self.setMenuBar(menu)
 
         file_menu = menu.addMenu("Файл")
-        file_menu.addAction(toolbar.open_action)
-        file_menu.addAction(toolbar.export_action)
+        file_menu.addAction(self.toolbar.open_action)
+        file_menu.addAction(self.toolbar.export_action)
 
         font_menu = menu.addMenu("Шрифт")
         group = qw.QActionGroup(self)
@@ -53,13 +53,14 @@ class UI(qw.QMainWindow):
             action.triggered.connect(self.font_size_selected)
 
         # Signals
-        toolbar.open_action.triggered.connect(self.read_file)
-        toolbar.analyze_action.triggered.connect(self.analyze)
-        toolbar.export_action.triggered.connect(self.export)
+        self.toolbar.open_action.triggered.connect(self.read_file)
+        self.toolbar.analyze_action.triggered.connect(self.analyze)
+        self.toolbar.export_action.triggered.connect(self.export)
         self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
         self.file_loaded.connect(self.main_widget.text_widget.show_text)
         self.file_loaded.connect(self.set_status)
-        self.analyzer.import_error_occured.connect(self.main_widget.text_widget.indicate_error)
+        if analyzer:
+            self.analyzer.import_error_occured.connect(self.process_import_error)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
 
     def read_file(self):
@@ -76,6 +77,10 @@ class UI(qw.QMainWindow):
         self.status_label.setText(
             filename + "\t" + "(" + str(size) + " байт)\t" + str(len(content)) + " символов"
         )
+
+    def set_analyzer(self, analyzer):
+        self.analyzer = analyzer
+        self.analyzer.import_error_occured.connect(self.process_import_error)
 
     def analyze(self):
         text = self.main_widget.text_widget.get_input()
@@ -100,3 +105,6 @@ class UI(qw.QMainWindow):
         filename = self.save_dialog.getSaveFileName(filter="*.txt")[0]
         self.analyzer.export(result, filename)
 
+    def process_import_error(self, msg):
+        self.main_widget.text_widget.indicate_error(msg)
+        self.toolbar.analyze_action.setEnabled(False)

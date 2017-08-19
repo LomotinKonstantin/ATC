@@ -8,21 +8,15 @@ class Analyzer(QObject):
 
     import_error_occured = pyqtSignal(str)
 
-    def __init__(self, config, params={}):
+    def __init__(self, config):
         super().__init__()
         self.config = config
-        self.params = params
         self.preprocessor_path = "modules/preprocessor"
-        # loading modules TODO
-        preproc_module = config.get(config.PREPROC_OPTION)
-        preprocessor = import_module("modules.preprocessor." + preproc_module + ".interface")
-        preprocessor_class = getattr(preprocessor, "Preprocessor")
-        self.preprocessor = preprocessor_class("", "")
-
-    def set_parameters(self, params):
-        if not isinstance(params, dict):
-            raise TypeError("Parameters must be a dict type")
-        self.params = params
+        self.vectorizer_path = "modules/wordembedding"
+        self.classifier_path = "modules/classifier"
+        self.preprocessor = None
+        self.vectorizer = None
+        self.classifier = None
 
     def load_file(self, filename):
         file = open(filename)
@@ -41,11 +35,41 @@ class Analyzer(QObject):
     def available_preprocessors(self):
         return self.dirs(self.preprocessor_path)
 
-    def _load_module(self, import_str):
+    def load_modules(self, params, error_slot=None):
+        preproc_module = self.config.get(self.config.PREPROC_OPTION)
+        format = params["format"]
+        lang = params["language"]
+        rubr_id = params["rubricator_id"]
         try:
-            import_module(import_str)
-        except TypeError or ImportError:
-            self.import_error_occured.emit("Не удалось загрузить модуль " + import_str)
+            preprocessor = import_module("modules.preprocessor." +
+                                         preproc_module + ".interface")
+            preprocessor_class = getattr(preprocessor, "Preprocessor")
+            self.preprocessor = preprocessor_class(format, lang)
+        except ImportError:
+            self.import_error_occured.emit("Не удалось загрузить предобработчик \"" +
+                                           preproc_module + "\"!")
+
+        we_module = self.config.get(self.config.WE_OPTION)
+        try:
+            we = import_module("modules.wordembedding." + we_module + ".interface")
+            we_class = getattr(we, "WordEmbedding")
+            self.vectorizer = we_class(lang)
+        except ImportError:
+            self.import_error_occured.emit("Не удалось загрузить векторайзер \"" +
+                                           we_module + "\"!")
+
+        class_module = self.config.get(self.config.CLASSIFIER_OPTION)
+        try:
+            classifier = import_module("modules.classifier." + class_module + ".interface")
+            classifier_class = getattr(classifier, "Classifier")
+            self.classifier = classifier_class(rubr_id, lang)
+        except ImportError:
+            self.import_error_occured.emit("Не удалось загрузить классификатор \"" +
+                                           class_module + "\"!")
+
+        if error_slot:
+            for i in [self.preprocessor, self.vectorizer, self.classifier]:
+                i.error_occured.connect(error_slot)
 
     def analyze(self, text):
         processed_text = self.preprocessor.process(text)
