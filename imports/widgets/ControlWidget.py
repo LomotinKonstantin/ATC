@@ -18,8 +18,9 @@ class ControlWidget(qw.QToolBar):
         self.export_action = qw.QAction(QIcon(":/save.png"), "Экспорт результата", self)
         self.export_action.setShortcut(QKeySequence("CTRL+S"))
         self.addAction(self.export_action)
-        self.config_action = qw.QAction(QIcon(":/settings.png"), "Параметры конфигурации", self)
-        self.addAction(self.config_action)
+        # What should we edit in setting?...
+        # self.config_action = qw.QAction(QIcon(":/settings.png"), "Параметры конфигурации", self)
+        # self.addAction(self.config_action)
         self.modules_action = qw.QAction(QIcon(":/exchange.png"), "Менеджер модулей", self)
         self.addAction(self.modules_action)
         self.help_action = qw.QAction(QIcon(":/notepad.png"), "Помощь", self)
