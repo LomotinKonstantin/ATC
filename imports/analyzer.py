@@ -8,7 +8,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 
 class Analyzer(QObject):
 
-    import_error_occured = pyqtSignal(str)
+    import_error_occurred = pyqtSignal(str)
 
     def __init__(self, config):
         super().__init__()
@@ -66,41 +66,43 @@ class Analyzer(QObject):
                                          preproc_module + ".interface")
             preprocessor_class = getattr(preprocessor, "Preprocessor")
             self.preprocessor = preprocessor_class(format, lang)
-        except ImportError:
-            self.import_error_occured.emit("Не удалось загрузить предобработчик \"" +
-                                           preproc_module + "\"!")
-
+            self.preprocessor.error_occurred.connect(error_slot)
+        except:
+            self.import_error_occurred.emit("Не удалось загрузить предобработчик \"" +
+                                            preproc_module + "\"!")
+            return False
         we_module = self.config.get(self.config.WE_OPTION)
         try:
-            we = import_module("modules.wordembedding." + we_module + ".interface")
+            we = import_module("modules.word_embedding." + we_module + ".interface")
             we_class = getattr(we, "WordEmbedding")
             self.vectorizer = we_class(lang)
-        except ImportError:
-            self.import_error_occured.emit("Не удалось загрузить векторайзер \"" +
-                                           we_module + "\"!")
-
+            self.vectorizer.error_occurred.connect(error_slot)
+        except:
+            self.import_error_occurred.emit("Не удалось загрузить векторайзер \"" +
+                                            we_module + "\"!")
+            return False
         class_module = self.config.get(self.config.CLASSIFIER_OPTION)
         try:
             classifier = import_module("modules.classifier." + class_module + ".interface")
             classifier_class = getattr(classifier, "Classifier")
             self.classifier = classifier_class(rubr_id, lang)
-        except ImportError:
-            self.import_error_occured.emit("Не удалось загрузить классификатор \"" +
-                                           class_module + "\"!")
-
-        if error_slot:
-            for i in [self.preprocessor, self.vectorizer, self.classifier]:
-                i.error_occured.connect(error_slot)
+            self.classifier.error_occurred.connect(error_slot)
+        except:
+            self.import_error_occurred.emit("Не удалось загрузить классификатор \"" +
+                                            class_module + "\"!")
+            return False
+        # if error_slot:
+        #     for i in [preprocessor_class, we_class, classifier_class]:
+        #         print(i.error_occurred)
+        #         i.error_occurred.connect(error_slot)
+        return True
 
     # TODO add signals
     def analyze(self, text):
         processed_text = self.preprocessor.process(text)
-        print(processed_text)
         vector = self.vectorizer.vectorize(processed_text)
-        print(vector)
-        result = self.preprocessor.classify(vector)
-        print(result)
-        return result
+        result = self.classifier.classify(vector)
+        return result.round(3)
 
     def export(self, result, filename):
         file = open(filename, "w")

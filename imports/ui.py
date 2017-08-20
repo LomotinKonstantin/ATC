@@ -4,6 +4,7 @@ import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal
+from pandas import Series
 
 from imports.widgets.MainWidget import MainWidget
 from imports.widgets.ControlWidget import ControlWidget
@@ -14,7 +15,7 @@ class UI(qw.QMainWindow):
 
     error_occurred = pyqtSignal(str)
     file_loaded = pyqtSignal(str, str, int)
-    analyzed = pyqtSignal(dict)
+    analyzed = pyqtSignal(Series)
 
     def __init__(self, config, analyzer=None):
         super().__init__()
@@ -65,7 +66,7 @@ class UI(qw.QMainWindow):
         self.file_loaded.connect(self.main_widget.text_widget.show_text)
         self.file_loaded.connect(self.set_status)
         if analyzer:
-            self.analyzer.import_error_occured.connect(self.process_import_error)
+            self.analyzer.import_error_occurred.connect(self.process_import_error)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
 
     def read_file(self):
@@ -93,7 +94,8 @@ class UI(qw.QMainWindow):
             return
         params = self.main_widget.opt_bar.options_to_dict()
         if self.main_widget.opt_bar.changed:
-            self.analyzer.load_modules(params)
+            if not self.analyzer.load_modules(params, self.main_widget.text_widget.indicate_error):
+                return
         result = self.analyzer.analyze(text)
         self.analyzed.emit(result)
 

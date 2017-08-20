@@ -3,8 +3,9 @@ from configparser import ConfigParser
 import numpy as np
 import os.path
 import sys 
-sys.path.append("..")
-from common import Module
+# sys.path.append("..")
+from modules.common import Module
+
 
 class WordEmbedding(Module):
     def __init__(self, lang='ru'):
@@ -12,14 +13,14 @@ class WordEmbedding(Module):
         self.lang = lang
         self.config = self.loadConfig()
         self.loadModel()
-        self.lenght = self.model.layer1_size # Размер вектора результата.
-        
+        self.lenght = self.model.layer1_size # пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+
     def vectorize(self, text):
         if self.model:
             features = np.zeros((1,self.lenght))
-            # Создание списка слов.
+            # пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ.
             tokens = text.split()
-            # В зависимости от типа свертки создание списка признаков.
+            # пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
             if self.config.get('Settings', 'convolution') == 'sum':
                 for t in tokens:
                     if t in self.model:
@@ -36,13 +37,14 @@ class WordEmbedding(Module):
             return None
         
     def loadModel(self):
-        if os.path.exists(self.config.get('Settings', self.lang)):
-            self.model = Word2Vec.load(self.config.get('Settings', self.lang))
+        file = self.config.get('Settings', self.lang)
+        if os.path.exists(file):
+            self.model = Word2Vec.load(file)
         else:
-            self.model = None          
-        
+            self.model = None
+
     def loadConfig(self): 
         configParcer = ConfigParser()
-        configParcer.read('config.ini')
+        configParcer.read('modules/word_embedding/vectorizer_v1/config.ini')
         return configParcer
         

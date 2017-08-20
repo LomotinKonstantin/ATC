@@ -1,11 +1,14 @@
 import PyQt5.QtWidgets as qw
-
+from pandas import Series
 
 class TextWidget(qw.QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, option_bar, parent=None):
         super().__init__(parent)
         layout = qw.QVBoxLayout()
+        self.option_bar = option_bar
+        self.current_output = None
+        self.option_bar.threshold.valueChanged.connect(self.show_output)
         self.setLayout(layout)
         # Input widget
         self.input_widget = qw.QTextEdit()
@@ -19,14 +22,14 @@ class TextWidget(qw.QWidget):
     def indicate_error(self, error_msg="Error!"):
         self.output_widget.insertHtml("<font color=\"red\">" + error_msg + "</font><br>")
 
-
     def show_output(self, output):
-        if isinstance(output, dict):
-            self.output_widget.setText("")
-            for i, j in output.items():
-                self.output_widget.append(str(i) + "\t" + str(j) + "\n")
-        else:
-            self.output_widget.setText(output)
+        self.output_widget.clear()
+        threshold = self.option_bar.options_to_dict()["threshold"]
+        if isinstance(output, Series):
+            self.current_output = output
+        if isinstance(self.current_output, Series):
+            for topic, proba in self.current_output[self.current_output > threshold].iteritems():
+                self.output_widget.append("{}\t{}".format(topic, proba))
 
     def show_text(self, text):
         self.output_widget.setText("")
