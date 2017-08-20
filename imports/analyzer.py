@@ -92,9 +92,15 @@ class Analyzer(QObject):
             for i in [self.preprocessor, self.vectorizer, self.classifier]:
                 i.error_occured.connect(error_slot)
 
+    # TODO add signals
     def analyze(self, text):
         processed_text = self.preprocessor.process(text)
-        return {"result" : processed_text.loc[0, "text"]}
+        print(processed_text)
+        vector = self.vectorizer.vectorize(processed_text)
+        print(vector)
+        result = self.preprocessor.classify(vector)
+        print(result)
+        return result
 
     def export(self, result, filename):
         file = open(filename, "w")

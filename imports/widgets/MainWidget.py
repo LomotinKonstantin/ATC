@@ -14,8 +14,8 @@ class MainWidget(qw.QWidget):
         self.text_widget = TextWidget()
         layout.addWidget(self.text_widget)
         # Setting side option bar
-        opt_bar = OptionBar(config)
-        layout.addWidget(opt_bar)
+        self.opt_bar = OptionBar(config)
+        layout.addWidget(self.opt_bar)
         # Lets play with fonts!
         self.font_size = 12
         self.set_font_size(self.font_size)

@@ -5,25 +5,42 @@ class OptionBar(qw.QGroupBox):
 
     def __init__(self, config, parent=None):
         super().__init__("Параметры", parent=parent)
+        self.changed = True
         # setting up form layout for parameter specifying
         layout = qw.QFormLayout()
         self.setLayout(layout)
         # rubricator id
-        id_selector = qw.QComboBox(self)
-        id_selector.addItems(config.get(config.ID_OPTION))
-        layout.addRow("Идентификатор рубрикатора", id_selector)
+        self.id_selector = qw.QComboBox(self)
+        self.id_selector.addItems(config.get(config.ID_OPTION))
+        self.id_selector.currentIndexChanged.connect(self.on_changed)
+        layout.addRow("Идентификатор рубрикатора", self.id_selector)
         # language
-        lang_selector = qw.QComboBox(self)
-        lang_selector.addItems(config.get(config.LANG_OPTION))
-        layout.addRow("Язык", lang_selector)
+        self.lang_selector = qw.QComboBox(self)
+        self.lang_selector.addItems(config.get(config.LANG_OPTION))
+        self.lang_selector.currentIndexChanged.connect(self.on_changed)
+        layout.addRow("Язык", self.lang_selector)
         # format
-        format_selector = qw.QComboBox(self)
-        format_selector.addItems(config.get(config.FORMAT_OPTION))
-        layout.addRow("Формат", format_selector)
+        self.format_selector = qw.QComboBox(self)
+        self.format_selector.addItems(config.get(config.FORMAT_OPTION))
+        self.format_selector.currentIndexChanged.connect(self.on_changed)
+        layout.addRow("Формат", self.format_selector)
         # threshold
-        threshold = qw.QDoubleSpinBox(self)
-        threshold.setValue(0.0)
-        threshold.setSingleStep(0.05)
-        threshold.setMaximum(1.0)
-        layout.addRow("Порог вероятности", threshold)
+        self.threshold = qw.QDoubleSpinBox(self)
+        self.threshold.setValue(0.0)
+        self.threshold.setSingleStep(0.05)
+        self.threshold.setMaximum(1.0)
+        layout.addRow("Порог вероятности", self.threshold)
 
+    def options_to_dict(self):
+        res = {}
+        res["rubricator_id"] = self.id_selector.currentText()
+        res["language"] = self.lang_selector.currentText()
+        res["format"] = self.format_selector.currentText()
+        res["threshold"] = self.threshold.value()
+        return res
+
+    def on_changed(self):
+        self.changed = True
+
+    def on_commited(self):
+        self.changed = False

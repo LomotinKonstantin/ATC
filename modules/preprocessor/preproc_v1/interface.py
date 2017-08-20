@@ -81,4 +81,4 @@ class Preprocessor(Module):
         s = re.sub("(((?<=^)|(?<=\w))-+((?=\s)|(?=$)))|(((?<=^)|(?<=\s))-+((?=\w)|(?=\s)|(?=$)))", "", s)
         s = re.sub("(^|(?<=\s))\w{,2}(?=\s|$)", "", s)
         res_str = " ".join(list(filter(lambda a: a != "", s.split())))
-        return pd.DataFrame(data=[res_str], columns=["text"])
+        return res_str

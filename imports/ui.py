@@ -58,6 +58,7 @@ class UI(qw.QMainWindow):
         # Signals
         self.toolbar.open_action.triggered.connect(self.read_file)
         self.toolbar.analyze_action.triggered.connect(self.analyze)
+        self.toolbar.analyze_action.triggered.connect(self.main_widget.opt_bar.on_commited)
         self.toolbar.export_action.triggered.connect(self.export)
         self.toolbar.modules_action.triggered.connect(self.module_manager.exec)
         self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
@@ -90,6 +91,9 @@ class UI(qw.QMainWindow):
         text = self.main_widget.text_widget.get_input()
         if len(text) == 0:
             return
+        params = self.main_widget.opt_bar.options_to_dict()
+        if self.main_widget.opt_bar.changed:
+            self.analyzer.load_modules(params)
         result = self.analyzer.analyze(text)
         self.analyzed.emit(result)
 

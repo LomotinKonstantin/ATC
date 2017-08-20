@@ -23,7 +23,8 @@ class ControlWidget(qw.QToolBar):
         # self.addAction(self.config_action)
         self.modules_action = qw.QAction(QIcon(":/exchange.png"), "Менеджер модулей", self)
         self.addAction(self.modules_action)
-        self.help_action = qw.QAction(QIcon(":/notepad.png"), "Помощь", self)
-        self.addAction(self.help_action)
+        # Maybe later?...
+        # self.help_action = qw.QAction(QIcon(":/notepad.png"), "Помощь", self)
+        # self.addAction(self.help_action)
 
 
