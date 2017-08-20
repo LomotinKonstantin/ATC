@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 import sys
 import os
+import warnings
+warnings.filterwarnings('ignore')
 
 from PyQt5.QtWidgets import QApplication
 
@@ -18,7 +20,6 @@ class ATC:
 
     def __init__(self):
         # initialising fields
-        print()
         self.parameters = {}
         # loading config
         self.config.load()
@@ -27,11 +28,17 @@ class ATC:
         # selecting mode
         if len(sys.argv) > 1:
             self._parse_args()
+            self.analyzer.import_error_occurred.connect(print)
             filename = self.parameters["input"]
             if not os.path.exists(filename):
                 print("Файл {} не существует".format(filename))
                 sys.exit()
-            self.analyzer.load_file(self.parameters["input"])
+            text = self.analyzer.load_file(self.parameters["input"])
+            self.analyzer.load_modules(self.parameters, print)
+            result = self.analyzer.analyze(text)
+            self.analyzer.export(result[result > self.parameters["threshold"]],
+                                 self.parameters["output"])
+            sys.exit(0)
         else:
             self.ui = UI(self.config, self.analyzer)
             self.ui.launch()

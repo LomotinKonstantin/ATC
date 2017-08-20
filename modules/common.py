@@ -3,6 +3,7 @@ from collections import OrderedDict
 from PyQt5.QtCore import pyqtSignal, QObject
 
 
+# TODO add config manager and path autodetection
 class Module(QObject):
 
     # Emit this signal with error message when smth goes wrong

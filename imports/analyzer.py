@@ -1,9 +1,11 @@
 import os
+import sys
 from importlib import import_module
 from collections import OrderedDict
 from json import loads
 
 from PyQt5.QtCore import QObject, pyqtSignal
+from pandas import Series
 
 
 class Analyzer(QObject):
@@ -13,9 +15,9 @@ class Analyzer(QObject):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.preprocessor_path = "modules/preprocessor"
-        self.vectorizer_path = "modules/word_embedding"
-        self.classifier_path = "modules/classifier"
+        self.preprocessor_path = sys.path[0] + "/modules/preprocessor"
+        self.vectorizer_path = sys.path[0] + "/modules/word_embedding"
+        self.classifier_path = sys.path[0] + "/modules/classifier"
         self.preprocessor = None
         self.vectorizer = None
         self.classifier = None
@@ -61,26 +63,26 @@ class Analyzer(QObject):
         format = params["format"]
         lang = params["language"]
         rubr_id = params["rubricator_id"]
-        try:
-            preprocessor = import_module("modules.preprocessor." +
-                                         preproc_module + ".interface")
-            preprocessor_class = getattr(preprocessor, "Preprocessor")
-            self.preprocessor = preprocessor_class(format, lang)
-            self.preprocessor.error_occurred.connect(error_slot)
-        except:
-            self.import_error_occurred.emit("Не удалось загрузить предобработчик \"" +
-                                            preproc_module + "\"!")
-            return False
+        # try:
+        preprocessor = import_module("modules.preprocessor." +
+                                     preproc_module + ".interface")
+        preprocessor_class = getattr(preprocessor, "Preprocessor")
+        self.preprocessor = preprocessor_class(format, lang)
+        self.preprocessor.error_occurred.connect(error_slot)
+        # except:
+        #     self.import_error_occurred.emit("Не удалось загрузить предобработчик \"" +
+        #                                     preproc_module + "\"!")
+        #     return False
         we_module = self.config.get(self.config.WE_OPTION)
-        try:
-            we = import_module("modules.word_embedding." + we_module + ".interface")
-            we_class = getattr(we, "WordEmbedding")
-            self.vectorizer = we_class(lang)
-            self.vectorizer.error_occurred.connect(error_slot)
-        except:
-            self.import_error_occurred.emit("Не удалось загрузить векторайзер \"" +
-                                            we_module + "\"!")
-            return False
+        # try:
+        we = import_module("modules.word_embedding." + we_module + ".interface")
+        we_class = getattr(we, "WordEmbedding")
+        self.vectorizer = we_class(lang)
+        self.vectorizer.error_occurred.connect(error_slot)
+        # except:
+        #     self.import_error_occurred.emit("Не удалось загрузить векторайзер \"" +
+        #                                     we_module + "\"!")
+        #     return False
         class_module = self.config.get(self.config.CLASSIFIER_OPTION)
         try:
             classifier = import_module("modules.classifier." + class_module + ".interface")
@@ -108,7 +110,10 @@ class Analyzer(QObject):
         file = open(filename, "w")
         if isinstance(result, dict):
             for i, j in result.items():
-                file.write("{}\t{}".format(i, j))
-        else:
+                file.write("{}\t{}\n".format(i, j))
+        elif isinstance(result, str):
             file.write(result)
+        elif isinstance(result, Series):
+            for topic, proba in result.iteritems():
+                file.write("{}\t{}\n".format(topic, proba))
 

@@ -1,8 +1,10 @@
 from configparser import ConfigParser
 
+import sys
+
 
 class Config(object):
-    def __init__(self, filename="./config.ini"):
+    def __init__(self, filename= sys.path[0] + "/config.ini"):
         self._filename = filename
         self._section = "Settings"
         self._delimiter = ", "

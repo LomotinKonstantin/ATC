@@ -27,11 +27,12 @@ class Classifier(Module):
         
     def loadConfig(self): 
         configParcer = ConfigParser()
-        configParcer.read('modules/classifier/classifier_v1/config.ini')
+        configParcer.read(os.path.dirname(__file__) + '/config.ini')
         return configParcer    
     
     def loadClf(self):
-        file = self.config.get('Settings', self.rubr_id+'_'+self.lang)
+        file = os.path.join(os.path.dirname(__file__),
+                            self.config.get('Settings', self.rubr_id+'_'+self.lang))
         if os.path.exists(file):
             self.clf = joblib.load(file)
         else:

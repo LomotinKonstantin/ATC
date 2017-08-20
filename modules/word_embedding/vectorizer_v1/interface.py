@@ -13,11 +13,11 @@ class WordEmbedding(Module):
         self.lang = lang
         self.config = self.loadConfig()
         self.loadModel()
-        self.lenght = self.model.layer1_size # ������ ������� ����������.
+        self.length = self.model.layer1_size  # ������ ������� ����������.
 
     def vectorize(self, text):
         if self.model:
-            features = np.zeros((1,self.lenght))
+            features = np.zeros((1, self.length))
             # �������� ������ ����.
             tokens = text.split()
             # � ����������� �� ���� ������� �������� ������ ���������.
@@ -29,7 +29,7 @@ class WordEmbedding(Module):
                 for t in tokens:
                     if t in self.model:
                         features = np.vstack((features, self.model[t]))
-                if features.shape[0]>1:
+                if features.shape[0] > 1:
                     features = features.max(axis=0)
                 features = [features]
             return features[0]
@@ -37,7 +37,7 @@ class WordEmbedding(Module):
             return None
         
     def loadModel(self):
-        file = self.config.get('Settings', self.lang)
+        file = os.path.join(os.path.dirname(__file__), self.config.get('Settings', self.lang))
         if os.path.exists(file):
             self.model = Word2Vec.load(file)
         else:
@@ -45,6 +45,6 @@ class WordEmbedding(Module):
 
     def loadConfig(self): 
         configParcer = ConfigParser()
-        configParcer.read('modules/word_embedding/vectorizer_v1/config.ini')
+        configParcer.read(os.path.dirname(__file__) + '/config.ini')
         return configParcer
         
