@@ -14,7 +14,7 @@ class Analyzer(QObject):
         super().__init__()
         self.config = config
         self.preprocessor_path = "modules/preprocessor"
-        self.vectorizer_path = "modules/wordembedding"
+        self.vectorizer_path = "modules/word_embedding"
         self.classifier_path = "modules/classifier"
         self.preprocessor = None
         self.vectorizer = None
