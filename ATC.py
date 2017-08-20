@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 import sys
+import os
 
 from PyQt5.QtWidgets import QApplication
 
@@ -26,6 +27,11 @@ class ATC:
         # selecting mode
         if len(sys.argv) > 1:
             self._parse_args()
+            filename = self.parameters["input"]
+            if not os.path.exists(filename):
+                print("Файл {} не существует".format(filename))
+                sys.exit()
+            self.analyzer.load_file(self.parameters["input"])
         else:
             self.ui = UI(self.config, self.analyzer)
             self.ui.launch()
@@ -56,6 +62,7 @@ class ATC:
                                type=float,
                                required=False)
         self.parameters = vars(argparser.parse_args())
+
 
 
 if __name__ == "__main__":

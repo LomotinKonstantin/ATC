@@ -12,6 +12,7 @@ class ModuleManager(qw.QDialog):
         self.config = config
         self.setModal(True)
         self.setWindowTitle("Менеджер модулей")
+        self.setMinimumSize(800, 400)
 
         # Layout
         layout = qw.QGridLayout()
