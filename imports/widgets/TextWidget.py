@@ -1,6 +1,7 @@
 import PyQt5.QtWidgets as qw
 from pandas import Series
 
+
 class TextWidget(qw.QWidget):
 
     def __init__(self, option_bar, parent=None):

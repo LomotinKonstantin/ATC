@@ -113,6 +113,8 @@ class UI(qw.QMainWindow):
         if not result:
             return
         filename = self.save_dialog.getSaveFileName(filter="*.txt")[0]
+        if not filename:
+            return 
         self.analyzer.export(result, filename)
 
     def process_import_error(self, msg):
