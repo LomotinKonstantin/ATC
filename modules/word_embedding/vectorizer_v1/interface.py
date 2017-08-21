@@ -41,10 +41,15 @@ class WordEmbedding(Module):
         if os.path.exists(file):
             self.model = Word2Vec.load(file)
         else:
+            self.error_occurred.emit('Model does not exists.')
             self.model = None
 
     def loadConfig(self): 
         configParcer = ConfigParser()
-        configParcer.read(os.path.dirname(__file__) + '/config.ini')
+        file = os.path.dirname(__file__) + '/config.ini'
+        if os.path.exists(file):
+            configParcer.read(file)
+        else:
+            self.error_occurred.emit("Can't find the configuration file.")
         return configParcer
         
