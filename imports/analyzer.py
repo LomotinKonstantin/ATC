@@ -106,8 +106,11 @@ class Analyzer(QObject):
         result = self.classifier.classify(vector)
         return result.round(3)
 
-    def export(self, result, filename):
+    def export(self, result, filename, params):
         file = open(filename, "w")
+        file.write("#\t{}\t{}\t{}\t{}\n".format(
+            params["rubricator_id"], params["language"], params["threshold"], params["format"]
+        ))
         if isinstance(result, dict):
             for i, j in result.items():
                 file.write("{}\t{}\n".format(i, j))

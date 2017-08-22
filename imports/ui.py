@@ -92,9 +92,9 @@ class UI(qw.QMainWindow):
         text = self.main_widget.text_widget.get_input()
         if len(text) == 0:
             return
-        params = self.main_widget.opt_bar.options_to_dict()
+        self.params = self.main_widget.opt_bar.options_to_dict()
         if self.main_widget.opt_bar.changed:
-            if not self.analyzer.load_modules(params, self.main_widget.text_widget.indicate_error):
+            if not self.analyzer.load_modules(self.params, self.main_widget.text_widget.indicate_error):
                 return
         result = self.analyzer.analyze(text)
         self.analyzed.emit(result)
@@ -115,7 +115,7 @@ class UI(qw.QMainWindow):
         filename = self.save_dialog.getSaveFileName(filter="*.txt")[0]
         if not filename:
             return 
-        self.analyzer.export(result, filename)
+        self.analyzer.export(result, filename, self.params)
 
     def process_import_error(self, msg):
         self.main_widget.text_widget.indicate_error(msg)

@@ -11,6 +11,7 @@ from imports.ui import UI
 from imports.analyzer import Analyzer
 
 
+# TODO Add splashscreen
 class ATC:
     config = Config()
     # Just a stub. Static fields initialize before main code is run
