@@ -17,7 +17,7 @@ class Classifier(Module):
         
     def classify(self, vector):
         if self.clf:
-            if clf.coef_.T.shape[0] == len(vector):
+            if self.clf.coef_.T.shape[0] == len(vector):
                 result = pd.Series(self.clf.predict_proba([vector])[0], index=self.clf.classes_)
                 result = result.sort_values(ascending=False)
                 # result = result.round(3)
