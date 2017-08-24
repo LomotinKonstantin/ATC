@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+﻿from argparse import ArgumentParser
 import sys
 import os
 import warnings
@@ -38,7 +38,7 @@ class ATC:
             self.analyzer.load_modules(self.parameters, print)
             result = self.analyzer.analyze(text)
             self.analyzer.export(result[result > self.parameters["threshold"]],
-                                 self.parameters["output"])
+                                 self.parameters["output"], self.parameters)
             sys.exit(0)
         else:
             self.ui = UI(self.config, self.analyzer)
