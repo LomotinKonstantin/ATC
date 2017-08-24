@@ -31,6 +31,7 @@ class TextWidget(qw.QWidget):
         if isinstance(self.current_output, Series):
             for topic, proba in self.current_output[self.current_output > threshold].iteritems():
                 self.output_widget.append("{}\t{}".format(topic, proba))
+        self.output_widget.verticalScrollBar().setValue(0)
 
     def show_text(self, text):
         self.output_widget.setText("")
