@@ -23,7 +23,7 @@ class Analyzer(QObject):
         self.classifier = None
 
     def load_file(self, filename):
-        file = open(filename)
+        file = open(filename, encoding="cp1251")
         content = file.read()
         return content
 
@@ -60,29 +60,29 @@ class Analyzer(QObject):
 
     def load_modules(self, params, error_slot=None):
         preproc_module = self.config.get(self.config.PREPROC_OPTION)
-        format = params["format"]
+        # format = params["format"]
         lang = params["language"]
         rubr_id = params["rubricator_id"]
-        # try:
-        preprocessor = import_module("modules.preprocessor." +
-                                     preproc_module + ".interface")
-        preprocessor_class = getattr(preprocessor, "Preprocessor")
-        self.preprocessor = preprocessor_class(format, lang)
-        self.preprocessor.error_occurred.connect(error_slot)
-        # except:
-        #     self.import_error_occurred.emit("Не удалось загрузить предобработчик \"" +
-        #                                     preproc_module + "\"!")
-        #     return False
+        try:
+            preprocessor = import_module("modules.preprocessor." +
+                                         preproc_module + ".interface")
+            preprocessor_class = getattr(preprocessor, "Preprocessor")
+            self.preprocessor = preprocessor_class(lang)
+            self.preprocessor.error_occurred.connect(error_slot)
+        except:
+            self.import_error_occurred.emit("Не удалось загрузить предобработчик \"" +
+                                            preproc_module + "\"!")
+            return False
         we_module = self.config.get(self.config.WE_OPTION)
-        # try:
-        we = import_module("modules.word_embedding." + we_module + ".interface")
-        we_class = getattr(we, "WordEmbedding")
-        self.vectorizer = we_class(lang)
-        self.vectorizer.error_occurred.connect(error_slot)
-        # except:
-        #     self.import_error_occurred.emit("Не удалось загрузить векторайзер \"" +
-        #                                     we_module + "\"!")
-        #     return False
+        try:
+            we = import_module("modules.word_embedding." + we_module + ".interface")
+            we_class = getattr(we, "WordEmbedding")
+            self.vectorizer = we_class(lang)
+            self.vectorizer.error_occurred.connect(error_slot)
+        except:
+            self.import_error_occurred.emit("Не удалось загрузить векторайзер \"" +
+                                            we_module + "\"!")
+            return False
         class_module = self.config.get(self.config.CLASSIFIER_OPTION)
         try:
             classifier = import_module("modules.classifier." + class_module + ".interface")
@@ -93,10 +93,6 @@ class Analyzer(QObject):
             self.import_error_occurred.emit("Не удалось загрузить классификатор \"" +
                                             class_module + "\"!")
             return False
-        # if error_slot:
-        #     for i in [preprocessor_class, we_class, classifier_class]:
-        #         print(i.error_occurred)
-        #         i.error_occurred.connect(error_slot)
         return True
 
     # TODO add signals
@@ -107,9 +103,9 @@ class Analyzer(QObject):
         return result.round(3)
 
     def export(self, result, filename, params):
-        file = open(filename, "w")
-        file.write("#\t{}\t{}\t{}\t{}\n".format(
-            params["rubricator_id"], params["language"], params["threshold"], params["format"]
+        file = open(filename, "w", encoding="cp1251")
+        file.write("#\t{}\t{}\t{}\n".format(
+            params["rubricator_id"], params["language"], params["threshold"]
         ))
         if isinstance(result, dict):
             for i, j in result.items():

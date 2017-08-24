@@ -10,14 +10,11 @@ from modules.common import Module
 
 class Preprocessor(Module):
 
-    def __init__(self, format, lang):
+    def __init__(self, lang):
         super().__init__()
-        if not isinstance(format, str):
-            raise TypeError("Expected parameter 'format' of type str, got type " + str(type(format)))
         if not isinstance(lang, str):
             raise TypeError("Expected parameter lang of type str, got type " + str(type(lang)))
         self.path = "./modules/preprocessor/preproc_v1/"
-        self.format = format
         self.lang = lang
         self._load_vocabulary()
         self.email_re = "(^|(?<=\s))([\w._-]+@[a-zA-Z]+\.\w+)(?=\s|$)"

@@ -62,7 +62,7 @@ class ATC:
                                required=True)
         argparser.add_argument("-f", "--format", help="формат входного файла",
                                choices=self.config.get(self.config.FORMAT_OPTION),
-                               required=True)
+                               required=False)
         argparser.add_argument("-l", "--language", help="язык входного текста",
                                choices=self.config.get(self.config.LANG_OPTION),
                                required=True)
