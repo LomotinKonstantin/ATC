@@ -1,13 +1,14 @@
 ﻿from argparse import ArgumentParser
 import sys
 import os
+from threading import Thread
 import warnings
 warnings.filterwarnings('ignore')
 
 from PyQt5.QtWidgets import QApplication
 
 from imports.config import Config
-from imports.ui import UI
+from imports.ui import UI, show_splashscreen
 from imports.analyzer import Analyzer
 
 
@@ -41,8 +42,10 @@ class ATC:
                                  self.parameters["output"], self.parameters)
             sys.exit(0)
         else:
+            show_splashscreen()
+            thread = Thread(target=UI, args=(self.config, self.analyzer))
+            thread.start()
             self.ui = UI(self.config, self.analyzer)
-            self.ui.launch()
 
     def _parse_args(self):
         description = "Automated Text Classifier for VINITI. Чтобы запустить графический сеанс, " \

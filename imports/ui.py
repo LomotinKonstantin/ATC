@@ -2,13 +2,14 @@ import os
 
 import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSignal
 from pandas import Series
 
 from imports.widgets.MainWidget import MainWidget
 from imports.widgets.ControlWidget import ControlWidget
 from imports.widgets.ModuleManager import ModuleManager
+import imports.splashscreen
 
 
 class UI(qw.QMainWindow):
@@ -69,6 +70,9 @@ class UI(qw.QMainWindow):
             self.analyzer.import_error_occurred.connect(self.process_import_error)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
 
+        # Launch
+        self.showMaximized()
+
     def read_file(self):
         filename = self.load_dialog.getOpenFileName()[0]
         if not filename:
@@ -105,9 +109,6 @@ class UI(qw.QMainWindow):
         self.config.set(self.config.FONT_OPTION, size)
         self.config.save()
 
-    def launch(self):
-        self.showMaximized()
-
     def export(self):
         result = self.main_widget.text_widget.get_output()
         if not result:
@@ -120,3 +121,14 @@ class UI(qw.QMainWindow):
     def process_import_error(self, msg):
         self.main_widget.text_widget.indicate_error(msg)
         self.toolbar.analyze_action.setEnabled(False)
+
+
+def show_splashscreen():
+    splash = qw.QSplashScreen(QPixmap(":/Splash_email_v2.png"), qc.Qt.WindowStaysOnTopHint)
+    time = qc.QTime()
+    splash.show()
+    time.start()
+    i = 0
+    while time.elapsed() <= 3000:
+        pass
+    splash.finish(None)
