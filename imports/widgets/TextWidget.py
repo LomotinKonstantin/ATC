@@ -1,5 +1,17 @@
 import PyQt5.QtWidgets as qw
+from PyQt5.QtCore import QMimeData
 from pandas import Series
+
+
+class PlainTextWidget(qw.QTextEdit):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def insertFromMimeData(self, md):
+        if not (md.hasText() or md.hasHtml()):
+            return
+        self.insertPlainText(md.text())
 
 
 class TextWidget(qw.QWidget):
@@ -12,7 +24,7 @@ class TextWidget(qw.QWidget):
         self.option_bar.threshold.valueChanged.connect(self.show_output)
         self.setLayout(layout)
         # Input widget
-        self.input_widget = qw.QTextEdit()
+        self.input_widget = PlainTextWidget()
         layout.addWidget(self.input_widget)
         # Output widget
         self.output_widget = qw.QTextEdit()
