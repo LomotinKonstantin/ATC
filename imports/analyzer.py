@@ -113,9 +113,6 @@ class Analyzer(QObject):
 
     def export(self, result, filename, params):
         file = open(filename, "w", encoding="cp1251")
-        print("#\t{}\t{}\t{}\t{}\n".format(
-            params["rubricator_id"], params["language"], params["threshold"], self.version
-        ))
         file.write("#\t{}\t{}\t{}\t{}\n".format(
             params["rubricator_id"], params["language"], params["threshold"], self.version
         ))

@@ -30,6 +30,11 @@ class OptionBar(qw.QGroupBox):
         self.threshold.setSingleStep(0.05)
         self.threshold.setMaximum(1.0)
         layout.addRow("Порог вероятности", self.threshold)
+        # Description
+        self.description = qw.QCheckBox()
+        self.description.setChecked(False)
+        self.description.setMinimumSize(0, 50)
+        layout.addRow("Расшифровка кодов", self.description)
 
     def options_to_dict(self):
         res = {}
@@ -44,3 +49,6 @@ class OptionBar(qw.QGroupBox):
 
     def on_commited(self):
         self.changed = False
+
+    def is_description_allowed(self):
+        return self.description.isChecked()

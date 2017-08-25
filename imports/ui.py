@@ -18,7 +18,7 @@ class UI(qw.QMainWindow):
 
     error_occurred = pyqtSignal(str)
     file_loaded = pyqtSignal(str, str, int)
-    analyzed = pyqtSignal(Series)
+    analyzed = pyqtSignal(Series, str)
 
     def __init__(self, config, analyzer=None):
         super().__init__()
@@ -38,6 +38,7 @@ class UI(qw.QMainWindow):
         self.main_widget = MainWidget(config)
         self.main_widget.set_font_size(int(self.config.get(self.config.FONT_OPTION)))
         self.setCentralWidget(self.main_widget)
+        self.params = self.main_widget.opt_bar.options_to_dict()
         # Module dialog
         self.module_manager = ModuleManager(analyzer, config, self.main_widget)
         # Menu bar
@@ -71,6 +72,7 @@ class UI(qw.QMainWindow):
         if analyzer:
             self.analyzer.import_error_occurred.connect(self.process_import_error)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
+        self.main_widget.opt_bar.description.stateChanged.connect(self.update_output)
 
         # Launch
         self.showMaximized()
@@ -103,7 +105,10 @@ class UI(qw.QMainWindow):
             if not self.analyzer.load_modules(self.params, self.main_widget.text_widget.indicate_error):
                 return
         result = self.analyzer.analyze(text)
-        self.analyzed.emit(result)
+        if self.main_widget.opt_bar.is_description_allowed():
+            self.analyzed.emit(result, self.params["rubricator_id"])
+        else:
+            self.analyzed.emit(result, "")
 
     def font_size_selected(self):
         size = int(self.sender().text())
@@ -117,12 +122,21 @@ class UI(qw.QMainWindow):
             return
         filename = self.save_dialog.getSaveFileName(filter="*.txt")[0]
         if not filename:
-            return 
+            return
         self.analyzer.export(result, filename, self.params)
 
     def process_import_error(self, msg):
         self.main_widget.text_widget.indicate_error(msg)
         self.toolbar.analyze_action.setEnabled(False)
+
+    def update_output(self, state):
+        res = self.main_widget.text_widget.last_result
+        if res is None:
+            return
+        if state == 2:
+            self.analyzed.emit(res, self.params["rubricator_id"])
+        else:
+            self.analyzed.emit(res, "")
 
 
 def show_splashscreen():
