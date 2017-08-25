@@ -9,7 +9,7 @@ from modules.common import Module
 
 class WordEmbedding(Module):
     def __init__(self, lang='ru'):
-        super().__init__()
+        super().__init__(os.path.dirname(__file__) + "\\metadata.json")
         self.lang = lang
         self.config = self.loadConfig()
         self.loadModel()

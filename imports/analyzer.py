@@ -21,6 +21,7 @@ class Analyzer(QObject):
         self.preprocessor = None
         self.vectorizer = None
         self.classifier = None
+        self.version = ""
 
     def load_file(self, filename):
         file = open(filename, encoding="cp1251")
@@ -63,15 +64,18 @@ class Analyzer(QObject):
         # format = params["format"]
         lang = params["language"]
         rubr_id = params["rubricator_id"]
+        version = ""
         try:
             preprocessor = import_module("modules.preprocessor." +
                                          preproc_module + ".interface")
             preprocessor_class = getattr(preprocessor, "Preprocessor")
             self.preprocessor = preprocessor_class(lang)
             self.preprocessor.error_occurred.connect(error_slot)
-        except:
-            self.import_error_occurred.emit("Не удалось загрузить предобработчик \"" +
-                                            preproc_module + "\"!")
+            version += "p" + self.preprocessor.version
+        except Exception as e:
+            self.import_error_occurred.emit("Не удалось загрузить предобработчик \"{}\"\nОшибка: {}".format(
+                preproc_module, e
+            ))
             return False
         we_module = self.config.get(self.config.WE_OPTION)
         try:
@@ -79,9 +83,11 @@ class Analyzer(QObject):
             we_class = getattr(we, "WordEmbedding")
             self.vectorizer = we_class(lang)
             self.vectorizer.error_occurred.connect(error_slot)
-        except:
-            self.import_error_occurred.emit("Не удалось загрузить векторайзер \"" +
-                                            we_module + "\"!")
+            version += "v" + self.vectorizer.version
+        except Exception as e:
+            self.import_error_occurred.emit("Не удалось загрузить векторайзер \"{}\"\nОшибка: {}".format(
+                we_module, e
+            ))
             return False
         class_module = self.config.get(self.config.CLASSIFIER_OPTION)
         try:
@@ -89,10 +95,13 @@ class Analyzer(QObject):
             classifier_class = getattr(classifier, "Classifier")
             self.classifier = classifier_class(rubr_id, lang)
             self.classifier.error_occurred.connect(error_slot)
-        except:
-            self.import_error_occurred.emit("Не удалось загрузить классификатор \"" +
-                                            class_module + "\"!")
+            version += "c" + self.classifier.version
+        except Exception as e:
+            self.import_error_occurred.emit("Не удалось загрузить классификатор \"{}\"\nОшибка: {}".format(
+                class_module, e
+            ))
             return False
+        self.version = version
         return True
 
     # TODO add signals
@@ -104,8 +113,11 @@ class Analyzer(QObject):
 
     def export(self, result, filename, params):
         file = open(filename, "w", encoding="cp1251")
-        file.write("#\t{}\t{}\t{}\n".format(
-            params["rubricator_id"], params["language"], params["threshold"]
+        print("#\t{}\t{}\t{}\t{}\n".format(
+            params["rubricator_id"], params["language"], params["threshold"], self.version
+        ))
+        file.write("#\t{}\t{}\t{}\t{}\n".format(
+            params["rubricator_id"], params["language"], params["threshold"], self.version
         ))
         if isinstance(result, dict):
             for i, j in result.items():

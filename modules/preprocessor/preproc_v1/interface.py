@@ -11,7 +11,7 @@ from modules.common import Module
 class Preprocessor(Module):
 
     def __init__(self, lang):
-        super().__init__()
+        super().__init__(os.path.dirname(__file__) + "\\metadata.json")
         if not isinstance(lang, str):
             raise TypeError("Expected parameter lang of type str, got type " + str(type(lang)))
         self.path = "./modules/preprocessor/preproc_v1/"
