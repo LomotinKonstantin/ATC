@@ -63,10 +63,11 @@ class TextWidget(qw.QWidget):
 
     def show_text(self, text):
         self.output_widget.setText("")
+        self.last_result = None
         self.input_widget.setText(text)
 
     def get_input(self):
         return self.input_widget.toPlainText()
 
     def get_output(self):
-        return self.current_output
+        return self.last_result

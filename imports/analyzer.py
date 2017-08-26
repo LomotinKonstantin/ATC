@@ -104,10 +104,15 @@ class Analyzer(QObject):
         self.version = version
         return True
 
-    # TODO add signals
-    def analyze(self, text):
+    def analyze(self, text, progress_dialog=None):
+        if progress_dialog:
+            progress_dialog.update_state(2, "Предобрабатываем текст...")
         processed_text = self.preprocessor.process(text)
+        if progress_dialog:
+            progress_dialog.update_state(3, "Преобразуем текст в вектор...")
         vector = self.vectorizer.vectorize(processed_text)
+        if progress_dialog:
+            progress_dialog.update_state(4, "Классифицируем...")
         result = self.classifier.classify(vector)
         return result.round(3)
 

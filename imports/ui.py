@@ -3,12 +3,13 @@ import os
 import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, QThread
 from pandas import Series
 
 from imports.widgets.MainWidget import MainWidget
 from imports.widgets.ControlWidget import ControlWidget
 from imports.widgets.ModuleManager import ModuleManager
+from imports.widgets.LoadingWidget import LoadingWidget
 import imports.splashscreen
 
 version = "1.1"
@@ -97,14 +98,19 @@ class UI(qw.QMainWindow):
         self.analyzer.import_error_occured.connect(self.process_import_error)
 
     def analyze(self):
+        lw = LoadingWidget(0, 5)
+        lw.show()
         text = self.main_widget.text_widget.get_input()
         if len(text) == 0:
             return
         self.params = self.main_widget.opt_bar.options_to_dict()
+        lw.update_state(0, "Инициализируем модули...")
         if self.main_widget.opt_bar.changed:
             if not self.analyzer.load_modules(self.params, self.main_widget.text_widget.indicate_error):
                 return
-        result = self.analyzer.analyze(text)
+        lw.update_state(1, "Анализируем...")
+        result = self.analyzer.analyze(text, lw)
+        lw.update_state(5, "Готово!")
         if self.main_widget.opt_bar.is_description_allowed():
             self.analyzed.emit(result, self.params["rubricator_id"])
         else:
@@ -118,7 +124,7 @@ class UI(qw.QMainWindow):
 
     def export(self):
         result = self.main_widget.text_widget.get_output()
-        if not result:
+        if result is None:
             return
         filename = self.save_dialog.getSaveFileName(filter="*.txt")[0]
         if not filename:
