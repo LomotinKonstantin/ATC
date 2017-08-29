@@ -3,7 +3,7 @@ import os
 import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import pyqtSignal, QThread
+from PyQt5.QtCore import pyqtSignal
 from pandas import Series
 
 from imports.widgets.MainWidget import MainWidget
@@ -72,6 +72,7 @@ class UI(qw.QMainWindow):
         self.file_loaded.connect(self.set_status)
         if analyzer:
             self.analyzer.import_error_occurred.connect(self.process_import_error)
+            self.analyzer.error_occurred.connect(self.main_widget.text_widget.indicate_error)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
         self.main_widget.opt_bar.description.stateChanged.connect(self.update_output)
         self.main_widget.opt_bar.threshold.valueChanged.connect(self.update_output)
@@ -102,15 +103,21 @@ class UI(qw.QMainWindow):
         lw = LoadingWidget(0, 5)
         lw.show()
         text = self.main_widget.text_widget.get_input()
+        if not self.analyzer.valid(text):
+            return
         if len(text) == 0:
             return
         self.params = self.main_widget.opt_bar.options_to_dict()
         if self.main_widget.opt_bar.changed:
             lw.update_state(0, "Инициализируем модули...")
-            if not self.analyzer.load_modules(self.params, self.main_widget.text_widget.indicate_error):
+            if not self.analyzer.load_modules(self.params,
+                                              self.main_widget.text_widget.indicate_error):
                 return
         lw.update_state(1, "Анализируем...")
         result = self.analyzer.analyze(text, lw)
+        if result is None:
+            self.main_widget.text_widget.indicate_error("Не удалось определить рубрики")
+            return
         lw.update_state(5, "Готово!")
         if self.main_widget.opt_bar.is_description_allowed():
             self.analyzed.emit(result, self.params["rubricator_id"])

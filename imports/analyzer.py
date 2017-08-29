@@ -11,6 +11,9 @@ from pandas import Series
 class Analyzer(QObject):
 
     import_error_occurred = pyqtSignal(str)
+    error_occurred = pyqtSignal(str)
+
+    eps = 1
 
     def __init__(self, config):
         super().__init__()
@@ -59,7 +62,7 @@ class Analyzer(QObject):
         else:
             return dirs
 
-    def load_modules(self, params, error_slot=None):
+    def load_modules(self, params, error_stream=None):
         preproc_module = self.config.get(self.config.PREPROC_OPTION)
         # format = params["format"]
         lang = params["language"]
@@ -70,7 +73,8 @@ class Analyzer(QObject):
                                          preproc_module + ".interface")
             preprocessor_class = getattr(preprocessor, "Preprocessor")
             self.preprocessor = preprocessor_class(lang)
-            self.preprocessor.error_occurred.connect(error_slot)
+            if error_stream:
+                self.preprocessor.error_occurred.connect(error_stream)
             version += "p" + self.preprocessor.version
         except Exception as e:
             self.import_error_occurred.emit("Не удалось загрузить предобработчик \"{}\"\nОшибка: {}".format(
@@ -82,7 +86,8 @@ class Analyzer(QObject):
             we = import_module("modules.word_embedding." + we_module + ".interface")
             we_class = getattr(we, "WordEmbedding")
             self.vectorizer = we_class(lang)
-            self.vectorizer.error_occurred.connect(error_slot)
+            if error_stream:
+                self.vectorizer.error_occurred.connect(error_stream)
             version += "v" + self.vectorizer.version
         except Exception as e:
             self.import_error_occurred.emit("Не удалось загрузить векторайзер \"{}\"\nОшибка: {}".format(
@@ -94,7 +99,8 @@ class Analyzer(QObject):
             classifier = import_module("modules.classifier." + class_module + ".interface")
             classifier_class = getattr(classifier, "Classifier")
             self.classifier = classifier_class(rubr_id, lang)
-            self.classifier.error_occurred.connect(error_slot)
+            if error_stream:
+                self.classifier.error_occurred.connect(error_stream)
             version += "c" + self.classifier.version
         except Exception as e:
             self.import_error_occurred.emit("Не удалось загрузить классификатор \"{}\"\nОшибка: {}".format(
@@ -105,14 +111,15 @@ class Analyzer(QObject):
         return True
 
     def analyze(self, text, progress_dialog=None):
-        if not self.valid(text):
-            return Series()
         if progress_dialog:
             progress_dialog.update_state(2, "Предобрабатываем текст...")
         processed_text = self.preprocessor.process(text)
         if progress_dialog:
             progress_dialog.update_state(3, "Преобразуем текст в вектор...")
         vector = self.vectorizer.vectorize(processed_text)
+        # print(vector)
+        if all(abs(i) < self.eps for i in vector):
+            return None
         if progress_dialog:
             progress_dialog.update_state(4, "Классифицируем...")
         result = self.classifier.classify(vector)

@@ -2,6 +2,7 @@
 import sys
 import os
 import warnings
+import locale
 warnings.filterwarnings('ignore')
 
 from PyQt5.QtWidgets import QApplication
@@ -30,16 +31,25 @@ class ATC:
         # selecting mode
         if len(sys.argv) > 1:
             self._parse_args()
-            self.analyzer.import_error_occurred.connect(print)
+            self.analyzer.import_error_occurred.connect(self.print_error)
+            self.analyzer.error_occurred.connect(self.print_error)
             filename = self.parameters["input"]
             if not os.path.exists(filename):
-                print("Файл {} не существует".format(filename))
+                self.print_error("File {} does not exist".format(filename))
                 sys.exit()
-            text = self.analyzer.load_file(self.parameters["input"])
-            if not self.analyzer.valid(text):
-                return
-            self.analyzer.load_modules(self.parameters, print)
+            try:
+                text = self.analyzer.load_file(self.parameters["input"])
+                if not self.analyzer.valid(text):
+                    self.print_error("File {} does not contain any text".format(filename))
+                    sys.exit()
+            except Exception as e:
+                self.print_error("Error loading file {}:\n{}".format(filename, e))
+                sys.exit()
+            self.analyzer.load_modules(self.parameters, self.print_error)
             result = self.analyzer.analyze(text)
+            if result is None:
+                self.print_error("Unable to define topics")
+                sys.exit()
             self.analyzer.export(result[result > self.parameters["threshold"]],
                                  self.parameters["output"], self.parameters)
             sys.exit(0)
@@ -76,6 +86,9 @@ class ATC:
                                type=float,
                                required=False)
         self.parameters = vars(argparser.parse_args())
+
+    def print_error(self, error_msg : str):
+        print(error_msg, file=sys.stderr)
 
 
 if __name__ == "__main__":
