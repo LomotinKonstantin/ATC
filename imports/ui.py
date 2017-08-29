@@ -74,6 +74,7 @@ class UI(qw.QMainWindow):
             self.analyzer.import_error_occurred.connect(self.process_import_error)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
         self.main_widget.opt_bar.description.stateChanged.connect(self.update_output)
+        self.main_widget.opt_bar.threshold.valueChanged.connect(self.update_output)
 
         # Launch
         self.showMaximized()
@@ -104,8 +105,8 @@ class UI(qw.QMainWindow):
         if len(text) == 0:
             return
         self.params = self.main_widget.opt_bar.options_to_dict()
-        lw.update_state(0, "Инициализируем модули...")
         if self.main_widget.opt_bar.changed:
+            lw.update_state(0, "Инициализируем модули...")
             if not self.analyzer.load_modules(self.params, self.main_widget.text_widget.indicate_error):
                 return
         lw.update_state(1, "Анализируем...")
@@ -139,10 +140,14 @@ class UI(qw.QMainWindow):
         res = self.main_widget.text_widget.last_result
         if res is None:
             return
-        if state == 2:
-            self.analyzed.emit(res, self.params["rubricator_id"])
+        if isinstance(state, int):
+            st = state
+        elif isinstance(state, float):
+            st = self.main_widget.opt_bar.description.checkState()
+        if st == 2:
+            self.main_widget.text_widget.show_output(res, self.params["rubricator_id"])
         else:
-            self.analyzed.emit(res, "")
+            self.main_widget.text_widget.show_output(res, "")
 
 
 def show_splashscreen():

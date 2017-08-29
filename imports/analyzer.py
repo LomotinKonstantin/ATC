@@ -105,6 +105,8 @@ class Analyzer(QObject):
         return True
 
     def analyze(self, text, progress_dialog=None):
+        if not self.valid(text):
+            return Series()
         if progress_dialog:
             progress_dialog.update_state(2, "Предобрабатываем текст...")
         processed_text = self.preprocessor.process(text)
@@ -129,4 +131,12 @@ class Analyzer(QObject):
         elif isinstance(result, Series):
             for topic, proba in result.iteritems():
                 file.write("{}\t{}\n".format(topic, proba))
+
+    def valid(self, text : str):
+        if not text:
+            return False
+        if text.strip() == "":
+            return False
+        return True
+
 

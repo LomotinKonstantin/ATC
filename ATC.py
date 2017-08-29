@@ -1,11 +1,11 @@
 ﻿from argparse import ArgumentParser
 import sys
 import os
-from threading import Thread
 import warnings
 warnings.filterwarnings('ignore')
 
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QThread
 
 from imports.config import Config
 from imports.ui import UI, show_splashscreen
@@ -36,6 +36,8 @@ class ATC:
                 print("Файл {} не существует".format(filename))
                 sys.exit()
             text = self.analyzer.load_file(self.parameters["input"])
+            if not self.analyzer.valid(text):
+                return
             self.analyzer.load_modules(self.parameters, print)
             result = self.analyzer.analyze(text)
             self.analyzer.export(result[result > self.parameters["threshold"]],
@@ -43,9 +45,10 @@ class ATC:
             sys.exit(0)
         else:
             show_splashscreen()
-            thread = Thread(target=UI, args=(self.config, self.analyzer))
-            thread.start()
+            self.thread = QThread()
+            self.thread.start()
             self.ui = UI(self.config, self.analyzer)
+            self.analyzer.moveToThread(self.thread)
 
     def _parse_args(self):
         description = "Automated Text Classifier for VINITI. Чтобы запустить графический сеанс, " \

@@ -44,7 +44,7 @@ class TextWidget(qw.QWidget):
 
     def show_output(self, output, extension=""):
         self.output_widget.clear()
-        threshold = self.option_bar.options_to_dict()["threshold"]
+        threshold = self.option_bar.threshold.value()
         if isinstance(output, Series):
             self.last_result = output
             self.current_output = ""
