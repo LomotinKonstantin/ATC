@@ -114,26 +114,36 @@ class Analyzer(QObject):
         if progress_dialog:
             progress_dialog.update_state(2, "Предобрабатываем текст...")
         processed_text = self.preprocessor.process(text)
-        if progress_dialog:
-            progress_dialog.update_state(3, "Преобразуем текст в вектор...")
-        if processed_text.index.name == "id":
-            vector_list = []
-            for i in processed_text.index:
-                vector_i = self.vectorizer.vectorize(
-                    processed_text.loc[i, "text"]
-                )
-                if all(abs(i) < self.eps for i in vector_i):
-                    return None
-                vector_list.append(vector_i)
-            processed_text["vector"] = Series(vector_list, index=processed_text.index)
-        else:
-            vector = self.vectorizer.vectorize(processed_text)
-        if all(abs(i) < self.eps for i in vector):
-            return None
-        if progress_dialog:
-            progress_dialog.update_state(4, "Классифицируем...")
-        result = self.classifier.classify(vector)
-        return result.round(3)
+        vector_list = []
+        result_list = []
+        for n, i in enumerate(processed_text.index):
+            if progress_dialog:
+                progress_dialog.update_state(3, "Преобразуем текст в вектор... {}/{}".format(
+                    n + 1, len(processed_text.index)
+                ))
+            vector_i = self.vectorizer.vectorize(
+                processed_text.loc[i, "text"]
+            )
+            if all(abs(i) < self.eps for i in vector_i):
+                vector_i = None
+                result_i = None
+                if progress_dialog:
+                    progress_dialog.update_state(3, "Не удалось определить рубрики... {}/{}".format(
+                        n + 1, len(processed_text.index)
+                    ))
+            else:
+                if progress_dialog:
+                    progress_dialog.update_state(3, "Классифицируем... {}/{}".format(
+                        n + 1, len(processed_text.index)
+                    ))
+                result_i = self.classifier.classify(vector_i)
+            vector_list.append(vector_i)
+            result_list.append(result_i.round(3))
+        processed_text["vector"] = Series(vector_list, index=processed_text.index)
+        processed_text["result"] = Series(result_list, index=processed_text.index)
+        print(processed_text)
+        input()
+        return processed_text
 
     def export(self, result, filename, params):
         file = open(filename, "w", encoding="cp1251")
