@@ -115,7 +115,7 @@ class Preprocessor(Module):
             str_repr = self.DELIMITER.join(rows_list)
             result_text = self.process_plain(str_repr).text.values[0]
             result_list = result_text.split(self.DELIMITER)
-            result = pd.DataFrame(result_list, index=df_to_process.index)
+            result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
         return result
 
     def csv_to_df(self, text : str, delim="\t"):

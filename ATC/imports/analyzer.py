@@ -116,8 +116,18 @@ class Analyzer(QObject):
         processed_text = self.preprocessor.process(text)
         if progress_dialog:
             progress_dialog.update_state(3, "Преобразуем текст в вектор...")
-        vector = self.vectorizer.vectorize(processed_text)
-        # print(vector)
+        if processed_text.index.name == "id":
+            vector_list = []
+            for i in processed_text.index:
+                vector_i = self.vectorizer.vectorize(
+                    processed_text.loc[i, "text"]
+                )
+                if all(abs(i) < self.eps for i in vector_i):
+                    return None
+                vector_list.append(vector_i)
+            processed_text["vector"] = Series(vector_list, index=processed_text.index)
+        else:
+            vector = self.vectorizer.vectorize(processed_text)
         if all(abs(i) < self.eps for i in vector):
             return None
         if progress_dialog:
@@ -145,5 +155,4 @@ class Analyzer(QObject):
         if text.strip() == "":
             return False
         return True
-
 
