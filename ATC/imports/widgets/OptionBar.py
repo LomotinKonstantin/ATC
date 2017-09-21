@@ -19,11 +19,6 @@ class OptionBar(qw.QGroupBox):
         self.lang_selector.addItems(config.get(config.LANG_OPTION))
         self.lang_selector.currentIndexChanged.connect(self.on_changed)
         layout.addRow("Язык", self.lang_selector)
-        # format
-        # self.format_selector = qw.QComboBox(self)
-        # self.format_selector.addItems(config.get(config.FORMAT_OPTION))
-        # self.format_selector.currentIndexChanged.connect(self.on_changed)
-        # layout.addRow("Формат", self.format_selector)
         # threshold
         self.threshold = qw.QDoubleSpinBox(self)
         self.threshold.setValue(0.0)
@@ -40,7 +35,6 @@ class OptionBar(qw.QGroupBox):
         res = {}
         res["rubricator_id"] = self.id_selector.currentText()
         res["language"] = self.lang_selector.currentText()
-        # res["format"] = self.format_selector.currentText()
         res["threshold"] = self.threshold.value()
         return res
 

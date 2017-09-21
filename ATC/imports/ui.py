@@ -4,7 +4,7 @@ import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSignal
-from pandas import Series, DataFrame
+from pandas import DataFrame
 
 from imports.widgets.MainWidget import MainWidget
 from imports.widgets.ControlWidget import ControlWidget

@@ -60,15 +60,15 @@ class TextWidget(qw.QWidget):
             else:
                 for topic, proba in result.iteritems():
                     row = "{}\t{}\n".format(topic, proba)
-                self.current_output += row
-                if extension == "SUBJ":
-                    self.output_widget.insertHtml(
-                        self.extended_str.format(row, self.subj_df.loc[topic, "description"]))
-                elif extension == "IPV":
-                    self.output_widget.insertHtml(
-                        self.extended_str.format(row, self.ipv_df.loc[topic, "description"]))
-                else:
-                    self.output_widget.append(row)
+                    self.current_output += row
+                    if extension == "SUBJ":
+                        self.output_widget.insertHtml(
+                            self.extended_str.format(row, self.subj_df.loc[topic, "description"]))
+                    elif extension == "IPV":
+                        self.output_widget.insertHtml(
+                            self.extended_str.format(row, self.ipv_df.loc[topic, "description"]))
+                    else:
+                        self.output_widget.append(row)
         self.output_widget.verticalScrollBar().setValue(0)
 
     def show_text(self, text):
