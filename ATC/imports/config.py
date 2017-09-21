@@ -16,6 +16,7 @@ class Config(object):
         self.FORMAT_OPTION = "available_formats"
         self.LANG_OPTION = "available_languages"
         self.FONT_OPTION = "font_size"
+        self.VERSION_OPTION = "version"
         self.options = {
             self.ID_OPTION : ["SUBJ", "IPV"],
             self.PREPROC_OPTION : "",
@@ -23,7 +24,8 @@ class Config(object):
             self.CLASSIFIER_OPTION : "",
             self.FORMAT_OPTION : ["plain", "divided"],
             self.LANG_OPTION : ["ru"],
-            self.FONT_OPTION : 12
+            self.FONT_OPTION : 12,
+            self.VERSION_OPTION : ""
         }
 
     def save(self):

@@ -106,7 +106,7 @@ class Analyzer(QObject):
                 class_module, e
             ))
             return False
-        self.version = version
+        self.version = self.config.get(self.config.VERSION_OPTION) + version
         return True
 
     def analyze(self, text, progress_dialog=None):
