@@ -5,11 +5,10 @@ from collections import OrderedDict
 from json import loads
 
 from PyQt5.QtCore import QObject, pyqtSignal
-from pandas import Series
+from pandas import Series, DataFrame
 
 
 class Analyzer(QObject):
-
     import_error_occurred = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
 
@@ -111,13 +110,13 @@ class Analyzer(QObject):
         return True
 
     def analyze(self, text, progress_dialog=None):
-        if progress_dialog:
+        if progress_dialog is not None:
             progress_dialog.update_state(2, "Предобрабатываем текст...")
         processed_text = self.preprocessor.process(text)
         vector_list = []
         result_list = []
         for n, i in enumerate(processed_text.index):
-            if progress_dialog:
+            if progress_dialog is not None:
                 progress_dialog.update_state(3, "Преобразуем текст в вектор... {}/{}".format(
                     n + 1, len(processed_text.index)
                 ))
@@ -127,42 +126,61 @@ class Analyzer(QObject):
             if all(abs(i) < self.eps for i in vector_i):
                 vector_i = None
                 result_i = None
-                if progress_dialog:
+                if progress_dialog is not None:
                     progress_dialog.update_state(3, "Не удалось определить рубрики... {}/{}".format(
                         n + 1, len(processed_text.index)
                     ))
             else:
-                if progress_dialog:
+                if progress_dialog is not None:
                     progress_dialog.update_state(3, "Классифицируем... {}/{}".format(
                         n + 1, len(processed_text.index)
                     ))
-                result_i = self.classifier.classify(vector_i)
+                result_i = self.classifier.classify(vector_i).round(3)
             vector_list.append(vector_i)
-            result_list.append(result_i.round(3))
+            result_list.append(result_i)
         processed_text["vector"] = Series(vector_list, index=processed_text.index)
         processed_text["result"] = Series(result_list, index=processed_text.index)
-        print(processed_text)
-        input()
         return processed_text
 
-    def export(self, result, filename, params):
+    def export(self, result: DataFrame, filename, params):
         file = open(filename, "w", encoding="cp1251")
-        file.write("#\t{}\t{}\t{}\t{}\n".format(
-            params["rubricator_id"], params["language"], params["threshold"], self.version
-        ))
-        if isinstance(result, dict):
-            for i, j in result.items():
-                file.write("{}\t{}\n".format(i, j))
-        elif isinstance(result, str):
-            file.write(result)
-        elif isinstance(result, Series):
-            for topic, proba in result.iteritems():
-                file.write("{}\t{}\n".format(topic, proba))
+        # If result has 'multidoc' format
+        if result.index.name == "id":
+            file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}{}".format(
+                "id", "result", "rubricator", "language", "threshold", "version", "correct",
+                os.linesep
+            ))
+            for i in result.index:
+                class_result = result.loc[i, "result"]
+                if class_result is not None:
+                    class_result = class_result[class_result > params["threshold"]]
+                    if len(class_result.index) > 0:
+                        result_str = "\\".join(
+                            ["{}-{}".format(j, class_result.loc[j]) for j in class_result.index]
+                        )
+                    else:
+                        result_str = "EMPTY"
+                else:
+                    result_str = "REJECT"
+                file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}{}".format(
+                    i, result_str, params["rubricator_id"],
+                    params["language"], params["threshold"], self.version, "###",
+                    os.linesep
+                ))
+        # Apparently, else
+        else:
+            file.write("#\t{}\t{}\t{}\t{}{}".format(
+                params["rubricator_id"], params["language"], params["threshold"], self.version,
+                os.linesep
+            ))
+            for topic, proba in result.loc[0, "result"].items():
+                if proba > params["threshold"]:
+                    file.write("{}\t{}{}".format(topic, proba, os.linesep))
+        file.close()
 
-    def valid(self, text : str):
+    def valid(self, text: str):
         if not text:
             return False
         if text.strip() == "":
             return False
         return True
-

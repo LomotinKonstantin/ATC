@@ -102,7 +102,7 @@ class Preprocessor(Module):
         result = ""
         # Plain & divided texts are processed the same way
         if text_format == self.PLAIN or text_format == self.DIVIDED:
-            result = self.processPlain(text)
+            result = self.process_plain(text)
         elif text_format == self.MULTIDOC:
             df_to_process = self.csv_to_df(text)
             rows_list = []

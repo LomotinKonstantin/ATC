@@ -3,6 +3,7 @@ import sys
 import os
 import warnings
 import locale
+import time
 warnings.filterwarnings('ignore')
 
 from PyQt5.QtWidgets import QApplication
@@ -13,7 +14,6 @@ from imports.ui import UI, show_splashscreen
 from imports.analyzer import Analyzer
 
 
-# TODO Add splashscreen
 class ATC:
     config = Config()
     # Just a stub. Static fields initialize before main code is run
@@ -22,6 +22,7 @@ class ATC:
     analyzer = None
 
     def __init__(self):
+        t = time.time()
         # initialising fields
         self.parameters = {}
         # loading config
@@ -52,6 +53,7 @@ class ATC:
                 sys.exit()
             self.analyzer.export(result[result > self.parameters["threshold"]],
                                  self.parameters["output"], self.parameters)
+            print(time.time() - t, "sec")
             sys.exit(0)
         else:
             show_splashscreen()
