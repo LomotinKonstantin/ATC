@@ -22,7 +22,7 @@ class TextWidget(qw.QWidget):
         self.option_bar = option_bar
         self.current_output = None
         self.last_result = None
-        self.option_bar.threshold.valueChanged.connect(self.show_output)
+        # self.option_bar.threshold.valueChanged.connect(self.show_output)
         self.setLayout(layout)
         # Input widget
         self.input_widget = PlainTextWidget()
@@ -42,7 +42,7 @@ class TextWidget(qw.QWidget):
     def indicate_error(self, error_msg="Error!"):
         self.output_widget.insertHtml("<font color=\"red\">" + error_msg + "</font><br>")
 
-    def show_output(self, output: DataFrame, extension=""):
+    def show_output(self, output, extension=""):
         self.output_widget.clear()
         threshold = self.option_bar.threshold.value()
         self.last_result = output
