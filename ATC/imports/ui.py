@@ -4,7 +4,7 @@ import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSignal
-from pandas import Series
+from pandas import Series, DataFrame
 
 from imports.widgets.MainWidget import MainWidget
 from imports.widgets.ControlWidget import ControlWidget
@@ -19,7 +19,7 @@ class UI(qw.QMainWindow):
 
     error_occurred = pyqtSignal(str)
     file_loaded = pyqtSignal(str, str, int)
-    analyzed = pyqtSignal(Series, str)
+    analyzed = pyqtSignal(DataFrame, str)
 
     def __init__(self, config, analyzer=None):
         super().__init__()
@@ -115,9 +115,10 @@ class UI(qw.QMainWindow):
                 return
         lw.update_state(1, "Анализируем...")
         result = self.analyzer.analyze(text, lw)
-        if result is None:
-            self.main_widget.text_widget.indicate_error("Не удалось определить рубрики")
-            return
+        if result.index.name != "id":
+            if result.loc[0, "result"] is None:
+                self.main_widget.text_widget.indicate_error("Не удалось определить рубрики")
+                return
         lw.update_state(5, "Готово!")
         if self.main_widget.opt_bar.is_description_allowed():
             self.analyzed.emit(result, self.params["rubricator_id"])

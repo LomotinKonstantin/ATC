@@ -1,7 +1,7 @@
 import os
 
 import PyQt5.QtWidgets as qw
-from pandas import Series
+from pandas import DataFrame
 import pandas as pd
 
 
@@ -42,14 +42,24 @@ class TextWidget(qw.QWidget):
     def indicate_error(self, error_msg="Error!"):
         self.output_widget.insertHtml("<font color=\"red\">" + error_msg + "</font><br>")
 
-    def show_output(self, output, extension=""):
+    def show_output(self, output: DataFrame, extension=""):
         self.output_widget.clear()
         threshold = self.option_bar.threshold.value()
-        if isinstance(output, Series):
-            self.last_result = output
-            self.current_output = ""
-            for topic, proba in output[output > threshold].iteritems():
-                row = "{}\t{}\n".format(topic, proba)
+        self.last_result = output
+        self.current_output = ""
+        for i in output.index:
+            result = output.loc[i, "result"]
+            result = result[result > threshold]
+            if output.index.name == "id":
+                str_res = "\\".join(
+                            ["{}-{}".format(j, result.loc[j]) for j in result.index]
+                        )
+                row = "{}\t{}\n".format(i, str_res)
+                self.current_output += row
+                self.output_widget.insertPlainText(row)
+            else:
+                for topic, proba in result.iteritems():
+                    row = "{}\t{}\n".format(topic, proba)
                 self.current_output += row
                 if extension == "SUBJ":
                     self.output_widget.insertHtml(
