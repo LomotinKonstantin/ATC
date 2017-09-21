@@ -52,4 +52,6 @@ class WordEmbedding(Module):
         else:
             self.error_occurred.emit("Can't find the configuration file.")
         return configParcer
-        
+
+    def rejectThreshold(self):
+        return self.config.get("Settings", "reject_threshold")

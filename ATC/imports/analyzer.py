@@ -12,8 +12,6 @@ class Analyzer(QObject):
     import_error_occurred = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
 
-    eps = 1
-
     def __init__(self, config):
         super().__init__()
         self.config = config
@@ -24,6 +22,7 @@ class Analyzer(QObject):
         self.vectorizer = None
         self.classifier = None
         self.version = ""
+        self.eps = 0
 
     def load_file(self, filename):
         file = open(filename, encoding="cp1251")
@@ -88,6 +87,7 @@ class Analyzer(QObject):
             if error_stream:
                 self.vectorizer.error_occurred.connect(error_stream)
             version += "v" + self.vectorizer.version
+            self.eps = float(self.vectorizer.rejectThreshold())
         except Exception as e:
             self.import_error_occurred.emit("Не удалось загрузить векторайзер \"{}\"\nОшибка: {}".format(
                 we_module, e
@@ -167,15 +167,24 @@ class Analyzer(QObject):
                     params["language"], params["threshold"], self.version, "###",
                     os.linesep
                 ))
-        # Apparently, else
+        # Apparently, if format is 'plain' or 'divided'
         else:
             file.write("#\t{}\t{}\t{}\t{}{}".format(
                 params["rubricator_id"], params["language"], params["threshold"], self.version,
                 os.linesep
             ))
-            for topic, proba in result.loc[0, "result"].items():
-                if proba > params["threshold"]:
-                    file.write("{}\t{}{}".format(topic, proba, os.linesep))
+            result_series = result.loc[0, "result"]
+            if result_series is None:
+                file.write("{}{}".format("REJECT", os.linesep))
+            else:
+                result_series = result_series[result_series > params["threshold"]]
+                if len(result_series.index) == 0:
+                    file.write("{}{}".format("EMPTY", os.linesep))
+                else:
+                    for topic in result_series.index:
+                        proba = result_series.loc[topic]
+                        if proba > params["threshold"]:
+                            file.write("{}\t{}{}".format(topic, proba, os.linesep))
         file.close()
 
     def valid(self, text: str):
