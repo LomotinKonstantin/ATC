@@ -12,8 +12,6 @@ from imports.widgets.ModuleManager import ModuleManager
 from imports.widgets.LoadingWidget import LoadingWidget
 import imports.splashscreen
 
-version = "1.1"
-
 
 class UI(qw.QMainWindow):
 
@@ -24,7 +22,7 @@ class UI(qw.QMainWindow):
     def __init__(self, config, analyzer=None):
         super().__init__()
         self.setMinimumSize(qc.QSize(800, 600))
-        self.setWindowTitle("ATC: Automatic Text Classifier v" + version)
+        self.setWindowTitle("ATC: Automatic Text Classifier v" + config.get(config.VERSION_OPTION))
         self.setWindowIcon(QIcon("icon.ico"))
         self.analyzer = analyzer
         self.config = config

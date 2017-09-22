@@ -22,7 +22,7 @@ class ControlWidget(qw.QToolBar):
         # self.config_action = qw.QAction(QIcon(":/settings.png"), "Параметры конфигурации", self)
         # self.addAction(self.config_action)
         self.modules_action = qw.QAction(QIcon(":/exchange.png"), "Менеджер модулей", self)
-        # self.addAction(self.modules_action)
+        self.addAction(self.modules_action)
         # self.help_action = qw.QAction(QIcon(":/notepad.png"), "Расшифровки", self)
         # self.addAction(self.help_action)
 
