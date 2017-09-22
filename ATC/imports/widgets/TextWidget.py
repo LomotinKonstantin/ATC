@@ -47,28 +47,45 @@ class TextWidget(qw.QWidget):
         threshold = self.option_bar.threshold.value()
         self.last_result = output
         self.current_output = ""
+        reject = "Не удалось определить рубрики"
+        empty = "Нет рубрик с вероятностью больше заданного порога"
         for i in output.index:
             result = output.loc[i, "result"]
-            result = result[result > threshold]
             if output.index.name == "id":
-                str_res = "\\".join(
-                            ["{}-{}".format(j, result.loc[j]) for j in result.index]
-                        )
+                if result is None:
+                    str_res = reject
+                else:
+                    result = result[result > threshold]
+                    if len(result.index) == 0:
+                        str_res = empty
+                    else:
+                        str_res = "\\".join(
+                                    ["{}-{}".format(j, result.loc[j]) for j in result.index]
+                                )
                 row = "{}\t{}\n".format(i, str_res)
                 self.current_output += row
-                self.output_widget.insertPlainText(row)
+                self.output_widget.append(row)
             else:
-                for topic, proba in result.iteritems():
-                    row = "{}\t{}\n".format(topic, proba)
-                    self.current_output += row
-                    if extension == "SUBJ":
-                        self.output_widget.insertHtml(
-                            self.extended_str.format(row, self.subj_df.loc[topic, "description"]))
-                    elif extension == "IPV":
-                        self.output_widget.insertHtml(
-                            self.extended_str.format(row, self.ipv_df.loc[topic, "description"]))
-                    else:
+                if result is None:
+                    row = reject
+                    self.output_widget.append(row)
+                else:
+                    result = result[result > threshold]
+                    if len(result.index) == 0:
+                        row = empty
                         self.output_widget.append(row)
+                    else:
+                        for topic, proba in result.iteritems():
+                            row = "{}\t{}\n".format(topic, proba)
+                            self.current_output += row
+                            if extension == "SUBJ":
+                                self.output_widget.insertHtml(
+                                    self.extended_str.format(row, self.subj_df.loc[topic, "description"]))
+                            elif extension == "IPV":
+                                self.output_widget.insertHtml(
+                                    self.extended_str.format(row, self.ipv_df.loc[topic, "description"]))
+                            else:
+                                self.output_widget.append(row)
         self.output_widget.verticalScrollBar().setValue(0)
 
     def show_text(self, text):

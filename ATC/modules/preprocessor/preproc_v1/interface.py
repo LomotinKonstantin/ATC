@@ -91,7 +91,7 @@ class Preprocessor(Module):
         res_str = " ".join(list(filter(lambda a: a != "", s.split())))
         return pd.DataFrame([res_str], columns=["text"])
 
-    def process(self, text : str):
+    def process(self, text: str):
         """
         :param text:
         :return: pandas.DataFrame with either ['id', 'text'] or ['text'] columns
@@ -101,7 +101,7 @@ class Preprocessor(Module):
         text_format = self.recognize_format(text)
         result = ""
         # Plain & divided texts are processed the same way
-        if text_format == self.PLAIN or text_format == self.DIVIDED:
+        if text_format in [self.PLAIN, self.DIVIDED, self.UNKNOWN]:
             result = self.process_plain(text)
         elif text_format == self.MULTIDOC:
             df_to_process = self.csv_to_df(text)
@@ -118,11 +118,15 @@ class Preprocessor(Module):
             result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
         return result
 
-    def csv_to_df(self, text : str, delim="\t"):
+    def csv_to_df(self, text: str, delim="\t"):
         rows = text.splitlines(False)
-        columns = rows[0].split(delim)
-        data = [i for i in [j.split(delim) for j in rows[1:]]]
-        result = pd.DataFrame(data, columns=columns)
+        first_row = rows[0].split(delim)
+        if first_row == self.MULTIDOC_COLUMS:
+            index = 1
+        else:
+            index = 0
+        data = [i for i in [j.split(delim) for j in rows[index:]]]
+        result = pd.DataFrame(data, columns=self.MULTIDOC_COLUMS)
         return result.set_index("id")
 
     def recognize_format(self, text : str):

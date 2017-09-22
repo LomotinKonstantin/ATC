@@ -145,6 +145,7 @@ class Analyzer(QObject):
     def export(self, result: DataFrame, filename, params):
         file = open(filename, "w", encoding="cp1251")
         # If result has 'multidoc' format
+        threshold = round(params["threshold"], 2)
         if result.index.name == "id":
             file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}{}".format(
                 "id", "result", "rubricator", "language", "threshold", "version", "correct",
@@ -153,7 +154,7 @@ class Analyzer(QObject):
             for i in result.index:
                 class_result = result.loc[i, "result"]
                 if class_result is not None:
-                    class_result = class_result[class_result > params["threshold"]]
+                    class_result = class_result[class_result > threshold]
                     if len(class_result.index) > 0:
                         result_str = "\\".join(
                             ["{}-{}".format(j, class_result.loc[j]) for j in class_result.index]
@@ -164,26 +165,26 @@ class Analyzer(QObject):
                     result_str = "REJECT"
                 file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}{}".format(
                     i, result_str, params["rubricator_id"],
-                    params["language"], params["threshold"], self.version, "###",
+                    params["language"], threshold, self.version, "###",
                     os.linesep
                 ))
         # Apparently, if format is 'plain' or 'divided'
         else:
             file.write("#\t{}\t{}\t{}\t{}{}".format(
-                params["rubricator_id"], params["language"], params["threshold"], self.version,
+                params["rubricator_id"], params["language"], threshold, self.version,
                 os.linesep
             ))
             result_series = result.loc[0, "result"]
             if result_series is None:
                 file.write("{}{}".format("REJECT", os.linesep))
             else:
-                result_series = result_series[result_series > params["threshold"]]
+                result_series = result_series[result_series > threshold]
                 if len(result_series.index) == 0:
                     file.write("{}{}".format("EMPTY", os.linesep))
                 else:
                     for topic in result_series.index:
                         proba = result_series.loc[topic]
-                        if proba > params["threshold"]:
+                        if proba > threshold:
                             file.write("{}\t{}{}".format(topic, proba, os.linesep))
         file.close()
 

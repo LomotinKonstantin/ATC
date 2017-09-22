@@ -138,6 +138,7 @@ class UI(qw.QMainWindow):
         filename = self.save_dialog.getSaveFileName(filter="*.txt")[0]
         if not filename:
             return
+        self.params["threshold"] = self.main_widget.opt_bar.threshold.value()
         self.analyzer.export(result, filename, self.params)
 
     def process_import_error(self, msg):
