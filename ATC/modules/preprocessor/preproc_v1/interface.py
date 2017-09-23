@@ -101,21 +101,25 @@ class Preprocessor(Module):
         text_format = self.recognize_format(text)
         result = ""
         # Plain & divided texts are processed the same way
-        if text_format in [self.PLAIN, self.DIVIDED, self.UNKNOWN]:
-            result = self.process_plain(text)
-        elif text_format == self.MULTIDOC:
-            df_to_process = self.csv_to_df(text)
-            rows_list = []
-            for i in df_to_process.index:
-                rows_list.append(" ".join([
-                    df_to_process.loc[i, "title"] * self.title_factor,
-                    df_to_process.loc[i, "body"] * self.text_factor,
-                    df_to_process.loc[i, "keywords"] * self.kw_factor
-                ]))
-            str_repr = self.DELIMITER.join(rows_list)
-            result_text = self.process_plain(str_repr).text.values[0]
-            result_list = result_text.split(self.DELIMITER)
-            result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
+        try:
+            if text_format in [self.PLAIN, self.DIVIDED, self.UNKNOWN]:
+                result = self.process_plain(text)
+            elif text_format == self.MULTIDOC:
+                df_to_process = self.csv_to_df(text)
+                rows_list = []
+                for i in df_to_process.index:
+                    rows_list.append(" ".join([
+                        df_to_process.loc[i, "title"] * self.title_factor,
+                        df_to_process.loc[i, "body"] * self.text_factor,
+                        df_to_process.loc[i, "keywords"] * self.kw_factor
+                    ]))
+                str_repr = self.DELIMITER.join(rows_list)
+                result_text = self.process_plain(str_repr).text.values[0]
+                result_list = result_text.split(self.DELIMITER)
+                result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
+        except Exception as e:
+            self.error_occurred.emit("Не удается обработать текст")
+            result = pd.DataFrame([""], columns=["text"])
         return result
 
     def csv_to_df(self, text: str, delim="\t"):
