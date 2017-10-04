@@ -9,7 +9,7 @@ from sklearn.externals import joblib
 
 class Classifier(Module):
     def __init__(self, rubr_id='SUBJ', lang='ru'):
-        super().__init__()
+        super().__init__(os.path.dirname(__file__) + "\\metadata.json")
         self.rubr_id = rubr_id
         self.lang = lang
         self.config = self.loadConfig()
