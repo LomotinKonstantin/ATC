@@ -6,6 +6,8 @@ from collections import OrderedDict
 
 class ModuleManager(qw.QDialog):
 
+    module_changed = qc.pyqtSignal()
+
     def __init__(self, analyzer, config, parent=None):
         super().__init__(parent, flags=qc.Qt.WindowCloseButtonHint)
         self.analyzer = analyzer
@@ -13,6 +15,7 @@ class ModuleManager(qw.QDialog):
         self.setModal(True)
         self.setWindowTitle("Менеджер модулей")
         self.setMinimumSize(800, 400)
+        self.changed = False
 
         # Layout
         layout = qw.QGridLayout()
@@ -128,16 +131,28 @@ class ModuleManager(qw.QDialog):
         return module_type
 
     def update_modules(self):
+        self.changed = False
         preprocessor = self.tab_widget.widget(0)
         module = preprocessor.selectedItems()
         if module:
+            old_preproc = self.config.get(self.config.PREPROC_OPTION)
+            if old_preproc != module[0].text():
+                self.changed = True
             self.config.set(self.config.PREPROC_OPTION, module[0].text())
         vectorizer = self.tab_widget.widget(1)
         module = vectorizer.selectedItems()
         if module:
-            self.config.set(self.config.WE_OPTION, module[0].text())
+            old_vect = self.config.get(self.config.WE_OPTION)
+            if old_vect != module[0].text():
+                self.changed = True
+                self.config.set(self.config.WE_OPTION, module[0].text())
         classifier = self.tab_widget.widget(2)
         module = classifier.selectedItems()
         if module:
-            self.config.set(self.config.CLASSIFIER_OPTION, module[0].text())
-        self.config.save()
+            old_class = self.config.get(self.config.CLASSIFIER_OPTION)
+            if old_class != module[0].text():
+                self.changed = True
+                self.config.set(self.config.CLASSIFIER_OPTION, module[0].text())
+        if self.changed:
+            self.module_changed.emit()
+            self.config.save()

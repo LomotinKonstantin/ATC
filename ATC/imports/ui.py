@@ -28,6 +28,7 @@ class UI(qw.QMainWindow):
         self.config = config
         self.status_label = qw.QLabel()
         self.statusBar().addWidget(self.status_label)
+        self.changed = True
         # File dialogs
         self.load_dialog = qw.QFileDialog()
         self.save_dialog = qw.QFileDialog()
@@ -62,7 +63,7 @@ class UI(qw.QMainWindow):
         # Signals
         self.toolbar.open_action.triggered.connect(self.read_file)
         self.toolbar.analyze_action.triggered.connect(self.analyze)
-        self.toolbar.analyze_action.triggered.connect(self.main_widget.opt_bar.on_commited)
+        # self.toolbar.analyze_action.triggered.connect(self.main_widget.opt_bar.on_commited)
         self.toolbar.export_action.triggered.connect(self.export)
         self.toolbar.modules_action.triggered.connect(self.module_manager.exec)
         self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
@@ -72,8 +73,11 @@ class UI(qw.QMainWindow):
             self.analyzer.import_error_occurred.connect(self.process_import_error)
             self.analyzer.error_occurred.connect(self.main_widget.text_widget.indicate_error)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
+        self.analyzed.connect(self.lower_changed_flag)
         self.main_widget.opt_bar.description.stateChanged.connect(self.update_output)
         self.main_widget.opt_bar.threshold.valueChanged.connect(self.update_output)
+        self.main_widget.opt_bar.state_changed.connect(self.raise_changed_flag)
+        self.module_manager.module_changed.connect(self.raise_changed_flag)
 
         # Launch
         self.showMaximized()
@@ -106,7 +110,7 @@ class UI(qw.QMainWindow):
         if len(text) == 0:
             return
         self.params = self.main_widget.opt_bar.options_to_dict()
-        if self.main_widget.opt_bar.changed:
+        if self.changed:
             lw.update_state(0, "Инициализируем модули...")
             if not self.analyzer.load_modules(self.params,
                                               self.main_widget.text_widget.indicate_error):
@@ -155,6 +159,12 @@ class UI(qw.QMainWindow):
             self.main_widget.text_widget.show_output(res, self.params["rubricator_id"])
         else:
             self.main_widget.text_widget.show_output(res, "")
+
+    def raise_changed_flag(self):
+        self.changed = True
+
+    def lower_changed_flag(self):
+        self.changed = False
 
 
 def show_splashscreen():

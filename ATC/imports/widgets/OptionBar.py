@@ -1,23 +1,26 @@
 import PyQt5.QtWidgets as qw
+from PyQt5.QtCore import pyqtSignal
 
 
 class OptionBar(qw.QGroupBox):
 
+    state_changed = pyqtSignal()
+
     def __init__(self, config, parent=None):
         super().__init__("Параметры", parent=parent)
-        self.changed = True
+        # self.changed = True
         # setting up form layout for parameter specifying
         layout = qw.QFormLayout()
         self.setLayout(layout)
         # rubricator id
         self.id_selector = qw.QComboBox(self)
         self.id_selector.addItems(config.get(config.ID_OPTION))
-        self.id_selector.currentIndexChanged.connect(self.on_changed)
+        self.id_selector.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Идентификатор рубрикатора", self.id_selector)
         # language
         self.lang_selector = qw.QComboBox(self)
         self.lang_selector.addItems(config.get(config.LANG_OPTION))
-        self.lang_selector.currentIndexChanged.connect(self.on_changed)
+        self.lang_selector.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Язык", self.lang_selector)
         # threshold
         self.threshold = qw.QDoubleSpinBox(self)
@@ -38,11 +41,11 @@ class OptionBar(qw.QGroupBox):
         res["threshold"] = self.threshold.value()
         return res
 
-    def on_changed(self):
-        self.changed = True
+    # def on_changed(self):
+    #     self.changed = True
 
-    def on_commited(self):
-        self.changed = False
+    # def on_commited(self):
+    #     self.changed = False
 
     def is_description_allowed(self):
         return self.description.isChecked()
