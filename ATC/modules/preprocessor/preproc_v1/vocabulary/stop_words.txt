@@ -34,6 +34,7 @@
 вокруг
 вопреки
 вослед
+вот
 впереди
 вплоть до
 впредь до
@@ -48,7 +49,7 @@
 за
 за вычетом
 за исключением
-за счёт
+за счет
 заместо
 из
 из-за
@@ -84,7 +85,7 @@
 напротив
 наряду с
 насупротив
-насчёт
+насчет
 начиная с
 не без
 недалеко от
@@ -126,8 +127,8 @@
 позади
 позднее
 помимо
-поперёд
-поперёк
+поперед
+поперек
 порядка
 посверху
 посередине
@@ -147,7 +148,7 @@
 против
 противно
 противу
-путём
+путем
 ради
 рядом с
 с
@@ -176,7 +177,6 @@
 супротив
 у
 через
-
 а
 а ведь
 а именно
@@ -196,8 +196,9 @@
 в результате чего
 ведь
 впрочем
-всё
-всё-таки
+все
+все-таки
+все
 вследствие чего
 где
 где-то
@@ -214,12 +215,14 @@
 еже
 ежели
 если
+еще
 ж
 же
 зато
 зачем
 значит
-и/или
+и
+или
 ибо
 из-за того, что
 из-за этого
@@ -270,12 +273,12 @@
 потому
 потому как
 потому что
-почём
+почем
 почему
 правда
 прежде чем
 притом
-причём
+причем
 просто
 пускай
 пусть
@@ -287,6 +290,7 @@
 словно
 словно бы
 столько
+так
 так как
 также
 теперь
@@ -307,3 +311,114 @@
 якобы
 —
 _
+aboard
+about
+above
+across
+afore
+after
+against
+along
+amidst
+among
+amongst
+around
+as
+aside
+aslant
+astride
+at
+athwart
+atop
+bar
+before
+behind
+below
+beneath
+beside
+besides
+between
+beyond
+but
+by
+circa
+despite
+down
+except
+for
+from
+given
+in
+inside
+into
+like
+mid
+near
+neath
+next
+notwithstanding
+of
+off
+on
+opposite
+out
+outside
+over
+per
+plus
+post
+pro
+since
+than
+through
+till
+to
+toward
+towards
+under
+underneath
+unlike
+until
+up
+via
+with
+without
+barring
+concerning
+considering
+depending
+during
+excepting
+excluding
+following
+including
+regarding
+because
+or
+and
+he
+she
+his
+it
+its
+it's
+my
+you
+your
+that
+this
+the
+thus
+hence
+these
+have
+has
+got
+get
+no
+not
+yes
+are
+each
+was
+were
