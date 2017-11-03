@@ -29,7 +29,7 @@ class Preprocessor(Module):
         self.email_re = "(^|(?<=\s))([\w._-]+@[a-zA-Z]+\.\w+)(?=\s|$)"
         self.lemm = Mystem()
         pac_str = ("(" + ")|(".join(self.stop_words) + ")" + "|(\w{,2})")
-        self.parse_re = re.compile("(^|(?<=\s))(" + pac_str + ")(?=\s|$)")
+        self.parse_re = re.compile("\b(" + pac_str + ")\b")
 
     def _load_vocabulary(self):
         # Loading VINITI alphabet
@@ -82,13 +82,21 @@ class Preprocessor(Module):
         # Removing VINITI alphabet
         for i in self.alphabet:
             s = s.replace(i, " ")
+        # Reducing the diversity of possible spellings
+        s = s.replace("ё", "е")
         s = re.sub("\s+", " ", s)
-        s = re.sub(self.parse_re, "", s)
+        # Regexp doesn't work for some reason, so
+        # we use built-in python functions.
+        # I hope, they are optimized
+        s = " ".join(filter(lambda x : x not in self.stop_words, s.split()))
         # Lemmatization
         s = "".join(self.lemm.lemmatize(s))
+        # Mmm... Let it be so
         s = re.sub("(((?<=^)|(?<=\w))-+((?=\s)|(?=$)))|(((?<=^)|(?<=\s))-+((?=\w)|(?=\s)|(?=$)))", "", s)
-        s = re.sub("(^|(?<=\s))\w{,2}(?=\s|$)", "", s)
+        # Removing all words shorter than 2 letters
+        s = re.sub("\b\w{,2}\b", "", s)
         res_str = " ".join(list(filter(lambda a: a != "", s.split())))
+        print(res_str)
         return pd.DataFrame([res_str], columns=["text"])
 
     def process(self, text: str):
@@ -113,7 +121,9 @@ class Preprocessor(Module):
                         df_to_process.loc[i, "body"] * self.text_factor,
                         df_to_process.loc[i, "keywords"] * self.kw_factor
                     ]))
-                str_repr = self.DELIMITER.join(rows_list)
+                # A little magic in order to create space around the first word in
+                # each text
+                str_repr = (" " + self.DELIMITER + " ").join(rows_list)
                 result_text = self.process_plain(str_repr).text.values[0]
                 result_list = result_text.split(self.DELIMITER)
                 result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
@@ -141,17 +151,3 @@ class Preprocessor(Module):
         if re.match("(\w+?[^\t]+)+", text):
             return self.PLAIN
         return self.UNKNOWN
-
-
-# if __name__ == '__main__':
-#     from time import time
-#     t = time()
-#     a = Preprocessor("ru")
-#     # # plain
-#     # print(a.recognizeFormat(open("D:\\Desktop\\VINITI\\test_samples\\J15078903131.txt").read()))
-#     # # divided
-#     # print(a.recognizeFormat(open("D:\\Desktop\\VINITI\\test_samples\\J1500957X107.csv").read()))
-#     # multidoc
-#     text = open("D:\\Desktop\\VINITI\\test_samples\\multidoc.txt").read()
-#     print(a.process(text).head())
-#     print(time() - t, "секунд")
