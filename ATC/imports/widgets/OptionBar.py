@@ -20,6 +20,7 @@ class OptionBar(qw.QGroupBox):
         # language
         self.lang_selector = qw.QComboBox(self)
         self.lang_selector.addItems(config.get(config.LANG_OPTION))
+        self.lang_selector.setCurrentIndex(0)
         self.lang_selector.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Язык", self.lang_selector)
         # threshold
@@ -40,12 +41,6 @@ class OptionBar(qw.QGroupBox):
         res["language"] = self.lang_selector.currentText()
         res["threshold"] = self.threshold.value()
         return res
-
-    # def on_changed(self):
-    #     self.changed = True
-
-    # def on_commited(self):
-    #     self.changed = False
 
     def is_description_allowed(self):
         return self.description.isChecked()

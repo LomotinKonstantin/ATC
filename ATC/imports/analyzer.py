@@ -7,6 +7,8 @@ from json import loads
 from PyQt5.QtCore import QObject, pyqtSignal
 from pandas import Series, DataFrame
 
+from modules.preprocessor.preproc_v1.interface import Preprocessor
+
 
 class Analyzer(QObject):
     import_error_occurred = pyqtSignal(str)
@@ -23,6 +25,8 @@ class Analyzer(QObject):
         self.classifier = None
         self.version = ""
         self.eps = 0
+        self.preprocessor = Preprocessor()
+
 
     def load_file(self, filename):
         file = open(filename, encoding="cp1251")
@@ -60,25 +64,15 @@ class Analyzer(QObject):
         else:
             return dirs
 
+    # ToDo:
+    # переделать все так, чтобы работало с tuple, который возвращает препроцессор
+    # потолкать Катрин, чтобы переделала ее модули (см. тикет в трелло)
     def load_modules(self, params, error_stream=None):
-        preproc_module = self.config.get(self.config.PREPROC_OPTION)
-        # format = params["format"]
         lang = params["language"]
         rubr_id = params["rubricator_id"]
         version = ""
-        try:
-            preprocessor = import_module("modules.preprocessor." +
-                                         preproc_module + ".interface")
-            preprocessor_class = getattr(preprocessor, "Preprocessor")
-            self.preprocessor = preprocessor_class(lang)
-            if error_stream:
-                self.preprocessor.error_occurred.connect(error_stream)
-            version += "p" + self.preprocessor.version
-        except Exception as e:
-            self.import_error_occurred.emit("Не удалось загрузить предобработчик \"{}\"\nОшибка: {}".format(
-                preproc_module, e
-            ))
-            return False
+        version += "p" + self.preprocessor.version
+
         we_module = self.config.get(self.config.WE_OPTION)
         try:
             we = import_module("modules.word_embedding." + we_module + ".interface")
@@ -93,6 +87,7 @@ class Analyzer(QObject):
                 we_module, e
             ))
             return False
+
         class_module = self.config.get(self.config.CLASSIFIER_OPTION)
         try:
             classifier = import_module("modules.classifier." + class_module + ".interface")
@@ -112,7 +107,7 @@ class Analyzer(QObject):
     def analyze(self, text, progress_dialog=None):
         if progress_dialog is not None:
             progress_dialog.update_state(2, "Предобрабатываем текст...")
-        processed_text = self.preprocessor.process(text)
+        processed_text, lang = self.preprocessor.process(text)
         vector_list = []
         result_list = []
         for n, i in enumerate(processed_text.index):

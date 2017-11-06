@@ -3,6 +3,8 @@ import os
 
 from pymystem3.mystem import Mystem
 import pandas as pd
+from nltk import WordNetLemmatizer, pos_tag, wordpunct_tokenize
+from nltk.corpus import stopwords
 
 from modules.common import Module
 
@@ -16,18 +18,14 @@ class Preprocessor(Module):
     MULTIDOC_COLUMS = ["id", "title", "body", "keywords", "correct"]
     DELIMITER = "┼┼┼"
 
-    def __init__(self, lang, title_factor=1, text_factor=1, kw_factor=1):
+    def __init__(self, title_factor=1, text_factor=1, kw_factor=1):
         super().__init__(os.path.dirname(__file__) + "\\metadata.json")
-        if not isinstance(lang, str):
-            raise TypeError("Expected parameter lang of type str, got type " + str(type(lang)))
         self.title_factor = title_factor
         self.text_factor = text_factor
         self.kw_factor = kw_factor
         self.path = "./modules/preprocessor/preproc_v1/"
-        self.lang = lang
         self._load_vocabulary()
         self.email_re = "(^|(?<=\s))([\w._-]+@[a-zA-Z]+\.\w+)(?=\s|$)"
-        self.lemm = Mystem()
         pac_str = ("(" + ")|(".join(self.stop_words) + ")" + "|(\w{,2})")
         self.parse_re = re.compile("\b(" + pac_str + ")\b")
 
@@ -49,18 +47,13 @@ class Preprocessor(Module):
                       "пробел",
                       "дефис",
                       "буквы лат."], axis=1, inplace=True)
-        # TODO add smth to keep
-        # alph_df.drop(["диакриты",
-        #               "буквы спец.",
-        #               "буквы греч.",
-        #               "форм. доп.",
-        #               "диакр. наезж."], axis=1, inplace=True)
         self.alphabet = [i for j in alph_df.values.flatten() for i in j]
         # Loading stop-words
-        self.stop_words = open(os.path.dirname(__file__) + "/vocabulary/stop_words.txt", encoding="utf-8").read().split("\n")
+        self.stop_words = open(os.path.dirname(__file__) + "/vocabulary/stop_words.txt",
+                               encoding="utf-8").read().split("\n")
         self.stop_words = list(filter(lambda a: a != "", self.stop_words))
 
-    def process_plain(self, text):
+    def process_plain(self, text, lang):
         """ Processes text. Removes all tokens except cyrillic and latin words.
             Lemmatization included
 
@@ -72,6 +65,7 @@ class Preprocessor(Module):
             -------
             pandas.DataFrame with cleared from VINITI`s alphabet and lemmatized text
         """
+        lemm = Lemmatizer(lang)
         s = text
         # Actually this check is not required
         # _Ё is already in service characters list and will be removed
@@ -90,28 +84,32 @@ class Preprocessor(Module):
         # I hope, they are optimized
         s = " ".join(filter(lambda x : x not in self.stop_words, s.split()))
         # Lemmatization
-        s = "".join(self.lemm.lemmatize(s))
+        s = "".join(lemm.lemmatize(s))
         # Mmm... Let it be so
         s = re.sub("(((?<=^)|(?<=\w))-+((?=\s)|(?=$)))|(((?<=^)|(?<=\s))-+((?=\w)|(?=\s)|(?=$)))", "", s)
         # Removing all words shorter than 2 letters
         s = re.sub("\b\w{,2}\b", "", s)
         res_str = " ".join(list(filter(lambda a: a != "", s.split())))
-        print(res_str)
         return pd.DataFrame([res_str], columns=["text"])
 
-    def process(self, text: str):
+    def process(self, text: str, lang="auto"):
         """
-        :param text:
-        :return: pandas.DataFrame with either ['id', 'text'] or ['text'] columns
+        :param lang: Text language (default: auto)
+        :param text: Text to turn into bag-of-words
+        :return: tuple: (pandas.DataFrame with either ['id', 'text'] or ['text'] columns, language)
         """
         if not text:
             return ""
+        if lang == "auto":
+            language = self.recognize_language(text)[:2]
+        else:
+            language = lang
         text_format = self.recognize_format(text)
         result = ""
         # Plain & divided texts are processed the same way
         try:
             if text_format in [self.PLAIN, self.DIVIDED, self.UNKNOWN]:
-                result = self.process_plain(text)
+                result = self.process_plain(text, language)
             elif text_format == self.MULTIDOC:
                 df_to_process = self.csv_to_df(text)
                 rows_list = []
@@ -124,13 +122,13 @@ class Preprocessor(Module):
                 # A little magic in order to create space around the first word in
                 # each text
                 str_repr = (" " + self.DELIMITER + " ").join(rows_list)
-                result_text = self.process_plain(str_repr).text.values[0]
+                result_text = self.process_plain(str_repr, language).text.values[0]
                 result_list = result_text.split(self.DELIMITER)
                 result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
         except Exception as e:
             self.error_occurred.emit("Не удается обработать текст")
             result = pd.DataFrame([""], columns=["text"])
-        return result
+        return result, language
 
     def csv_to_df(self, text: str, delim="\t"):
         rows = text.splitlines(False)
@@ -143,7 +141,7 @@ class Preprocessor(Module):
         result = pd.DataFrame(data, columns=self.MULTIDOC_COLUMS)
         return result.set_index("id")
 
-    def recognize_format(self, text : str):
+    def recognize_format(self, text: str):
         if re.match("((^|\t)[^\t]+){4,5}", text):
             return self.MULTIDOC
         if re.match("((^|\t)[^\t]+){3,}", text):
@@ -151,3 +149,44 @@ class Preprocessor(Module):
         if re.match("(\w+?[^\t]+)+", text):
             return self.PLAIN
         return self.UNKNOWN
+
+    def recognize_language(self, text: str):
+        languages_ratios = {}
+        tokens = wordpunct_tokenize(text)
+        words = [word.lower() for word in tokens]
+        for language in stopwords.fileids():
+            stopwords_set = set(stopwords.words(language))
+            words_set = set(words)
+            common_elements = words_set.intersection(stopwords_set)
+            languages_ratios[language] = len(common_elements)
+        most_rated_language = max(languages_ratios, key=languages_ratios.get)
+        return most_rated_language
+
+
+class Lemmatizer:
+
+    pos_map = {
+        "NN": "n",
+        "JJ": "a",
+        "VB": "v"
+    }
+
+    def __init__(self, lang: str):
+        self.lang = lang
+        if self.lang == "ru":
+            self.lemmatize = Mystem().lemmatize
+        elif self.lang == "en":
+            self.lemmatize = self.nltk_lemmatize
+
+    def nltk_lemmatize(self, text):
+        tag = pos_tag([text])[0][1]
+        lemm = WordNetLemmatizer()
+        if tag in self.pos_map.keys():
+            tag = self.pos_map[tag]
+        else:
+            tag = "v"
+        res = []
+        for word in text.split():
+            res.append(lemm.lemmatize(word, tag))
+        res = " ".join(res)
+        return res

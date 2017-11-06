@@ -45,22 +45,6 @@ class ModuleManager(qw.QDialog):
         groupbox.setLayout(groupbox_layout)
         groupbox_layout.addWidget(self.metadata_widget)
 
-        # Preprocessors tab
-        self.preprocessors = qw.QListWidget()
-        self.preprocessors.itemClicked.connect(self.on_item_clicked)
-        self.available_preprocessors = self.analyzer.available_modules(self.analyzer.preprocessor_path,
-                                                                       True)
-        current_preproc = self.config.get(self.config.PREPROC_OPTION)
-        for i in self.available_preprocessors.keys():
-            j = qw.QListWidgetItem(i, self.preprocessors)
-            if i == current_preproc:
-                j.setSelected(True)
-        if len(self.available_preprocessors.keys()) == 1:
-            self.preprocessors.item(0).setSelected(True)
-        else:
-            self.preprocessors.sortItems()
-        self.tab_widget.addTab(self.preprocessors, "Предобработчики")
-
         # Vectorizers tab
         self.vectorizers = qw.QListWidget()
         self.vectorizers.itemClicked.connect(self.on_item_clicked)
@@ -122,9 +106,7 @@ class ModuleManager(qw.QDialog):
 
     def tab_num_to_available_modules(self, num):
         module_type = OrderedDict()
-        if num == 0:
-            module_type = self.available_preprocessors
-        elif num == 1:
+        if num == 1:
             module_type = self.available_vectorizers
         elif num == 2:
             module_type = self.available_classifiers
@@ -132,13 +114,6 @@ class ModuleManager(qw.QDialog):
 
     def update_modules(self):
         self.changed = False
-        preprocessor = self.tab_widget.widget(0)
-        module = preprocessor.selectedItems()
-        if module:
-            old_preproc = self.config.get(self.config.PREPROC_OPTION)
-            if old_preproc != module[0].text():
-                self.changed = True
-            self.config.set(self.config.PREPROC_OPTION, module[0].text())
         vectorizer = self.tab_widget.widget(1)
         module = vectorizer.selectedItems()
         if module:
