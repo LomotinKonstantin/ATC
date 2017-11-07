@@ -101,7 +101,7 @@ class Preprocessor(Module):
         if not text:
             return ""
         if lang == "auto":
-            language = self.recognize_language(text)[:2]
+            language = self.recognize_language(text)
         else:
             language = lang
         text_format = self.recognize_format(text)
@@ -109,7 +109,7 @@ class Preprocessor(Module):
         # Plain & divided texts are processed the same way
         try:
             if text_format in [self.PLAIN, self.DIVIDED, self.UNKNOWN]:
-                result = self.process_plain(text, language)
+                result = self.process_plain(text, language[:2])
             elif text_format == self.MULTIDOC:
                 df_to_process = self.csv_to_df(text)
                 rows_list = []
@@ -122,7 +122,7 @@ class Preprocessor(Module):
                 # A little magic in order to create space around the first word in
                 # each text
                 str_repr = (" " + self.DELIMITER + " ").join(rows_list)
-                result_text = self.process_plain(str_repr, language).text.values[0]
+                result_text = self.process_plain(str_repr, language[:2]).text.values[0]
                 result_list = result_text.split(self.DELIMITER)
                 result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
         except Exception as e:

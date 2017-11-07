@@ -13,7 +13,7 @@ class ModuleManager(qw.QDialog):
         self.analyzer = analyzer
         self.config = config
         self.setModal(True)
-        self.setWindowTitle("Менеджер модулей")
+        self.setWindowTitle("Менеджер модулей (возможность выбора временно отключена)")
         self.setMinimumSize(800, 400)
         self.changed = False
 
@@ -27,10 +27,11 @@ class ModuleManager(qw.QDialog):
         layout.addWidget(self.tab_widget, 0, 0, 3, 2)
 
         # Buttons
-        self.ok_button = qw.QPushButton("Ок")
-        self.ok_button.clicked.connect(self.accept)
-        self.ok_button.clicked.connect(self.update_modules)
-        layout.addWidget(self.ok_button, 3, 2)
+        # Turn it on when all the bugs are fixed!
+        # self.ok_button = qw.QPushButton("Ок")
+        # self.ok_button.clicked.connect(self.accept)
+        # self.ok_button.clicked.connect(self.update_modules)
+        # layout.addWidget(self.ok_button, 3, 2)
         self.cancel_button = qw.QPushButton("Отмена")
         self.cancel_button.clicked.connect(self.reject)
         layout.addWidget(self.cancel_button, 3, 3)
@@ -44,6 +45,22 @@ class ModuleManager(qw.QDialog):
         groupbox_layout = qw.QVBoxLayout()
         groupbox.setLayout(groupbox_layout)
         groupbox_layout.addWidget(self.metadata_widget)
+
+        # Preprocessors tab
+        # self.preprocessors = qw.QListWidget()
+        # self.preprocessors.itemClicked.connect(self.on_item_clicked)
+        # self.available_preprocessors = self.analyzer.available_modules(self.analyzer.preprocessor_path,
+        #                                                                True)
+        # current_preproc = self.config.get(self.config.PREPROC_OPTION)
+        # for i in self.available_preprocessors.keys():
+        #     j = qw.QListWidgetItem(i, self.preprocessors)
+        #     if i == current_preproc:
+        #         j.setSelected(True)
+        # if len(self.available_preprocessors.keys()) == 1:
+        #     self.preprocessors.item(0).setSelected(True)
+        # else:
+        #     self.preprocessors.sortItems()
+        # self.tab_widget.addTab(self.preprocessors, "Предобработчики")
 
         # Vectorizers tab
         self.vectorizers = qw.QListWidget()
@@ -106,22 +123,31 @@ class ModuleManager(qw.QDialog):
 
     def tab_num_to_available_modules(self, num):
         module_type = OrderedDict()
-        if num == 1:
+        # if num == 0:
+        #     module_type = self.available_preprocessors
+        if num == 0:
             module_type = self.available_vectorizers
-        elif num == 2:
+        elif num == 1:
             module_type = self.available_classifiers
         return module_type
 
     def update_modules(self):
         self.changed = False
-        vectorizer = self.tab_widget.widget(1)
+        # preprocessor = self.tab_widget.widget(0)
+        # module = preprocessor.selectedItems()
+        # if module:
+        #     old_preproc = self.config.get(self.config.PREPROC_OPTION)
+        #     if old_preproc != module[0].text():
+        #         self.changed = True
+        #     self.config.set(self.config.PREPROC_OPTION, module[0].text())
+        vectorizer = self.tab_widget.widget(0)
         module = vectorizer.selectedItems()
         if module:
             old_vect = self.config.get(self.config.WE_OPTION)
             if old_vect != module[0].text():
                 self.changed = True
                 self.config.set(self.config.WE_OPTION, module[0].text())
-        classifier = self.tab_widget.widget(2)
+        classifier = self.tab_widget.widget(1)
         module = classifier.selectedItems()
         if module:
             old_class = self.config.get(self.config.CLASSIFIER_OPTION)

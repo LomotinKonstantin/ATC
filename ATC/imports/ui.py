@@ -27,7 +27,9 @@ class UI(qw.QMainWindow):
         self.analyzer = analyzer
         self.config = config
         self.status_label = qw.QLabel()
+        self.lang_label = qw.QLabel()
         self.statusBar().addWidget(self.status_label)
+        self.statusBar().addWidget(self.lang_label)
         self.changed = True
         # File dialogs
         self.load_dialog = qw.QFileDialog()
@@ -72,6 +74,7 @@ class UI(qw.QMainWindow):
         if analyzer:
             self.analyzer.import_error_occurred.connect(self.process_import_error)
             self.analyzer.error_occurred.connect(self.main_widget.text_widget.indicate_error)
+            self.analyzer.language_recognized.connect(self.set_language)
         self.analyzed.connect(self.main_widget.text_widget.show_output)
         self.analyzed.connect(self.lower_changed_flag)
         self.main_widget.opt_bar.description.stateChanged.connect(self.update_output)
@@ -97,6 +100,13 @@ class UI(qw.QMainWindow):
             filename + "\t" + "(" + str(size) + " байт)\t" + str(len(content)) + " символов"
         )
 
+    def set_language(self, lang, is_auto=False):
+        if is_auto:
+            a = " (auto)"
+        else:
+            a = ""
+        self.lang_label.setText(lang + a)
+
     def set_analyzer(self, analyzer):
         self.analyzer = analyzer
         self.analyzer.import_error_occured.connect(self.process_import_error)
@@ -117,9 +127,9 @@ class UI(qw.QMainWindow):
                                                   self.main_widget.text_widget.indicate_error):
                     return
             lw.update_state(1, "Анализируем...")
-            result = self.analyzer.analyze(text, lw)
+            result = self.analyzer.analyze(text, self.params, lw)
             if result is None:
-                self.main_widget.text_widget.indicate_error("Не удалось предобработать текст")
+                # self.main_widget.text_widget.indicate_error("Не удалось предобработать текст")
                 return
             if result.index.name != "id":
                 if result.loc[0, "result"] is None:

@@ -13,6 +13,7 @@ from modules.preprocessor.preproc_v1.interface import Preprocessor
 class Analyzer(QObject):
     import_error_occurred = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
+    language_recognized = pyqtSignal(str, bool)
 
     def __init__(self, config):
         super().__init__()
@@ -26,6 +27,7 @@ class Analyzer(QObject):
         self.version = ""
         self.eps = 0
         self.preprocessor = Preprocessor()
+        self.last_language = None
 
 
     def load_file(self, filename):
@@ -100,12 +102,18 @@ class Analyzer(QObject):
         self.version = self.config.get(self.config.VERSION_OPTION) + version
         return True
 
-    def analyze(self, text, progress_dialog=None):
+    def analyze(self, text, params, progress_dialog=None):
         if progress_dialog is not None:
             progress_dialog.update_state(2, "Предобрабатываем текст...")
-        processed_text, lang = self.preprocessor.process(text)
+        lang = params["language"]
+        auto = lang == "auto"
+        processed_text, language = self.preprocessor.process(text, lang)
+        lang = language[:2]
+        self.last_language = lang + (":auto" if auto else "")
+        self.language_recognized.emit(language, auto)
         if lang not in self.config.get(self.config.LANG_OPTION):
-            self.error_occurred.emit("Язык не распознан. Укажите язык текста на панели справа")
+            self.error_occurred.emit(
+                "Язык {} не поддерживается. Укажите язык текста на панели справа".format(language))
             return None
         vector_list = []
         result_list = []
@@ -118,7 +126,6 @@ class Analyzer(QObject):
                 processed_text.loc[i, "text"],
                 lang
             )
-            print(vector_i)
             if all(abs(i) < self.eps for i in vector_i):
                 vector_i = None
                 result_i = None
@@ -161,7 +168,7 @@ class Analyzer(QObject):
                     result_str = "REJECT"
                 file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}{}".format(
                     i, result_str, params["rubricator_id"],
-                    params["language"], threshold, self.version, "###",
+                    self.last_language, threshold, self.version, "###",
                     os.linesep
                 ))
         # Apparently, if format is 'plain' or 'divided'

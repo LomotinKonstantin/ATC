@@ -6,6 +6,7 @@ import pandas as pd
 
 
 class PlainTextWidget(qw.QTextEdit):
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -16,12 +17,14 @@ class PlainTextWidget(qw.QTextEdit):
 
 
 class TextWidget(qw.QWidget):
+
     def __init__(self, option_bar, parent=None):
         super().__init__(parent)
         layout = qw.QVBoxLayout()
         self.option_bar = option_bar
         self.current_output = None
         self.last_result = None
+        self.is_last_error = False
         # self.option_bar.threshold.valueChanged.connect(self.show_output)
         self.setLayout(layout)
         # Input widget
@@ -40,9 +43,13 @@ class TextWidget(qw.QWidget):
         self.extended_str = "{}\t<font color='#6c6874'>{}</font><br><br>"
 
     def indicate_error(self, error_msg="Error!"):
+        if not self.is_last_error:
+            self.output_widget.clear()
+        self.is_last_error = True
         self.output_widget.insertHtml("<font color=\"red\">" + error_msg + "</font><br>")
 
     def show_output(self, output, extension=""):
+        self.is_last_error = False
         self.output_widget.clear()
         threshold = self.option_bar.threshold.value()
         self.last_result = output
