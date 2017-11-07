@@ -64,9 +64,6 @@ class Analyzer(QObject):
         else:
             return dirs
 
-    # ToDo:
-    # переделать все так, чтобы работало с tuple, который возвращает препроцессор
-    # потолкать Катрин, чтобы переделала ее модули (см. тикет в трелло)
     def load_modules(self, params, error_stream=None):
         lang = params["language"]
         rubr_id = params["rubricator_id"]
@@ -77,7 +74,7 @@ class Analyzer(QObject):
         try:
             we = import_module("modules.word_embedding." + we_module + ".interface")
             we_class = getattr(we, "WordEmbedding")
-            self.vectorizer = we_class(lang)
+            self.vectorizer = we_class()
             if error_stream:
                 self.vectorizer.error_occurred.connect(error_stream)
             version += "v" + self.vectorizer.version
@@ -92,7 +89,7 @@ class Analyzer(QObject):
         try:
             classifier = import_module("modules.classifier." + class_module + ".interface")
             classifier_class = getattr(classifier, "Classifier")
-            self.classifier = classifier_class(rubr_id, lang)
+            self.classifier = classifier_class(rubr_id)
             if error_stream:
                 self.classifier.error_occurred.connect(error_stream)
             version += "c" + self.classifier.version
@@ -116,7 +113,8 @@ class Analyzer(QObject):
                     n + 1, len(processed_text.index)
                 ))
             vector_i = self.vectorizer.vectorize(
-                processed_text.loc[i, "text"]
+                processed_text.loc[i, "text"],
+                lang
             )
             if all(abs(i) < self.eps for i in vector_i):
                 vector_i = None
@@ -130,7 +128,7 @@ class Analyzer(QObject):
                     progress_dialog.update_state(3, "Классифицируем... {}/{}".format(
                         n + 1, len(processed_text.index)
                     ))
-                result_i = self.classifier.classify(vector_i).round(3)
+                result_i = self.classifier.classify(vector_i, lang).round(3)
             vector_list.append(vector_i)
             result_list.append(result_i)
         processed_text["vector"] = Series(vector_list, index=processed_text.index)
@@ -189,3 +187,4 @@ class Analyzer(QObject):
         if text.strip() == "":
             return False
         return True
+
