@@ -14,10 +14,16 @@ class Classifier(Module):
         self.config = self.loadConfig()
         self.loadClf()
         
-    # Classifies vector according to last set language.
+    # If lang == None, classifies vector according to last set language.
+    # If lang != None, checks if input language corresponds with current language 
+    # before classification. If it does not, set new current language and changes classifier.       
     # Language can be set in constructor, classify(self, text, lang) function
     # or with setter.
-    def classify(self, vector):
+    def classify(self, vector, lang = None):
+        if lang:
+            if self.lang != lang:
+                self.lang = lang
+                self.loadClf()            
         if self.clf:
             if self.clf.coef_.T.shape[0] == len(vector):
                 result = pd.Series(self.clf.predict_proba([vector])[0], index=self.clf.classes_)
@@ -31,14 +37,7 @@ class Classifier(Module):
         else:
             return None   
     
-    # Checks if input language corresponds with current language before classification.
-    # If it does not, set new current language and changes classifier.    
-    def classify(self, vector, lang):
-        if self.lang != lang:
-            self.lang = lang
-            self.loadClf()
-        return self.classify(vector)
-        
+     
     def loadConfig(self): 
         configParcer = ConfigParser()
         file = os.path.dirname(__file__) + '/config.ini'
