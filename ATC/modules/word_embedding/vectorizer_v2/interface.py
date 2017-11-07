@@ -13,10 +13,16 @@ class WordEmbedding(Module):
         self.config = self.loadConfig()
         self.loadModel()
         
-    # Creating vector according to last set language.
+    # If lang == None, creates vector according to last set language.
+    # If lang != None, checks if input language corresponds with model language 
+    # before creating vectors. If it does not, set new model language and changes model.
     # Language can be set in constructor, vectorize(self, text, lang) function
     # or with setter.
-    def vectorize(self, text):
+    def vectorize(self, text, lang = None):
+        if lang:
+            if self.lang != lang:
+                self.lang = lang
+                self.loadModel()            
         if self.model:
             tokens = text.split()
             features = [0]*self.length
@@ -37,14 +43,6 @@ class WordEmbedding(Module):
             return features[0]
         else:
             return None
-        
-    # Checks if input language corresponds with model language before creating vectors.
-    # If it does not, set new model language and changes model.
-    def vectorize(self, text, lang):
-        if self.lang != lang:
-            self.lang = lang
-            self.loadModel()
-        return self.vectorize(text)
         
     def loadModel(self):
         file = os.path.join(os.path.dirname(__file__), self.config.get('Settings', self.lang))
