@@ -65,7 +65,6 @@ class Analyzer(QObject):
             return dirs
 
     def load_modules(self, params, error_stream=None):
-        lang = params["language"]
         rubr_id = params["rubricator_id"]
         version = ""
         version += "p" + self.preprocessor.version
@@ -105,6 +104,9 @@ class Analyzer(QObject):
         if progress_dialog is not None:
             progress_dialog.update_state(2, "Предобрабатываем текст...")
         processed_text, lang = self.preprocessor.process(text)
+        if lang not in self.config.get(self.config.LANG_OPTION):
+            self.error_occurred.emit("Язык не распознан. Укажите язык текста на панели справа")
+            return None
         vector_list = []
         result_list = []
         for n, i in enumerate(processed_text.index):
@@ -116,6 +118,7 @@ class Analyzer(QObject):
                 processed_text.loc[i, "text"],
                 lang
             )
+            print(vector_i)
             if all(abs(i) < self.eps for i in vector_i):
                 vector_i = None
                 result_i = None

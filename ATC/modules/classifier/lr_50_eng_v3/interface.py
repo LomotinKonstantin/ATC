@@ -57,9 +57,9 @@ class Classifier(Module):
             self.clf = None
             
     # Language setter. Reloads classifier immediately.
-    def setLang(lang):
+    def setLang(self, lang):
         self.lang = lang
         self.loadClf()
         
-    def getLang():
+    def getLang(self):
         return self.lang    

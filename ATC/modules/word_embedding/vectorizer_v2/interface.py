@@ -39,8 +39,7 @@ class WordEmbedding(Module):
                         features = features.max(axis=0)
                     else:
                         features = features.mean(axis=0)
-                features = [features]              
-            return features[0]
+            return features
         else:
             return None
         
@@ -66,9 +65,9 @@ class WordEmbedding(Module):
         return self.config.get("Settings", "reject_threshold")
     
     # Language setter. Reloads model immediately.
-    def setLang(lang):
+    def setLang(self, lang):
         self.lang = lang
         self.loadModel()
         
-    def getLang():
+    def getLang(self):
         return self.lang

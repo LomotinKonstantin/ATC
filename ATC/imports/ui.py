@@ -102,30 +102,38 @@ class UI(qw.QMainWindow):
         self.analyzer.import_error_occured.connect(self.process_import_error)
 
     def analyze(self):
-        lw = LoadingWidget(0, 5)
-        lw.show()
-        text = self.main_widget.text_widget.get_input()
-        if not self.analyzer.valid(text):
-            return
-        if len(text) == 0:
-            return
-        self.params = self.main_widget.opt_bar.options_to_dict()
-        if self.changed:
-            lw.update_state(0, "Инициализируем модули...")
-            if not self.analyzer.load_modules(self.params,
-                                              self.main_widget.text_widget.indicate_error):
+        try:
+            lw = LoadingWidget(0, 5)
+            lw.show()
+            text = self.main_widget.text_widget.get_input()
+            if not self.analyzer.valid(text):
                 return
-        lw.update_state(1, "Анализируем...")
-        result = self.analyzer.analyze(text, lw)
-        if result.index.name != "id":
-            if result.loc[0, "result"] is None:
-                self.main_widget.text_widget.indicate_error("Не удалось определить рубрики")
+            if len(text) == 0:
                 return
-        lw.update_state(5, "Готово!")
-        if self.main_widget.opt_bar.is_description_allowed():
-            self.analyzed.emit(result, self.params["rubricator_id"])
-        else:
-            self.analyzed.emit(result, "")
+            self.params = self.main_widget.opt_bar.options_to_dict()
+            if self.changed:
+                lw.update_state(0, "Инициализируем модули...")
+                if not self.analyzer.load_modules(self.params,
+                                                  self.main_widget.text_widget.indicate_error):
+                    return
+            lw.update_state(1, "Анализируем...")
+            result = self.analyzer.analyze(text, lw)
+            if result is None:
+                self.main_widget.text_widget.indicate_error("Не удалось предобработать текст")
+                return
+            if result.index.name != "id":
+                if result.loc[0, "result"] is None:
+                    self.main_widget.text_widget.indicate_error("Не удалось определить рубрики")
+                    return
+            lw.update_state(5, "Готово!")
+            if self.main_widget.opt_bar.is_description_allowed():
+                self.analyzed.emit(result, self.params["rubricator_id"])
+            else:
+                self.analyzed.emit(result, "")
+        except Exception as e:
+            print(e)
+            import traceback
+            traceback.print_exc()
 
     def font_size_selected(self):
         size = int(self.sender().text())
