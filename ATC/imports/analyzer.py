@@ -29,7 +29,6 @@ class Analyzer(QObject):
         self.preprocessor = Preprocessor()
         self.last_language = None
 
-
     def load_file(self, filename):
         file = open(filename, encoding="cp1251")
         content = file.read()

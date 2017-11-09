@@ -31,7 +31,8 @@ class Preprocessor(Module):
 
     def _load_vocabulary(self):
         # Loading VINITI alphabet
-        alph = open(os.path.dirname(__file__) + "/vocabulary/viniti_alphabet.txt").read().split("\n")
+        alph = open(os.path.dirname(__file__) + "/vocabulary/viniti_alphabet.txt",
+                    encoding="cp1251").read().split("\n")
         alph = list(filter(lambda a: a != "", alph))
         rules = {}
         for i in alph:
