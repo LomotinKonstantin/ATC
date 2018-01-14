@@ -2,26 +2,29 @@
 import sys
 import os
 import warnings
+from configparser import ConfigParser
+
 warnings.filterwarnings('ignore')
 
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QThread
 
-from gui.GUI import UI
+from gui.GUI import GUI
 from analyzer.analyzer import Analyzer
 
 
 class ATC:
-    # Just a stub. Static fields initialize before main code is run
-    # So QApplication isn't launched yet and it crashes the app
+
+    section = "AvailableOptions"
 
     def __init__(self):
-        # initialising fields
+        # Initialising fields
         self.parameters = {}
-        # selecting mode
+        # Loading config
+        self.config = self.loadConfig()
+        self.analyzer = Analyzer(self.config)
+        # Selecting mode
         if len(sys.argv) > 1:
-            self._parse_args()
-            self.analyzer.import_error_occurred.connect(self.print_error)
+            self.parse_args()
             self.analyzer.error_occurred.connect(self.print_error)
             filename = self.parameters["input"]
             if not os.path.exists(filename):
@@ -29,8 +32,8 @@ class ATC:
                 sys.exit()
             try:
                 text = self.analyzer.load_file(self.parameters["input"])
-                if not self.analyzer.valid(text):
-                    self.print_error("File {} does not contain any text".format(filename))
+                if not self.analyzer.isTextValid(text):
+                    self.print_error("File {} does not contain valid text".format(filename))
                     sys.exit()
             except Exception as e:
                 self.print_error("Error loading file {}:\n{}".format(filename, e))
@@ -44,12 +47,10 @@ class ATC:
                                  self.parameters["output"], self.parameters)
             sys.exit(0)
         else:
-            self.thread = QThread()
-            self.thread.start()
-            self.ui = UI(self.config, self.analyzer)
-            self.analyzer.moveToThread(self.thread)
+            self.ui = GUI()
+            self.ui.start()
 
-    def _parse_args(self):
+    def parse_args(self):
         description = "Automated Text Classifier for VINITI. Чтобы запустить графический сеанс, " \
                       "запустите программу без аргументов"
         argparser = ArgumentParser(prog="ATC", description=description)
@@ -60,13 +61,13 @@ class ATC:
         argparser.add_argument("-id",
                                "--rubricator-id",
                                help="идентификатор рубрикатора",
-                               choices=self.config.get(self.config.ID_OPTION),
+                               choices=self.config.get(self.section, "ids"),
                                required=True)
         argparser.add_argument("-f", "--format", help="формат входного файла",
-                               choices=self.config.get(self.config.FORMAT_OPTION),
+                               choices=self.config.get(self.section, "formats"),
                                required=False)
         argparser.add_argument("-l", "--language", help="язык входного текста",
-                               choices=self.config.get(self.config.LANG_OPTION),
+                               choices=self.config.get(self.section, "languages"),
                                required=True)
         argparser.add_argument("-t", "--threshold", help="пороговое значение вероятности. " +
                                                          "Ответы классификатора с вероятностью ниже " +
@@ -76,8 +77,13 @@ class ATC:
                                required=False)
         self.parameters = vars(argparser.parse_args())
 
-    def print_error(self, error_msg : str):
+    def print_error(self, error_msg: str):
         print(error_msg, file=sys.stderr)
+
+    def loadConfig(self):
+        parser = ConfigParser()
+        parser.read(["config.ini"], encoding="utf-8")
+        return parser
 
 
 if __name__ == "__main__":

@@ -7,13 +7,16 @@ from json import loads
 from PyQt5.QtCore import QObject, pyqtSignal
 from pandas import Series, DataFrame
 
-from modules.preprocessor.preproc_v1.interface import Preprocessor
+from analyzer.modules.preprocessor.interface import Preprocessor
 
 
 class Analyzer(QObject):
-    import_error_occurred = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
     language_recognized = pyqtSignal(str, bool)
+
+    ###
+    ### TODO: add moar signals for each operation (preprocessing, w2v, classification)
+    ###
 
     def __init__(self, config):
         super().__init__()
@@ -195,7 +198,7 @@ class Analyzer(QObject):
                             file.write("{}\t{}{}".format(topic, proba, os.linesep))
         file.close()
 
-    def valid(self, text: str):
+    def isTextValid(self, text: str):
         if not text:
             return False
         if text.strip() == "":

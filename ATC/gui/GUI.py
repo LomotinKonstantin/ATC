@@ -13,13 +13,17 @@ from imports.widgets.LoadingWidget import LoadingWidget
 import imports.splashscreen
 
 
-class UI(qw.QMainWindow):
+class GUI(qw.QMainWindow):
 
     error_occurred = pyqtSignal(str)
     file_loaded = pyqtSignal(str, str, int)
     analyzed = pyqtSignal(DataFrame, str)
 
-    def __init__(self, config, analyzer=None):
+    ###
+    ### TODO: implement start() method
+    ###
+
+    def __init__(self):
         super().__init__()
         self.setMinimumSize(qc.QSize(800, 600))
         self.setWindowTitle("ATC: Automatic Text Classifier v" + config.get(config.VERSION_OPTION))
