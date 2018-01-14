@@ -4,6 +4,10 @@ import PyQt5.QtWidgets as qw
 from pandas import DataFrame
 import pandas as pd
 
+###
+### TODO: refactor, remove option pane
+###
+
 
 class PlainTextWidget(qw.QTextEdit):
 

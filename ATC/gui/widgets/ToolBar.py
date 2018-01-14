@@ -3,6 +3,10 @@ from PyQt5.QtGui import QIcon, QKeySequence
 
 import imports.widgets.tool_icons
 
+###
+### TODO: refactor, change names and titles
+###
+
 
 class ControlWidget(qw.QToolBar):
 

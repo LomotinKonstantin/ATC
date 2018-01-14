@@ -3,6 +3,10 @@ import PyQt5.QtWidgets as qw
 from imports.widgets.OptionBar import OptionBar
 from imports.widgets.TextWidget import TextWidget
 
+###
+### TODO: make this class the main widget inherited from QMainWindow
+###
+
 
 class MainWidget(qw.QWidget):
 

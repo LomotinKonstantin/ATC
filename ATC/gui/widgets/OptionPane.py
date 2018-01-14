@@ -1,6 +1,10 @@
 import PyQt5.QtWidgets as qw
 from PyQt5.QtCore import pyqtSignal
 
+###
+### TODO: refactor
+###
+
 
 class OptionBar(qw.QGroupBox):
 

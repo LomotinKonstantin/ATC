@@ -3,6 +3,10 @@ import PyQt5.QtCore as qc
 
 from collections import OrderedDict
 
+###
+### TODO: change the widget totally according to the new functionality
+###
+
 
 class ModuleManager(qw.QDialog):
 

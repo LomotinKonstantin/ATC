@@ -1,6 +1,10 @@
 import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
 
+###
+### TODO: total refactoring
+###
+
 
 class LoadingWidget(qw.QProgressDialog):
 

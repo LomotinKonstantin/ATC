@@ -20,7 +20,9 @@ class GUI(qw.QMainWindow):
     analyzed = pyqtSignal(DataFrame, str)
 
     ###
-    ### TODO: implement start() method
+    ### TODO: implement start() method and config loading
+    ### TODO: wrap all the signals
+    ### TODO: this class is not inherited from QMainWindow
     ###
 
     def __init__(self):
