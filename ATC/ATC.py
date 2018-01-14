@@ -7,25 +7,17 @@ warnings.filterwarnings('ignore')
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QThread
 
-from imports.config import Config
-from imports.ui import UI, show_splashscreen
-from imports.analyzer import Analyzer
+from gui.GUI import UI
+from analyzer.analyzer import Analyzer
 
 
 class ATC:
-    config = Config()
     # Just a stub. Static fields initialize before main code is run
     # So QApplication isn't launched yet and it crashes the app
-    ui = None
-    analyzer = None
 
     def __init__(self):
         # initialising fields
         self.parameters = {}
-        # loading config
-        self.config.load()
-        # loading core & modules
-        self.analyzer = Analyzer(self.config)
         # selecting mode
         if len(sys.argv) > 1:
             self._parse_args()
@@ -52,7 +44,6 @@ class ATC:
                                  self.parameters["output"], self.parameters)
             sys.exit(0)
         else:
-            show_splashscreen()
             self.thread = QThread()
             self.thread.start()
             self.ui = UI(self.config, self.analyzer)
