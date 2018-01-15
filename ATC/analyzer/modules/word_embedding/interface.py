@@ -1,16 +1,14 @@
 import warnings
 warnings.filterwarnings(action='ignore')
 from gensim.models import Word2Vec
-from configparser import ConfigParser
 import numpy as np
 import os.path
-import sys 
-from modules.common import Module
+from analyzer.modules.module import Module
 
 
 class WordEmbedding(Module):
     def __init__(self, lang='ru'):
-        super().__init__(os.path.dirname(__file__) + "\\metadata.json")
+        super().__init__(os.path.join(os.path.dirname(__file__), "metadata.json"))
         self.lang = lang
         self.config = self.loadConfig()
         self.loadModel()
@@ -20,7 +18,7 @@ class WordEmbedding(Module):
     # before creating vectors. If it does not, set new model language and changes model.
     # Language can be set in constructor, vectorize(self, text, lang) function
     # or with setter.
-    def vectorize(self, text, lang = None):
+    def vectorize(self, text, lang=None):
         if lang:
             if self.lang != lang:
                 self.lang = lang
@@ -53,15 +51,6 @@ class WordEmbedding(Module):
         else:
             self.error_occurred.emit('The model does not exist.')
             self.model = None
-
-    def loadConfig(self): 
-        configParcer = ConfigParser()
-        file = os.path.dirname(__file__) + '/config.ini'
-        if os.path.exists(file):
-            configParcer.read(file)
-        else:
-            self.error_occurred.emit("Can't find the configuration file.")
-        return configParcer
 
     def rejectThreshold(self):
         return self.config.get("Settings", "reject_threshold")

@@ -7,7 +7,11 @@ from pymystem3.mystem import Mystem
 from nltk.stem.snowball import SnowballStemmer
 from nltk.stem import WordNetLemmatizer
 
-from modules.common import Module
+from analyzer.modules.module import Module
+
+###
+### TODO: make language recognition NLTK-independent
+###
 
 
 def expand_language(lang: str):
@@ -102,8 +106,8 @@ class Preprocessor(Module):
                 "цифры"            - арабские цифры
         """
 
+    def __init__(self, title_factor=1, text_factor=1, kw_factor=1):
         super().__init__(os.path.join(os.path.dirname(__file__), "metadata.json"))
-        self.groups_to_save = groups_to_save
         self.title_factor = title_factor
         self.body_factor = body_factor
         self.kw_factor = kw_factor
