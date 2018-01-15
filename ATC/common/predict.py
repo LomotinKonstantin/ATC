@@ -11,12 +11,15 @@ class Predict:
     methods for different representations of the result.
     """
 
-    def __init__(self, predict: Series, lang: str, text_format: str, rubr_id: str, version: str):
+    def __init__(self, predict=None, lang=None, text_format=None, rubr_id=None, version=None):
         self.data = None
-        self.language = None
-        self.format = None
-        self.rubr_id = None
-        self.setPredict(predict, lang, text_format, rubr_id)
+        self.params = {
+            "language": None,
+            "format": None,
+            "rubr_id": None,
+            "version": None
+        }
+        self.setPredict(predict, lang, text_format, rubr_id, version)
         return
 
     def saveToFile(self, file, threshold=0, n_digits=3):
@@ -36,7 +39,7 @@ class Predict:
         data_to_save = self.data.round(n_digits)
         if dest_file.read() == "":
             dest_file.write("#\t{}\t{}\t{}\t{}{}".format(
-                self.rubr_id, self.language, threshold, self.version,
+                self.params["rubr_id"], self.params["language"], threshold, self.params["version"],
                 os.linesep
             ))
         result_series = data_to_save.loc[0, "result"]
@@ -60,8 +63,19 @@ class Predict:
     def getPredict(self):
         return self.data
 
-    def setPredict(self, predict: Series, lang: str, text_format: str, rubr_id: str):
+    def setParams(self, lang=None, text_format=None, rubr_id=None, version=None):
+        if lang is not None:
+            self.params["language"] = lang
+        if text_format is not None:
+            self.params["format"] = lang
+        if rubr_id is not None:
+            self.params["rubr_id"] = rubr_id
+        if version is not None:
+            self.params["version"] = version
+
+    def setPredict(self, predict: Series, lang: str, text_format: str, rubr_id: str, version):
         self.data = predict
-        self.language = lang
-        self.format = text_format
-        self.rubr_id = rubr_id
+        self.params["language"] = lang
+        self.params["format"] = text_format
+        self.params["rubr_id"] = rubr_id
+        self.params["version"] = version

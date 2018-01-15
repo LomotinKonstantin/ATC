@@ -1,13 +1,12 @@
 import os
-import sys
-from importlib import import_module
-from collections import OrderedDict
-from json import loads
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from pandas import Series, DataFrame
 
 from analyzer.modules.preprocessor.interface import Preprocessor
+from analyzer.modules.word_embedding.interface import WordEmbedding
+from analyzer.modules.classifier.interface import Classifier
+from common.predict import Predict
 
 
 class Analyzer(QObject):
@@ -21,16 +20,13 @@ class Analyzer(QObject):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.preprocessor_path = sys.path[0] + "/modules/preprocessor"
-        self.vectorizer_path = sys.path[0] + "/modules/word_embedding"
-        self.classifier_path = sys.path[0] + "/modules/classifier"
         self.preprocessor = None
         self.vectorizer = None
         self.classifier = None
         self.version = ""
         self.eps = 0
-        self.preprocessor = Preprocessor()
         self.last_language = None
+        self.load_modules()
 
     def load_file(self, filename):
         file = open(filename, encoding="cp1251")
@@ -46,88 +42,42 @@ class Analyzer(QObject):
                 res.append(i)
         return res
 
-    def available_modules(self, module_path, meta=True):
-        """
-        :param meta: if True, returns OrderedDict with module and metadata
-        :param module_path: one of the Analyzer.preprocessor_path, Analyzer.vectorizer_path or
-                Analyzer.classifier_path
-        :return: list or OrderedDict of available modules
-        """
-        dirs = self.dirs(module_path)
-        if meta:
-            res = OrderedDict()
-            for module in dirs:
-                try:
-                    json_string = open(os.path.join(module_path, module, "metadata.json"),
-                                       encoding="utf-8").read()
-                    metadata = loads(json_string, object_pairs_hook=OrderedDict)
-                except:
-                    metadata = ""
-                res[module] = metadata
-            return res
-        else:
-            return dirs
+    ###
+    ### TODO: make modules multi-usable (not to load them each time)
+    ###
 
-    def load_modules(self, params, error_stream=None):
-        rubr_id = params["rubricator_id"]
+    def load_modules(self):
+        self.preprocessor = Preprocessor()
+        self.vectorizer = WordEmbedding()
+        self.classifier = Classifier()
+
+        self.eps = float(self.vectorizer.rejectThreshold())
         version = ""
         version += "p" + self.preprocessor.version
-
-        we_module = self.config.get(self.config.WE_OPTION)
-        try:
-            we = import_module("modules.word_embedding." + we_module + ".interface")
-            we_class = getattr(we, "WordEmbedding")
-            self.vectorizer = we_class()
-            if error_stream:
-                self.vectorizer.error_occurred.connect(error_stream)
-            version += "v" + self.vectorizer.version
-            self.eps = float(self.vectorizer.rejectThreshold())
-        except Exception as e:
-            self.import_error_occurred.emit("Не удалось загрузить векторайзер \"{}\"\nОшибка: {}".format(
-                we_module, e
-            ))
-            return False
-
-        class_module = self.config.get(self.config.CLASSIFIER_OPTION)
-        try:
-            classifier = import_module("modules.classifier." + class_module + ".interface")
-            classifier_class = getattr(classifier, "Classifier")
-            self.classifier = classifier_class(rubr_id)
-            if error_stream:
-                self.classifier.error_occurred.connect(error_stream)
-            version += "c" + self.classifier.version
-        except Exception as e:
-            self.import_error_occurred.emit("Не удалось загрузить классификатор \"{}\"\nОшибка: {}".format(
-                class_module, e
-            ))
-            return False
+        version += "v" + self.vectorizer.version
+        version += "c" + self.classifier.version
         self.version = self.config.get(self.config.VERSION_OPTION) + version
-        return True
 
-    def analyze(self, text, params, progress_dialog=None):
-        if progress_dialog is not None:
-            progress_dialog.update_state(2, "Предобрабатываем текст...")
-        text_format = params["format"]
+
+    def analyze(self, text, params: dict):
         lang = params["language"]
         auto = lang == "auto"
-        if auto:
-            language = self.preprocessor.recognize_language(text)
-        else:
-            language = lang
-        processed_text = self.preprocessor.process(text, language, text_format)
-        if language not in self.config.get(self.config.LANG_OPTION):
+        processed_text, language = self.preprocessor.process(text, lang)
+        lang = language[:2]
+        predict = Predict()
+        predict.setParams(lang=lang)
+        
+
+
+
+        if lang not in self.config.get(self.config.LANG_OPTION):
             self.error_occurred.emit(
                 "Язык {} не поддерживается. Укажите язык текста на панели справа".format(language))
             return None
-        self.last_language = language + (":auto" if auto else "")
-        self.language_recognized.emit(language, auto)
+        predict = Predict()
         vector_list = []
         result_list = []
         for n, i in enumerate(processed_text.index):
-            if progress_dialog is not None:
-                progress_dialog.update_state(3, "Преобразуем текст в вектор... {}/{}".format(
-                    n + 1, len(processed_text.index)
-                ))
             vector_i = self.vectorizer.vectorize(
                 processed_text.loc[i, "text"],
                 language
@@ -136,16 +86,8 @@ class Analyzer(QObject):
             if all(abs(i) < self.eps for i in vector_i):
                 vector_i = None
                 result_i = None
-                if progress_dialog is not None:
-                    progress_dialog.update_state(3, "Не удалось определить рубрики... {}/{}".format(
-                        n + 1, len(processed_text.index)
-                    ))
             else:
-                if progress_dialog is not None:
-                    progress_dialog.update_state(3, "Классифицируем... {}/{}".format(
-                        n + 1, len(processed_text.index)
-                    ))
-                result_i = self.classifier.classify(vector_i, language).round(3)
+                result_i = self.classifier.classify(vector_i, lang).round(3)
             vector_list.append(vector_i)
             result_list.append(result_i)
         processed_text["vector"] = Series(vector_list, index=processed_text.index)
