@@ -9,6 +9,7 @@ from nltk.stem import WordNetLemmatizer
 
 from analyzer.modules.module import Module
 
+
 ###
 ### TODO: make language recognition NLTK-independent
 ###
@@ -235,6 +236,7 @@ class Preprocessor(Module):
                    normalization: str,
                    language="auto",
                    default_lang="error") -> str:
+
         """
         Предобработка одного текста.
         ----------------------------
@@ -290,7 +292,7 @@ class Preprocessor(Module):
 
     def process(self, text, lang="auto", text_format="auto"):
         if not text:
-            return ""
+            return None
         if lang == "auto":
             language = self.recognize_language(text)
         else:

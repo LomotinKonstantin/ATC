@@ -65,14 +65,12 @@ class Analyzer(QObject):
         auto = lang == "auto"
         processed_text, language = self.preprocessor.process(text, lang)
         lang = language[:2]
-        predict = Predict()
-        predict.setParams(lang=lang)
-
-        if lang not in self.config.get(""):
+        if lang not in self.config.get(self.config_section, "languages"):
             self.error_occurred.emit(
                 "Язык {} не поддерживается. Укажите язык текста на панели справа".format(language))
             return None
         predict = Predict()
+        predict.setParams(lang=lang)
         vector_list = []
         result_list = []
         for n, i in enumerate(processed_text.index):
