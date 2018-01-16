@@ -12,6 +12,7 @@ from common.predict import Predict
 class Analyzer(QObject):
     error_occurred = pyqtSignal(str)
     language_recognized = pyqtSignal(str, bool)
+    config_section = "AvailableOptions"
 
     ###
     ### TODO: add moar signals for each operation (preprocessing, w2v, classification)
@@ -66,11 +67,8 @@ class Analyzer(QObject):
         lang = language[:2]
         predict = Predict()
         predict.setParams(lang=lang)
-        
 
-
-
-        if lang not in self.config.get(self.config.LANG_OPTION):
+        if lang not in self.config.get(""):
             self.error_occurred.emit(
                 "Язык {} не поддерживается. Укажите язык текста на панели справа".format(language))
             return None
