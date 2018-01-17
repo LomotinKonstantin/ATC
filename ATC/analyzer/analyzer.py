@@ -1,6 +1,4 @@
-from time import time
-
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal
 from pandas import Series
 
 from analyzer.modules.preprocessor.interface import Preprocessor
@@ -9,11 +7,11 @@ from analyzer.modules.classifier.interface import Classifier
 from common.predict import Predict
 
 
-class Analyzer(QObject):
+class Analyzer(QThread):
     error_occurred = pyqtSignal(str)
     language_recognized = pyqtSignal(str, bool)
     in_process = pyqtSignal(str)
-    complete = pyqtSignal(str)
+    complete = pyqtSignal(Predict)
 
     config_section = "AvailableOptions"
 
@@ -27,6 +25,8 @@ class Analyzer(QObject):
         self.eps = 0
         self.last_language = None
         self.load_modules()
+        self.text = None
+        self.params = None
 
     def load_file(self, filename):
         file = open(filename, encoding="cp1251")
@@ -56,7 +56,6 @@ class Analyzer(QObject):
 
 
     def analyze(self, text, params: dict):
-        start_time = time()
         lang = params["language"]
         rubr_id = params["rubr_id"]
         self.in_process.emit("Preprocessing...")
@@ -89,8 +88,22 @@ class Analyzer(QObject):
                           rubr_id=rubr_id,
                           version=self.version,
                           text_format=text_format)
-        self.complete.emit("Done! {} s".format(int(time() - start_time)))
+        self.complete.emit(predict)
         return predict
+
+    def run(self):
+        self.analyze(self.text, self.params)
+
+    def analyzeInParallel(self, text, params: dict):
+        """
+        Launches classification in a separate thread. Result is contained in the 'complete()'
+        signal.
+        :param text: text to process
+        :param params: user options
+        """
+        self.text = text
+        self.params = params
+        self.start()
 
     def isTextValid(self, text: str):
         if not text:
