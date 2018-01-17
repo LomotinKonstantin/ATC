@@ -1,8 +1,7 @@
-import os
 from time import time
 
 from PyQt5.QtCore import QObject, pyqtSignal
-from pandas import Series, DataFrame
+from pandas import Series
 
 from analyzer.modules.preprocessor.interface import Preprocessor
 from analyzer.modules.word_embedding.interface import WordEmbedding
@@ -34,18 +33,14 @@ class Analyzer(QObject):
         content = file.read()
         return content
 
-    def dirs(self, path):
-        files = os.listdir(path)
-        res = []
-        for i in files:
-            file = os.path.join(path, i)
-            if os.path.isdir(file) and i != "__pycache__":
-                res.append(i)
-        return res
-
-    ###
-    ### TODO: make modules multi-usable (not to load them each time)
-    ###
+    # def dirs(self, path):
+    #     files = os.listdir(path)
+    #     res = []
+    #     for i in files:
+    #         file = os.path.join(path, i)
+    #         if os.path.isdir(file) and i != "__pycache__":
+    #             res.append(i)
+    #     return res
 
     def load_modules(self):
         self.preprocessor = Preprocessor()
