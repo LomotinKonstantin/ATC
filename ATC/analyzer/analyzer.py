@@ -12,6 +12,9 @@ from common.predict import Predict
 class Analyzer(QObject):
     error_occurred = pyqtSignal(str)
     language_recognized = pyqtSignal(str, bool)
+    in_process = pyqtSignal(str)
+    complete = pyqtSignal(str)
+
     config_section = "AvailableOptions"
 
     ###
@@ -62,15 +65,13 @@ class Analyzer(QObject):
 
     def analyze(self, text, params: dict):
         lang = params["language"]
-        auto = lang == "auto"
-        processed_text, language = self.preprocessor.process(text, lang)
+        rubr_id = params["rubr_id"]
+        processed_text, language, text_format = self.preprocessor.process(text, lang)
         lang = language[:2]
         if lang not in self.config.get(self.config_section, "languages"):
             self.error_occurred.emit(
                 "Язык {} не поддерживается. Укажите язык текста на панели справа".format(language))
             return None
-        predict = Predict()
-        predict.setParams(lang=lang)
         vector_list = []
         result_list = []
         for n, i in enumerate(processed_text.index):
@@ -83,12 +84,17 @@ class Analyzer(QObject):
                 vector_i = None
                 result_i = None
             else:
-                result_i = self.classifier.classify(vector_i, lang).round(3)
+                result_i = self.classifier.classify(vector_i, lang, rubr_id).round(3)
             vector_list.append(vector_i)
             result_list.append(result_i)
         processed_text["vector"] = Series(vector_list, index=processed_text.index)
         processed_text["result"] = Series(result_list, index=processed_text.index)
-        return processed_text
+        predict = Predict(processed_text,
+                          lang=lang,
+                          rubr_id=rubr_id,
+                          version=self.version,
+                          text_format=text_format)
+        return predict
 
     def export(self, result: DataFrame, filename, params):
         file = open(filename, "w", encoding="cp1251")
