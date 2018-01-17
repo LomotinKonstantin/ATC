@@ -1,4 +1,5 @@
 import os
+from time import time
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from pandas import Series, DataFrame
@@ -16,10 +17,6 @@ class Analyzer(QObject):
     complete = pyqtSignal(str)
 
     config_section = "AvailableOptions"
-
-    ###
-    ### TODO: add moar signals for each operation (preprocessing, w2v, classification)
-    ###
 
     def __init__(self, config):
         super().__init__()
@@ -64,8 +61,10 @@ class Analyzer(QObject):
 
 
     def analyze(self, text, params: dict):
+        start_time = time()
         lang = params["language"]
         rubr_id = params["rubr_id"]
+        self.in_process.emit("Preprocessing...")
         processed_text, language, text_format = self.preprocessor.process(text, lang)
         lang = language[:2]
         if lang not in self.config.get(self.config_section, "languages"):
@@ -74,6 +73,7 @@ class Analyzer(QObject):
             return None
         vector_list = []
         result_list = []
+        self.in_process.emit("Vectorizing and classifying...")
         for n, i in enumerate(processed_text.index):
             vector_i = self.vectorizer.vectorize(
                 processed_text.loc[i, "text"],
@@ -94,53 +94,8 @@ class Analyzer(QObject):
                           rubr_id=rubr_id,
                           version=self.version,
                           text_format=text_format)
+        self.complete.emit("Done! {} s".format(int(time() - start_time)))
         return predict
-
-    def export(self, result: DataFrame, filename, params):
-        file = open(filename, "w", encoding="cp1251")
-        # If result has 'multidoc' format
-        threshold = round(params["threshold"], 2)
-        if result.index.name == "id":
-            file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}{}".format(
-                "id", "result", "rubricator", "language", "threshold", "version", "correct",
-                os.linesep
-            ))
-            for i in result.index:
-                class_result = result.loc[i, "result"]
-                if class_result is not None:
-                    class_result = class_result[class_result > threshold]
-                    if len(class_result.index) > 0:
-                        result_str = "\\".join(
-                            ["{}-{}".format(j, class_result.loc[j]) for j in class_result.index]
-                        )
-                    else:
-                        result_str = "EMPTY"
-                else:
-                    result_str = "REJECT"
-                file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}{}".format(
-                    i, result_str, params["rubricator_id"],
-                    self.last_language, threshold, self.version, "###",
-                    os.linesep
-                ))
-        # Apparently, if format is 'plain' or 'divided'
-        else:
-            file.write("#\t{}\t{}\t{}\t{}{}".format(
-                params["rubricator_id"], params["language"], threshold, self.version,
-                os.linesep
-            ))
-            result_series = result.loc[0, "result"]
-            if result_series is None:
-                file.write("{}{}".format("REJECT", os.linesep))
-            else:
-                result_series = result_series[result_series > threshold]
-                if len(result_series.index) == 0:
-                    file.write("{}{}".format("EMPTY", os.linesep))
-                else:
-                    for topic in result_series.index:
-                        proba = result_series.loc[topic]
-                        if proba > threshold:
-                            file.write("{}\t{}{}".format(topic, proba, os.linesep))
-        file.close()
 
     def isTextValid(self, text: str):
         if not text:

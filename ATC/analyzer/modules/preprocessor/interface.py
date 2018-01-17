@@ -60,6 +60,7 @@ def remove_empty_items(lst):
     return list(filter(lambda x: not bool(re.fullmatch("\s*", x)), lst))
 
 
+
 class Preprocessor(Module):
     """
     Класс для выполнения предобработки однотипных данных.
