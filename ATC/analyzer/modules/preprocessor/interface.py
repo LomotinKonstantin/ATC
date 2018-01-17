@@ -7,6 +7,7 @@ from pymystem3.mystem import Mystem
 from nltk.stem.snowball import SnowballStemmer
 from nltk.stem import WordNetLemmatizer
 
+
 from analyzer.modules.module import Module
 
 
