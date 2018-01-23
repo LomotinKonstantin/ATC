@@ -8,7 +8,7 @@ import imports.widgets.tool_icons
 ###
 
 
-class ControlWidget(qw.QToolBar):
+class ToolBarWidget(qw.QToolBar):
 
     def __init__(self, parent=None):
         super().__init__(parent)

@@ -8,7 +8,7 @@ from collections import OrderedDict
 ###
 
 
-class ModuleManager(qw.QDialog):
+class ModuleInfoWidget(qw.QDialog):
 
     module_changed = qc.pyqtSignal()
 

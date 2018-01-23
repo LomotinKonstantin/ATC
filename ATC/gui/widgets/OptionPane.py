@@ -6,7 +6,7 @@ from PyQt5.QtCore import pyqtSignal
 ###
 
 
-class OptionBar(qw.QGroupBox):
+class OptionPane(qw.QGroupBox):
 
     state_changed = pyqtSignal()
 
