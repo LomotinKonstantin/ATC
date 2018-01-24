@@ -60,3 +60,15 @@ class OptionPane(qw.QGroupBox):
 
     def is_description_allowed(self):
         return self.description.isChecked()
+
+
+# if __name__ == '__main__':
+#     from PyQt5.QtWidgets import QApplication
+#     import sys
+#     from configparser import ConfigParser
+#     c = ConfigParser()
+#     c.read("../../config.ini")
+#     a = QApplication(sys.argv)
+#     m = OptionPane(c)
+#     m.show()
+#     a.exec()
