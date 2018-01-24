@@ -1,16 +1,65 @@
 from PyQt5 import QtWidgets as qw
+
+from common.predict import Predict
+
+
 ###
 ### TODO: implement PredictTableWidget inherited from QTableView
 ###
 
 
 class PredictTableWidget(qw.QTableWidget):
-
-    def __init__(self, parent=None):
+    def __init__(self, descriptions, parent=None):
         super().__init__(parent)
+        self.displayed_predict = None
+        self.descriptions = descriptions
+        self.setEditTriggers(qw.QAbstractItemView.NoEditTriggers)
+
+    def displayResult(self, predict: Predict):
+        self.displayed_predict = predict
+        result = predict.data.loc[0, "result"]
+        print(result)
+        if predict.getFormat() != "multidoc":
+            self.setRowCount(len(result.index))
+            self.setColumnCount(2)
+            self.setHorizontalHeaderLabels(["Рубрика", "Вероятность"])
+            for ni, i in enumerate(result.index):
+                topic_cell = qw.QTableWidgetItem(i)
+                self.setItem(ni, 0, topic_cell)
+                proba_cell = qw.QTableWidgetItem(str(result[i]))
+                self.setItem(ni, 1, proba_cell)
+        self.showDescriptions()
+
+    def showDescriptions(self):
+        if self.displayed_predict.getFormat() == "multidoc":
+            return
+
+
+if __name__ == '__main__':
+    from PyQt5.QtWidgets import QApplication
+    import sys
+    from pandas import DataFrame, Series
+
+    test_df = DataFrame({"text": ["hohoho, hahaha"],
+                         "vector": [[1, 2, 3]],
+                         "result": [Series([0.1, 0.3, 0.6, 0.234],
+                                           ["e8", "e7", "f1", "wtf"])]})
+    # print(test_df.columns)
+    # for i in test_df.index:
+    #     s = ""
+    #     for j in test_df.columns:
+    #         s += "{} ".format(test_df.loc[i, j])
+    #     print(s)
+    # print(test_df)
+    test_predict = Predict(test_df, "ru", "plain", "SUBJ", "1.5")
+    a = QApplication(sys.argv)
+    m = PredictTableWidget("")
+    m.displayResult(test_predict)
+    m.show()
+    a.exec()
+
 
 class TextWidget(qw.QWidget):
-
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = qw.QVBoxLayout()
@@ -62,8 +111,8 @@ class TextWidget(qw.QWidget):
                         str_res = empty
                     else:
                         str_res = "\\".join(
-                                    ["{}-{}".format(j, result.loc[j]) for j in result.index]
-                                )
+                            ["{}-{}".format(j, result.loc[j]) for j in result.index]
+                        )
                 row = "{}\t{}\n".format(i, str_res)
                 self.current_output += row
                 self.output_widget.append(row)

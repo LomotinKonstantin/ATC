@@ -91,3 +91,15 @@ class Predict:
         self.params["format"] = text_format
         self.params["rubr_id"] = rubr_id
         self.params["version"] = version
+
+    def getFormat(self):
+        return self.params["format"]
+
+    def getLanguage(self):
+        return self.params["language"]
+
+    def getRubrId(self):
+        return self.params["rubr_id"]
+
+    def getVersion(self):
+        return self.params["version"]
