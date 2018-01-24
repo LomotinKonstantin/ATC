@@ -15,7 +15,7 @@ from gui.widgets.ConsoleWidget import ConsoleWidget
 
 class MainWindow(qw.QMainWindow):
     font_family = "Segoe"
-    font_size_selected = pyqtSignal(str)
+    font_size_selected = pyqtSignal()
 
     def __init__(self, config, parent=None):
         super().__init__(parent)
@@ -29,6 +29,10 @@ class MainWindow(qw.QMainWindow):
         # Setting the text widget
         self.text_widget = TextWidget(self.opt_bar, parent=self)
         layout.addWidget(self.text_widget, 0, 0, 3, 6)
+        # Setting the toolbar
+        ### TODO: signals
+        self.toolbar = ToolBarWidget(self)
+        self.addToolBar(self.toolbar)
         # Creating the menu bar
         ### TODO: signals
         self.createMenu()
@@ -42,10 +46,6 @@ class MainWindow(qw.QMainWindow):
         ### TODO: signals
         self.predict_table = PredictTableWidget(self)
         layout.addWidget(self.predict_table, 3, 0, 3, 6)
-        # Setting the toolbar
-        ### TODO: signals
-        self.toolbar = ToolBarWidget(self)
-        self.addToolBar(self.toolbar)
         # Setting the console widget
         ### TODO: signals
         self.console = ConsoleWidget(self)
@@ -64,8 +64,8 @@ class MainWindow(qw.QMainWindow):
         for i in range(8, 21):
             action = qw.QAction(QIcon(), str(i), self)
             action.setCheckable(True)
-            if i == self.main_widget.font_size:
-                action.setChecked(True)
+            # if i == self.font_size:
+            #     action.setChecked(True)
             action.setActionGroup(group)
             font_menu.addAction(action)
             action.triggered.connect(self.font_size_selected)
@@ -84,7 +84,10 @@ class MainWindow(qw.QMainWindow):
 if __name__ == '__main__':
     from PyQt5.QtWidgets import QApplication
     import sys
+    from configparser import ConfigParser
     a = QApplication(sys.argv)
-    m = MainWindow({"lang": ["ru", "en"], "rubr_id": ["tfidf"]})
+    c = ConfigParser()
+    c.read("../../config.ini")
+    m = MainWindow(c)
     m.show()
     a.exec()

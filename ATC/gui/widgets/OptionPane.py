@@ -21,12 +21,12 @@ class OptionPane(qw.QGroupBox):
         self.setLayout(layout)
         # Rubricator id
         self.id_selector = qw.QComboBox(self)
-        self.id_selector.addItems(config.get(self.section, "ids"))
+        self.id_selector.addItems(config.get(self.section, "ids").split(", "))
         self.id_selector.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Идентификатор рубрикатора", self.id_selector)
         # Language
         self.lang_selector = qw.QComboBox(self)
-        self.lang_selector.addItems(config.get(self.section, "languages"))
+        self.lang_selector.addItems(config.get(self.section, "languages").split(", "))
         self.lang_selector.setCurrentIndex(0)
         self.lang_selector.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Язык", self.lang_selector)

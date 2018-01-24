@@ -1,7 +1,7 @@
 import PyQt5.QtWidgets as qw
 from PyQt5.QtGui import QIcon, QKeySequence
 
-import imports.widgets.tool_icons
+import resources.tool_icons
 
 ###
 ### TODO: refactor, change names and titles
@@ -27,7 +27,5 @@ class ToolBarWidget(qw.QToolBar):
         # self.addAction(self.config_action)
         self.modules_action = qw.QAction(QIcon(":/exchange.png"), "Менеджер модулей", self)
         self.addAction(self.modules_action)
-        # self.help_action = qw.QAction(QIcon(":/notepad.png"), "Расшифровки", self)
-        # self.addAction(self.help_action)
 
 

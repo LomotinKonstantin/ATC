@@ -40,9 +40,12 @@ class TextWidget(qw.QWidget):
         self.output_widget.setPlaceholderText("Здесь будет результат!")
         layout.addWidget(self.output_widget)
         # Loading descriptions
-        self.subj_df = pd.read_csv(os.path.dirname(__file__) + "/SUBJ.txt",
+        path_to_res = os.path.join(os.path.dirname(__file__), "..", "..", "resources")
+        subj_path = os.path.join(path_to_res, "SUBJ.txt")
+        self.subj_df = pd.read_csv(subj_path,
                                    encoding="cp1251", sep="\t", index_col=0, names=["description"])
-        self.ipv_df = pd.read_csv(os.path.dirname(__file__) + "/IPV.txt",
+        ipv_path = os.path.join(path_to_res, "IPV.txt")
+        self.ipv_df = pd.read_csv(ipv_path,
                                   encoding="cp1251", sep="\t", index_col=0, names=["description"])
         self.extended_str = "{}\t<font color='#6c6874'>{}</font><br><br>"
 
