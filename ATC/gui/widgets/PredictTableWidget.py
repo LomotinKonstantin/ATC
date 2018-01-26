@@ -6,44 +6,152 @@ from common.predict import Predict
 ###
 ### TODO: implement PredictTableWidget inherited from QTableView
 ###
+from PyQt5.QtGui import QKeyEvent
 
 
 class PredictTableWidget(qw.QTableWidget):
     def __init__(self, descriptions, parent=None):
+        """
+        This class can display multidoc, plain and divided results in table,
+        apply threshold and show topics descriptions
+        :param descriptions: a dict of
+                {
+                    "RUBR_ID1": {
+                                "topic11": "desc11",
+                                ...
+                                "topic1N": "desc1N"
+                                }
+                    ...
+                    "RUBR_IDM": {
+                                "topicM1": "descM1",
+                                ...
+                                "topicMK": "descMK"
+                                }
+                }
+        :param parent: QObject parent
+        """
         super().__init__(parent)
-        self.displayed_predict = None
+        self.last_predict = None
         self.descriptions = descriptions
+        self.threshold = 0.0
+        self.descriptions_on = False
         self.setEditTriggers(qw.QAbstractItemView.NoEditTriggers)
 
     def displayResult(self, predict: Predict):
-        self.displayed_predict = predict
-        result = predict.data.loc[0, "result"]
-        print(result)
-        if predict.getFormat() != "multidoc":
-            self.setRowCount(len(result.index))
-            self.setColumnCount(2)
-            self.setHorizontalHeaderLabels(["Рубрика", "Вероятность"])
+        print()
+        self.last_predict = predict
+        if predict.getFormat() == "multidoc":
+            row_num = 0
+            df = predict.data
+            model = {}
+            for i in predict.data.index:
+                res = df.loc[i, "result"]
+                res = res[res > self.threshold]
+                row_num += len(res.index)
+                model[i] = res
+            col_num = 4 if self.descriptions_on else 3
+            self.setRowCount(row_num)
+            self.setColumnCount(col_num)
+            labels = ["ID текста", "Рубрика", "Вероятность"]
+            if self.descriptions_on:
+                labels.append("Расшифровка")
+            self.setHorizontalHeaderLabels(labels)
+            actual_row = 0
+            for i, index in enumerate(model):
+                print(actual_row)
+                res = model[index]
+                index_cell = qw.QTableWidgetItem(index)
+                self.setItem(actual_row, 0, index_cell)
+                span = len(res.index)
+                self.setSpan(actual_row, 0, span, 1)
+                for j, topic in enumerate(res.index):
+                    next_row = j + actual_row
+                    topic_cell = qw.QTableWidgetItem(topic)
+                    self.setItem(next_row, 1, topic_cell)
+                    proba_cell = qw.QTableWidgetItem(str(res[topic]))
+                    self.setItem(next_row, 2, proba_cell)
+                    if self.descriptions_on:
+                        description = self.descriptions[predict.getRubrId()]
+                        desc_cell = qw.QTableWidgetItem(description[topic])
+                        self.setItem(next_row, 3, desc_cell)
+                actual_row += span
+        else:
+            result = predict.data.loc[0, "result"]
+            row_num = len(result.index)
+            col_num = 3 if self.descriptions_on else 2
+            self.setRowCount(row_num)
+            self.setColumnCount(col_num)
+            labels = ["Рубрика", "Вероятность"]
+            if self.descriptions_on:
+                labels.append("Расшифровка")
+            self.setHorizontalHeaderLabels(labels)
             for ni, i in enumerate(result.index):
                 topic_cell = qw.QTableWidgetItem(i)
                 self.setItem(ni, 0, topic_cell)
                 proba_cell = qw.QTableWidgetItem(str(result[i]))
                 self.setItem(ni, 1, proba_cell)
-        self.showDescriptions()
+                if self.descriptions_on:
+                    description = self.descriptions[predict.getRubrId()]
+                    desc_cell = qw.QTableWidgetItem(description[i])
+                    self.setItem(ni, 2, desc_cell)
 
-    def showDescriptions(self):
-        if self.displayed_predict.getFormat() == "multidoc":
-            return
+    def onDescriptionsSwitchTurned(self, state):
+        self.descriptions_on = state == 2
+        self.updateTable()
+
+    def onThresholdChanged(self, new_threshold: float):
+        self.threshold = new_threshold
+        self.updateTable()
+
+    def updateTable(self):
+        self.displayResult(self.last_predict)
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == qt.Key_Left:
+            self.descriptions_on = False
+        elif event.key() == qt.Key_Right:
+            self.descriptions_on = True
+        elif event.key() == qt.Key_Up:
+            self.threshold = min([10, self.threshold + 0.1])
+        elif event.key() == qt.Key_Down:
+            self.threshold = max([0, self.threshold - 0.1])
+        self.setWindowTitle(str(self.threshold))
+        self.updateTable()
 
 
 if __name__ == '__main__':
     from PyQt5.QtWidgets import QApplication
+    from PyQt5.Qt import Qt as qt
     import sys
     from pandas import DataFrame, Series
 
-    test_df = DataFrame({"text": ["hohoho, hahaha"],
-                         "vector": [[1, 2, 3]],
-                         "result": [Series([0.1, 0.3, 0.6, 0.234],
-                                           ["e8", "e7", "f1", "wtf"])]})
+    descriptions = {
+        "IPV": {
+            "de": "das ist Deutsch",
+            "en": "this is English",
+            "ru": "это русский"
+        },
+        "SUBJ": {
+            "e8": "math",
+            "e7": "biology",
+            "f1": "electronics",
+            "wtf": "SoC"
+        }
+    }
+
+    index = ["abc1", "soc2", "ooo20"]
+    entry = {"text": ["hohoho, hahaha", "wololo", "look at my horse"],
+             "vector": [[1, 2, 3], [0.2, 0.1, 0], [5, 5, 5]],
+             "result": [Series([0.1, 0.3, 0.6, 0.234],
+                               ["e8", "e7", "f1", "wtf"]),
+                        Series([1, 2, 3, 4],
+                               ["e8", "e7", "f1", "wtf"]),
+                        Series([0.01, 0.02, 5, 10],
+                               ["e8", "e7", "f1", "wtf"])
+                        ]}
+
+    test_df = DataFrame(entry, index=index)
+
     # print(test_df.columns)
     # for i in test_df.index:
     #     s = ""
@@ -51,10 +159,11 @@ if __name__ == '__main__':
     #         s += "{} ".format(test_df.loc[i, j])
     #     print(s)
     # print(test_df)
-    test_predict = Predict(test_df, "ru", "plain", "SUBJ", "1.5")
+    test_predict = Predict(test_df, "ru", "multidoc", "SUBJ", "1.5")
     a = QApplication(sys.argv)
-    m = PredictTableWidget("")
+    m = PredictTableWidget(descriptions)
     m.displayResult(test_predict)
+    m.onDescriptionsSwitchTurned(2)
     m.show()
     a.exec()
 
