@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from PyQt5 import QtWidgets as qw
 
 from common.predict import Predict
@@ -43,7 +45,7 @@ class PredictTableWidget(qw.QTableWidget):
         if predict.getFormat() == "multidoc":
             row_num = 0
             df = predict.data
-            model = {}
+            model = OrderedDict()
             for i in predict.data.index:
                 res = df.loc[i, "result"]
                 res = res[res > self.threshold]
@@ -58,12 +60,12 @@ class PredictTableWidget(qw.QTableWidget):
             self.setHorizontalHeaderLabels(labels)
             actual_row = 0
             for i, index in enumerate(model):
-                print(actual_row)
                 res = model[index]
                 index_cell = qw.QTableWidgetItem(index)
                 self.setItem(actual_row, 0, index_cell)
                 span = len(res.index)
                 self.setSpan(actual_row, 0, span, 1)
+                print(self.rowSpan(actual_row, 0), len(res.index))
                 for j, topic in enumerate(res.index):
                     next_row = j + actual_row
                     topic_cell = qw.QTableWidgetItem(topic)
@@ -77,6 +79,7 @@ class PredictTableWidget(qw.QTableWidget):
                 actual_row += span
         else:
             result = predict.data.loc[0, "result"]
+            result = result[result > self.threshold]
             row_num = len(result.index)
             col_num = 3 if self.descriptions_on else 2
             self.setRowCount(row_num)
@@ -144,9 +147,9 @@ if __name__ == '__main__':
              "vector": [[1, 2, 3], [0.2, 0.1, 0], [5, 5, 5]],
              "result": [Series([0.1, 0.3, 0.6, 0.234],
                                ["e8", "e7", "f1", "wtf"]),
-                        Series([1, 2, 3, 4],
-                               ["e8", "e7", "f1", "wtf"]),
                         Series([0.01, 0.02, 5, 10],
+                               ["e8", "e7", "f1", "wtf"]),
+                        Series([1, 2, 3, 4],
                                ["e8", "e7", "f1", "wtf"])
                         ]}
 
