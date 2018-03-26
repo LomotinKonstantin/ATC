@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings(action='ignore')
 from gensim.models import Word2Vec
 from configparser import ConfigParser
 import numpy as np

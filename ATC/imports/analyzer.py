@@ -106,14 +106,17 @@ class Analyzer(QObject):
             progress_dialog.update_state(2, "Предобрабатываем текст...")
         lang = params["language"]
         auto = lang == "auto"
-        processed_text, language = self.preprocessor.process(text, lang)
-        lang = language[:2]
-        self.last_language = lang + (":auto" if auto else "")
-        self.language_recognized.emit(language, auto)
-        if lang not in self.config.get(self.config.LANG_OPTION):
+        if auto:
+            language = self.preprocessor.recognize_language(text)
+        else:
+            language = lang
+        processed_text = self.preprocessor.process(text, language)
+        if language not in self.config.get(self.config.LANG_OPTION):
             self.error_occurred.emit(
                 "Язык {} не поддерживается. Укажите язык текста на панели справа".format(language))
             return None
+        self.last_language = language + (":auto" if auto else "")
+        self.language_recognized.emit(language, auto)
         vector_list = []
         result_list = []
         for n, i in enumerate(processed_text.index):
@@ -123,7 +126,7 @@ class Analyzer(QObject):
                 ))
             vector_i = self.vectorizer.vectorize(
                 processed_text.loc[i, "text"],
-                lang
+                language
             )
             if all(abs(i) < self.eps for i in vector_i):
                 vector_i = None
@@ -137,7 +140,7 @@ class Analyzer(QObject):
                     progress_dialog.update_state(3, "Классифицируем... {}/{}".format(
                         n + 1, len(processed_text.index)
                     ))
-                result_i = self.classifier.classify(vector_i, lang).round(3)
+                result_i = self.classifier.classify(vector_i, language).round(3)
             vector_list.append(vector_i)
             result_list.append(result_i)
         processed_text["vector"] = Series(vector_list, index=processed_text.index)
