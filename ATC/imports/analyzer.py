@@ -128,6 +128,7 @@ class Analyzer(QObject):
                 processed_text.loc[i, "text"],
                 language
             )
+            # print(processed_text.loc[i, "text"], vector_i)
             if all(abs(i) < self.eps for i in vector_i):
                 vector_i = None
                 result_i = None

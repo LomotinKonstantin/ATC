@@ -171,7 +171,7 @@ class Preprocessor(Module):
     def __csv_to_df(self, text: str, delim="\t"):
         rows = text.splitlines(keepends=False)
         first_row = rows[0].split(delim)
-        if first_row == self.MULTIDOC_COLUMNS:
+        if tuple(first_row) == self.MULTIDOC_COLUMNS:
             index = 1
         else:
             index = 0
