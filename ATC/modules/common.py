@@ -14,6 +14,7 @@ class Module(QObject):
         super().__init__()
         self._load_metadata(filename)
         self.version = str(self.metadata["Версия"])
+        self.DEBUG = False
 
     def _load_metadata(self, filename):
         try:
@@ -21,3 +22,7 @@ class Module(QObject):
             self.metadata = json.loads(json_string, object_pairs_hook=OrderedDict)
         except IOError:
             self.metadata = {}
+
+    def debug(self, message):
+        if self.DEBUG:
+            print(message)

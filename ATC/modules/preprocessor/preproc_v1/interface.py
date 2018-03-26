@@ -115,6 +115,7 @@ class Preprocessor(Module):
                                                self.sw_files[lang])
         self.stopwords = self.__load_sw()
         self.viniti_md = self.__load_md()
+        self.DEBUG = False
 
     def __dense(self, text: str) -> str:
         return re.sub("\\s{2,}", " ", text)
@@ -212,7 +213,6 @@ class Preprocessor(Module):
         return res_lang
 
     def recognize_format(self, text: str):
-        # if re.match("((^|\t)[^\t]+){4,5}", text):
         if "\n" in text.strip():
             return self.MULTIDOC
         if re.match("((^|\t)[^\t]+){3,}", text.strip()):
@@ -289,6 +289,7 @@ class Preprocessor(Module):
                 result = pd.DataFrame([processed_text], columns=["text"])
             elif text_format == self.MULTIDOC:
                 df_to_process = self.__csv_to_df(text)
+                self.debug(df_to_process)
                 rows_list = []
                 for i in df_to_process.index:
                     rows_list.append(" ".join([
@@ -305,6 +306,7 @@ class Preprocessor(Module):
                 result_list = result_text.split(self.delim)
                 result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
         except Exception as e:
+            self.debug(e)
             self.error_occurred.emit("Не удается обработать текст")
             result = pd.DataFrame([""], columns=["text"])
         return result
