@@ -190,7 +190,6 @@ def show_splashscreen():
     time = qc.QTime()
     splash.show()
     time.start()
-    i = 0
     while time.elapsed() <= 3000:
         pass
     splash.finish(None)
