@@ -213,11 +213,16 @@ class Preprocessor(Module):
         return res_lang
 
     def recognize_format(self, text: str):
-        if "\n" in text.strip():
-            return self.MULTIDOC
-        if re.match("((^|\t)[^\t]+){3,}", text.strip()):
+        stripped = text.strip()
+        if "\n" in stripped:
+            lines = stripped.count("\n") + 1
+            tabs = stripped.count("\t")
+            print(lines, tabs)
+            if tabs == lines * 4:
+                return self.MULTIDOC
+        if re.match("((^|\t)[^\t]+){3,}", stripped):
             return self.DIVIDED
-        if re.match("(\w+?[^\t]+)+", text.strip()):
+        if re.match("(\w+?[^\t]+)+", stripped):
             return self.PLAIN
         return self.UNKNOWN
 
