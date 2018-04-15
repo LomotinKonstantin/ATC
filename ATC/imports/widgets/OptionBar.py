@@ -34,6 +34,12 @@ class OptionBar(qw.QGroupBox):
         self.description.setChecked(False)
         self.description.setMinimumSize(0, 50)
         layout.addRow("Расшифровка кодов", self.description)
+        # Format
+        self.format = qw.QComboBox(self)
+        self.format.addItems(config.get(config.FORMAT_OPTION))
+        self.format.setCurrentIndex(0)
+        self.format.currentIndexChanged.connect(self.state_changed)
+        layout.addRow("Формат", self.format)
 
     def options_to_dict(self):
         res = {}
