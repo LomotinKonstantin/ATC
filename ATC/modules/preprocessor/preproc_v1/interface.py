@@ -217,7 +217,6 @@ class Preprocessor(Module):
         if "\n" in stripped:
             lines = stripped.count("\n") + 1
             tabs = stripped.count("\t")
-            print(lines, tabs)
             if tabs == lines * 4:
                 return self.MULTIDOC
         if re.match("((^|\t)[^\t]+){3,}", stripped):
@@ -275,24 +274,37 @@ class Preprocessor(Module):
         res = self.__beautify(res)
         return res
 
-    def process(self, text, lang="auto"):
+    def encodeFormat(self, text_format):
+        if text_format == "multidoc":
+            return self.MULTIDOC
+        elif text_format == "divided":
+            return self.DIVIDED
+        elif text_format == "plain":
+            return self.PLAIN
+        else:
+            return self.UNKNOWN
+
+    def process(self, text, lang="auto", text_format="auto"):
         if not text:
             return ""
         if lang == "auto":
             language = self.recognize_language(text)
         else:
             language = lang
-        text_format = self.recognize_format(text)
+        if text_format == "auto":
+            checked_format = self.recognize_format(text)
+        else:
+            checked_format = self.encodeFormat(text_format)
         result = ""
         # Plain & divided texts are processed the same way
         try:
-            if text_format in [self.PLAIN, self.DIVIDED, self.UNKNOWN]:
+            if checked_format in [self.PLAIN, self.DIVIDED, self.UNKNOWN]:
                 processed_text = self.preprocess(text=text,
                                          remove_stopwords=True,
                                          normalization="lemmatization",
                                          language=language)
                 result = pd.DataFrame([processed_text], columns=["text"])
-            elif text_format == self.MULTIDOC:
+            elif checked_format == self.MULTIDOC:
                 df_to_process = self.__csv_to_df(text)
                 self.debug(df_to_process)
                 rows_list = []

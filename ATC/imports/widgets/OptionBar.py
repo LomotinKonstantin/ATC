@@ -46,6 +46,7 @@ class OptionBar(qw.QGroupBox):
         res["rubricator_id"] = self.id_selector.currentText()
         res["language"] = self.lang_selector.currentText()
         res["threshold"] = self.threshold.value()
+        res["format"] = self.format.currentText()
         return res
 
     def is_description_allowed(self):

@@ -104,13 +104,14 @@ class Analyzer(QObject):
     def analyze(self, text, params, progress_dialog=None):
         if progress_dialog is not None:
             progress_dialog.update_state(2, "Предобрабатываем текст...")
+        text_format = params["format"]
         lang = params["language"]
         auto = lang == "auto"
         if auto:
             language = self.preprocessor.recognize_language(text)
         else:
             language = lang
-        processed_text = self.preprocessor.process(text, language)
+        processed_text = self.preprocessor.process(text, language, text_format)
         if language not in self.config.get(self.config.LANG_OPTION):
             self.error_occurred.emit(
                 "Язык {} не поддерживается. Укажите язык текста на панели справа".format(language))
