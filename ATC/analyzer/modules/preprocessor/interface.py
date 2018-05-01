@@ -109,7 +109,7 @@ class Preprocessor(Module):
                 "цифры"            - арабские цифры
         """
 
-    def __init__(self, title_factor=1, text_factor=1, kw_factor=1):
+    def __init__(self, title_factor=1, body_factor=1, kw_factor=1):
         super().__init__(os.path.join(os.path.dirname(__file__), "metadata.json"))
         self.title_factor = title_factor
         self.body_factor = body_factor

@@ -6,11 +6,12 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSignal
 from pandas import DataFrame
 
-from imports.widgets.MainWidget import MainWidget
-from imports.widgets.ControlWidget import ControlWidget
-from imports.widgets.ModuleManager import ModuleManager
-from imports.widgets.LoadingWidget import LoadingWidget
-import imports.splashscreen
+from gui.widgets.MainWidget import MainWidget
+from gui.widgets.ControlWidget import ControlWidget
+from gui.widgets.ModuleManager import ModuleManager
+from gui.widgets.LoadingWidget import LoadingWidget
+
+import resources.splashscreen
 
 
 class GUI(qw.QMainWindow):
