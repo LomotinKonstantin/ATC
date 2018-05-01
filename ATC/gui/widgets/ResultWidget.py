@@ -33,18 +33,8 @@ class ResultWidget(qw.QWidget):
         self.output_widget.setPlaceholderText("Здесь будет результат!")
         layout.addWidget(self.output_widget)
         # Loading descriptions
-        self.subj_df = pd.read_csv(os.path.join(os.path.dirname(__file__),
-                                                "..",
-                                                "..",
-                                                "resources",
-                                                "SUBJ.txt"),
-                                   encoding="cp1251", sep="\t", index_col=0, names=["description"])
-        self.ipv_df = pd.read_csv(os.path.join(os.path.dirname(__file__),
-                                               "..",
-                                               "..",
-                                               "resources",
-                                               "IPV.txt"),
-                                  encoding="cp1251", sep="\t", index_col=0, names=["description"])
+        self.subj_df = self.loadTopicStrings("SUBJ.txt")
+        self.ipv_df = self.loadTopicStrings("IPV.txt")
         self.extended_str = "{}\t<font color='#6c6874'>{}</font><br><br>"
 
     def indicate_error(self, error_msg="Error!"):
@@ -110,3 +100,16 @@ class ResultWidget(qw.QWidget):
 
     def get_output(self):
         return self.last_result
+
+    def loadTopicStrings(self, filename: str) -> DataFrame:
+        file_path = os.path.join(os.path.dirname(__file__),
+                                 "..",
+                                 "..",
+                                 "resources",
+                                 filename)
+        return pd.read_csv(file_path,
+                           encoding="cp1251",
+                           sep="\t",
+                           index_col=0,
+                           names=["description"])
+

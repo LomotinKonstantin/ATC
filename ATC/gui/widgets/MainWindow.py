@@ -18,17 +18,18 @@ class MainWindow(qw.QMainWindow):
     font_size_selected = pyqtSignal()
 
     def __init__(self, config, parent=None):
-        super().__init__(parent)
+        super(MainWindow, self).__init__(parent)
         self.config = config
+        central_widget = qw.QWidget(self)
         # Setting the layout
         layout = qw.QGridLayout()
-        self.setLayout(layout)
+        central_widget.setLayout(layout)
         # Setting the side option bar
         self.opt_bar = OptionPane(config, parent=self)
-        layout.addWidget(self.opt_bar, 0, 6, 3, 2)
+        # layout.addWidget(self.opt_bar, 0, 6, 3, 2)
         # Setting the text widget
         self.text_widget = TextWidget()
-        layout.addWidget(self.text_widget, 0, 0, 3, 6)
+        # layout.addWidget(self.text_widget, 0, 0, 3, 6)
         # Setting the toolbar
         ### TODO: signals
         self.toolbar = ToolBarWidget(self)
@@ -48,10 +49,11 @@ class MainWindow(qw.QMainWindow):
         layout.addWidget(self.predict_widget, 3, 0, 3, 6)
         # Setting the console widget
         ### TODO: signals
-        self.console = ConsoleWidget(self)
-        layout.addWidget(self.console, 3, 6, 3, 2)
+        self.console = ConsoleWidget()
+        # layout.addWidget(self.console, 3, 6, 3, 2)
         # Lets play with fonts!
         self.setFont(QFont(self.font_family))
+        self.setCentralWidget(central_widget)
 
     def createMenu(self):
         menu = qw.QMenuBar()
