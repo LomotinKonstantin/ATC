@@ -6,7 +6,6 @@ import pandas as pd
 
 
 class PlainTextWidget(qw.QTextEdit):
-
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -17,11 +16,9 @@ class PlainTextWidget(qw.QTextEdit):
 
 
 class ResultWidget(qw.QWidget):
-
-    def __init__(self, option_bar, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         layout = qw.QVBoxLayout()
-        self.option_bar = option_bar
         self.current_output = None
         self.last_result = None
         self.is_last_error = False
@@ -36,9 +33,17 @@ class ResultWidget(qw.QWidget):
         self.output_widget.setPlaceholderText("Здесь будет результат!")
         layout.addWidget(self.output_widget)
         # Loading descriptions
-        self.subj_df = pd.read_csv(os.path.dirname(__file__) + "/SUBJ.txt",
+        self.subj_df = pd.read_csv(os.path.join(os.path.dirname(__file__),
+                                                "..",
+                                                "..",
+                                                "resources",
+                                                "SUBJ.txt"),
                                    encoding="cp1251", sep="\t", index_col=0, names=["description"])
-        self.ipv_df = pd.read_csv(os.path.dirname(__file__) + "/IPV.txt",
+        self.ipv_df = pd.read_csv(os.path.join(os.path.dirname(__file__),
+                                               "..",
+                                               "..",
+                                               "resources",
+                                               "IPV.txt"),
                                   encoding="cp1251", sep="\t", index_col=0, names=["description"])
         self.extended_str = "{}\t<font color='#6c6874'>{}</font><br><br>"
 
@@ -67,8 +72,8 @@ class ResultWidget(qw.QWidget):
                         str_res = empty
                     else:
                         str_res = "\\".join(
-                                    ["{}-{}".format(j, result.loc[j]) for j in result.index]
-                                )
+                            ["{}-{}".format(j, result.loc[j]) for j in result.index]
+                        )
                 row = "{}\t{}\n".format(i, str_res)
                 self.current_output += row
                 self.output_widget.append(row)

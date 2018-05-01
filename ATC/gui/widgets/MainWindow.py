@@ -45,7 +45,7 @@ class MainWindow(qw.QMainWindow):
         # Setting the result table
         ### TODO: signals
         self.predict_widget = ResultWidget()
-        layout.addWidget(self.predict_table, 3, 0, 3, 6)
+        layout.addWidget(self.predict_widget, 3, 0, 3, 6)
         # Setting the console widget
         ### TODO: signals
         self.console = ConsoleWidget(self)

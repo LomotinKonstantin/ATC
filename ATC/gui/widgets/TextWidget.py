@@ -16,12 +16,12 @@ class TextWidget(qw.QTextEdit):
         self.insertPlainText(md.text())
 
 
-# if __name__ == '__main__':
-#     from PyQt5.QtWidgets import QApplication
-#     import sys
-#     a = QApplication(sys.argv)
-#     m = TextWidget()
-#     m.show()
-#     a.exec()
+if __name__ == '__main__':
+    from PyQt5.QtWidgets import QApplication
+    import sys
+    a = QApplication(sys.argv)
+    m = TextWidget()
+    m.show()
+    a.exec()
 
 

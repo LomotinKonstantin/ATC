@@ -45,7 +45,7 @@ class OptionPane(qw.QGroupBox):
         layout.addRow("Расшифровка кодов", self.description)
         # Format
         self.format = qw.QComboBox(self)
-        self.format.addItems(config.get(config.FORMAT_OPTION))
+        self.format.addItems(config.get(self.section, "formats").split(", "))
         self.format.setCurrentIndex(0)
         self.format.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Формат", self.format)
