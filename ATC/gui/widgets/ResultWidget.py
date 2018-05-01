@@ -16,7 +16,7 @@ class PlainTextWidget(qw.QTextEdit):
         self.insertPlainText(md.text())
 
 
-class TextWidget(qw.QWidget):
+class ResultWidget(qw.QWidget):
 
     def __init__(self, option_bar, parent=None):
         super().__init__(parent)

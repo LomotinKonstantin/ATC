@@ -4,7 +4,7 @@ from PyQt5.QtCore import pyqtSignal
 
 from gui.widgets.OptionPane import OptionPane
 from gui.widgets.TextWidget import TextWidget
-from gui.widgets.PredictTableWidget import PredictTableWidget
+from gui.widgets.ResultWidget import ResultWidget
 from gui.widgets.ToolBar import ToolBarWidget
 from gui.widgets.ConsoleWidget import ConsoleWidget
 
@@ -27,7 +27,7 @@ class MainWindow(qw.QMainWindow):
         self.opt_bar = OptionPane(config, parent=self)
         layout.addWidget(self.opt_bar, 0, 6, 3, 2)
         # Setting the text widget
-        self.text_widget = TextWidget(self.opt_bar, parent=self)
+        self.text_widget = TextWidget()
         layout.addWidget(self.text_widget, 0, 0, 3, 6)
         # Setting the toolbar
         ### TODO: signals
@@ -44,7 +44,7 @@ class MainWindow(qw.QMainWindow):
         self.statusBar().addWidget(self.lang_label)
         # Setting the result table
         ### TODO: signals
-        self.predict_table = PredictTableWidget(self)
+        self.predict_widget = ResultWidget()
         layout.addWidget(self.predict_table, 3, 0, 3, 6)
         # Setting the console widget
         ### TODO: signals
