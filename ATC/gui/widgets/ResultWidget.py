@@ -5,47 +5,26 @@ from pandas import DataFrame
 import pandas as pd
 
 
-class PlainTextWidget(qw.QTextEdit):
+class ResultWidget(qw.QTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
-
-    def insertFromMimeData(self, md):
-        if not (md.hasText() or md.hasHtml()):
-            return
-        self.insertPlainText(md.text())
-
-
-class ResultWidget(qw.QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        layout = qw.QVBoxLayout()
         self.current_output = None
         self.last_result = None
         self.is_last_error = False
         # self.option_bar.threshold.valueChanged.connect(self.show_output)
-        self.setLayout(layout)
         # Input widget
-        self.input_widget = PlainTextWidget()
-        layout.addWidget(self.input_widget)
         # Output widget
         self.output_widget = qw.QTextEdit()
-        self.output_widget.setReadOnly(True)
-        self.output_widget.setPlaceholderText("Здесь будет результат!")
-        layout.addWidget(self.output_widget)
+        self.setReadOnly(True)
+        self.setPlaceholderText("Здесь будет результат!")
         # Loading descriptions
         self.subj_df = self.loadTopicStrings("SUBJ.txt")
         self.ipv_df = self.loadTopicStrings("IPV.txt")
         self.extended_str = "{}\t<font color='#6c6874'>{}</font><br><br>"
 
-    def indicate_error(self, error_msg="Error!"):
-        if not self.is_last_error:
-            self.output_widget.clear()
-        self.is_last_error = True
-        self.output_widget.insertHtml("<font color=\"red\">" + error_msg + "</font><br>")
-
     def show_output(self, output, extension=""):
         self.is_last_error = False
-        self.output_widget.clear()
+        self.clear()
         threshold = self.option_bar.threshold.value()
         self.last_result = output
         self.current_output = ""
@@ -66,37 +45,34 @@ class ResultWidget(qw.QWidget):
                         )
                 row = "{}\t{}\n".format(i, str_res)
                 self.current_output += row
-                self.output_widget.append(row)
+                self.append(row)
             else:
                 if result is None:
                     row = reject
-                    self.output_widget.append(row)
+                    self.append(row)
                 else:
                     result = result[result > threshold]
                     if len(result.index) == 0:
                         row = empty
-                        self.output_widget.append(row)
+                        self.append(row)
                     else:
                         for topic, proba in result.iteritems():
                             row = "{}\t{}\n".format(topic, proba)
                             self.current_output += row
                             if extension == "SUBJ":
-                                self.output_widget.insertHtml(
+                                self.insertHtml(
                                     self.extended_str.format(row, self.subj_df.loc[topic, "description"]))
                             elif extension == "IPV":
-                                self.output_widget.insertHtml(
+                                self.insertHtml(
                                     self.extended_str.format(row, self.ipv_df.loc[topic, "description"]))
                             else:
-                                self.output_widget.append(row)
-        self.output_widget.verticalScrollBar().setValue(0)
+                                self.append(row)
+        self.verticalScrollBar().setValue(0)
 
     def show_text(self, text):
-        self.output_widget.setText("")
+        self.setText("")
         self.last_result = None
         self.input_widget.setText(text)
-
-    def get_input(self):
-        return self.input_widget.toPlainText()
 
     def get_output(self):
         return self.last_result

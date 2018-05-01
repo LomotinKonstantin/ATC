@@ -15,6 +15,9 @@ class TextWidget(qw.QTextEdit):
             return
         self.insertPlainText(md.text())
 
+    def get_input(self):
+        return self.toPlainText()
+
 
 if __name__ == '__main__':
     from PyQt5.QtWidgets import QApplication
