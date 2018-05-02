@@ -11,6 +11,7 @@ class ConsoleWidget(qw.QTextEdit):
         self.content_list = []
         self.enable_ts = enable_time_stamps
         self.setReadOnly(True)
+        self.setStyleSheet("background-color:#FAFAFA; border: 3px groove gray;")
 
     def timeStamp(self):
         return datetime.datetime.now().strftime("%H:%M:%S")
@@ -34,7 +35,7 @@ class ConsoleWidget(qw.QTextEdit):
     #     if event.button() == qt.Qt.LeftButton:
     #         self.printInfoMessage("Что-то сделалось :3")
     #     elif event.button() == qt.Qt.MidButton:
-    #         self.printWarningMessage("Что-то немного не так..." * 10)
+    #         self.printWarningMessage("Что-то немного не так...")
     #     elif event.button() == qt.Qt.RightButton:
     #         self.printErrorMessage("Что-то совсем не так!")
 
