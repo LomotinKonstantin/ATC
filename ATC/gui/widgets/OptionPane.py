@@ -37,18 +37,19 @@ class OptionPane(qw.QGroupBox):
         self.threshold.setMaximum(1.0)
         self.threshold.valueChanged.connect(self.threshold_changed)
         layout.addRow("Порог вероятности", self.threshold)
-        # Code description
-        self.description = qw.QCheckBox()
-        self.description.setChecked(False)
-        self.description.setMinimumSize(0, 50)
-        self.description.stateChanged.connect(self.description_state_changed)
-        layout.addRow("Расшифровка кодов", self.description)
         # Format
         self.format = qw.QComboBox(self)
         self.format.addItems(config.get(self.section, "formats").split(", "))
         self.format.setCurrentIndex(0)
         self.format.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Формат", self.format)
+        # Code description
+        self.description = qw.QCheckBox()
+        self.description.setChecked(False)
+        self.description.setMinimumSize(0, 50)
+        self.description.stateChanged.connect(self.description_state_changed)
+        layout.addRow("Расшифровка кодов", self.description)
+
 
     def options_to_dict(self):
         res = {}
