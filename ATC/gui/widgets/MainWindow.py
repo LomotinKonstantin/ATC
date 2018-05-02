@@ -18,6 +18,7 @@ class MainWindow(qw.QMainWindow):
     font_size_selected = pyqtSignal()
     error_occurred = pyqtSignal(str)
     analyze_request = pyqtSignal()
+    export_request = pyqtSignal()
 
     def __init__(self, config, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -41,6 +42,7 @@ class MainWindow(qw.QMainWindow):
         self.addToolBar(self.toolbar)
         self.toolbar.open_action.triggered.connect(self.load_file)
         self.toolbar.analyze_action.connect()
+        self.toolbar.export_action.triggered.connect(self.export_request)
         # Creating the menu bar
         ### TODO: signals
         self.createMenu()
