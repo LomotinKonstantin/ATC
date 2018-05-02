@@ -16,6 +16,7 @@ from gui.widgets.ConsoleWidget import ConsoleWidget
 class MainWindow(qw.QMainWindow):
     font_family = "Segoe"
     font_size_selected = pyqtSignal()
+    error_occurred = pyqtSignal(str)
 
     def __init__(self, config, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -37,6 +38,7 @@ class MainWindow(qw.QMainWindow):
         ### TODO: signals
         self.toolbar = ToolBarWidget(self)
         self.addToolBar(self.toolbar)
+        self.toolbar.open_action.triggered.connect(self.load_file)
         # Creating the menu bar
         ### TODO: signals
         self.createMenu()
@@ -54,6 +56,7 @@ class MainWindow(qw.QMainWindow):
         ### TODO: signals
         self.console = ConsoleWidget()
         layout.addWidget(self.console, 4, 6, 2, 2)
+        self.error_occurred.connect(self.console.printErrorMessage)
         # Lets play with fonts!
         self.setFont(QFont(self.font_family))
         #
@@ -84,6 +87,16 @@ class MainWindow(qw.QMainWindow):
         font = self.font()
         font.setPointSize(size)
         self.setFont(font)
+
+    def load_file(self):
+        filename = self.load_dialog.getOpenFileName()[0]
+        if not filename:
+            return
+        try:
+            content = open(file=filename).read()
+            self.text_widget.setText(content)
+        except Exception as e:
+            self.error_occurred.emit("Не удалось прочитать текст из файла!")
 
 
 if __name__ == '__main__':
