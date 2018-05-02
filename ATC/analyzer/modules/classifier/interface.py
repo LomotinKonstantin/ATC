@@ -10,7 +10,7 @@ class Classifier(Module):
         self.last_rubr_id = None
         self.last_lang = None
         self.clf = None
-        self.config = self.loadConfig()
+        self.config = self.loadConfig(__file__)
 
     # If lang == None, classifies vector according to last set language.
     # If lang != None, checks if input language corresponds with current language 

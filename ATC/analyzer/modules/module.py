@@ -29,9 +29,9 @@ class Module(QObject):
             metadata = {}
         return metadata
 
-    def loadConfig(self):
+    def loadConfig(self, base_path):
         configParcer = ConfigParser()
-        file = os.path.join(os.path.dirname(__file__), 'config.ini')
+        file = os.path.join(os.path.dirname(base_path), 'config.ini')
         if os.path.exists(file):
             configParcer.read(file)
         else:

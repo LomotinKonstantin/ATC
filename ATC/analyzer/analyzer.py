@@ -33,15 +33,6 @@ class Analyzer(QThread):
         content = file.read()
         return content
 
-    # def dirs(self, path):
-    #     files = os.listdir(path)
-    #     res = []
-    #     for i in files:
-    #         file = os.path.join(path, i)
-    #         if os.path.isdir(file) and i != "__pycache__":
-    #             res.append(i)
-    #     return res
-
     def load_modules(self):
         self.preprocessor = Preprocessor()
         self.vectorizer = WordEmbedding()
@@ -52,7 +43,7 @@ class Analyzer(QThread):
         version += "p" + self.preprocessor.version
         version += "v" + self.vectorizer.version
         version += "c" + self.classifier.version
-        self.version = self.config.get(self.config.VERSION_OPTION) + version
+        self.version = self.config.get("App", "version") + version
 
 
     def analyze(self, text, params: dict):

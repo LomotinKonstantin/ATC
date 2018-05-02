@@ -35,57 +35,62 @@ class GUI(qc.QObject):
         self.main_window.setWindowIcon(QIcon("icon.ico"))
         self.analyzer = analyzer
         self.config = config
+        self.main_window.app_info_window_request.connect(self.invoke_info_widget)
+        self.main_window.showMaximized()
 
-        # Toolbar
-        self.toolbar = ControlWidget()
-        self.addToolBar(self.toolbar)
-        self.main_widget = MainWidget(config)
-        self.main_widget.set_font_size(int(self.config.get(self.config.FONT_OPTION)))
-        self.setCentralWidget(self.main_widget)
-        self.params = self.main_widget.opt_bar.options_to_dict()
-        # Module dialog
-        self.module_manager = ModuleManager(analyzer, config, self.main_widget)
-        # Menu bar
-        menu = qw.QMenuBar()
-        self.setMenuBar(menu)
+        # # Toolbar
+        # self.toolbar = ControlWidget()
+        # self.addToolBar(self.toolbar)
+        # self.main_widget = MainWidget(config)
+        # self.main_widget.set_font_size(int(self.config.get(self.config.FONT_OPTION)))
+        # self.setCentralWidget(self.main_widget)
+        # self.params = self.main_widget.opt_bar.options_to_dict()
+        # # Module dialog
+        # self.module_manager = ModuleManager(analyzer, config, self.main_widget)
+        # # Menu bar
+        # menu = qw.QMenuBar()
+        # self.setMenuBar(menu)
+        #
+        # file_menu = menu.addMenu("Файл")
+        # file_menu.addAction(self.toolbar.open_action)
+        # file_menu.addAction(self.toolbar.export_action)
+        #
+        # font_menu = menu.addMenu("Шрифт")
+        # group = qw.QActionGroup(self)
+        # for i in range(8, 21):
+        #     action = qw.QAction(QIcon(), str(i), self)
+        #     action.setCheckable(True)
+        #     if i == self.main_widget.font_size:
+        #         action.setChecked(True)
+        #     action.setActionGroup(group)
+        #     font_menu.addAction(action)
+        #     action.triggered.connect(self.font_size_selected)
+        #
+        # # Signals
+        # self.toolbar.open_action.triggered.connect(self.read_file)
+        # self.toolbar.analyze_action.triggered.connect(self.analyze)
+        # # self.toolbar.analyze_action.triggered.connect(self.main_widget.opt_bar.on_commited)
+        # self.toolbar.export_action.triggered.connect(self.export)
+        # self.toolbar.modules_action.triggered.connect(self.module_manager.exec)
+        # self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
+        # self.file_loaded.connect(self.main_widget.text_widget.show_text)
+        # self.file_loaded.connect(self.set_status)
+        # if analyzer:
+        #     self.analyzer.import_error_occurred.connect(self.process_import_error)
+        #     self.analyzer.error_occurred.connect(self.main_widget.text_widget.indicate_error)
+        #     self.analyzer.language_recognized.connect(self.set_language)
+        # self.analyzed.connect(self.main_widget.text_widget.show_output)
+        # self.analyzed.connect(self.lower_changed_flag)
+        # self.main_widget.opt_bar.description.stateChanged.connect(self.update_output)
+        # self.main_widget.opt_bar.threshold.valueChanged.connect(self.update_output)
+        # self.main_widget.opt_bar.state_changed.connect(self.raise_changed_flag)
+        # self.module_manager.module_changed.connect(self.raise_changed_flag)
+        #
+        # # Launch
+        # self.showMaximized()
 
-        file_menu = menu.addMenu("Файл")
-        file_menu.addAction(self.toolbar.open_action)
-        file_menu.addAction(self.toolbar.export_action)
-
-        font_menu = menu.addMenu("Шрифт")
-        group = qw.QActionGroup(self)
-        for i in range(8, 21):
-            action = qw.QAction(QIcon(), str(i), self)
-            action.setCheckable(True)
-            if i == self.main_widget.font_size:
-                action.setChecked(True)
-            action.setActionGroup(group)
-            font_menu.addAction(action)
-            action.triggered.connect(self.font_size_selected)
-
-        # Signals
-        self.toolbar.open_action.triggered.connect(self.read_file)
-        self.toolbar.analyze_action.triggered.connect(self.analyze)
-        # self.toolbar.analyze_action.triggered.connect(self.main_widget.opt_bar.on_commited)
-        self.toolbar.export_action.triggered.connect(self.export)
-        self.toolbar.modules_action.triggered.connect(self.module_manager.exec)
-        self.error_occurred.connect(self.main_widget.text_widget.indicate_error)
-        self.file_loaded.connect(self.main_widget.text_widget.show_text)
-        self.file_loaded.connect(self.set_status)
-        if analyzer:
-            self.analyzer.import_error_occurred.connect(self.process_import_error)
-            self.analyzer.error_occurred.connect(self.main_widget.text_widget.indicate_error)
-            self.analyzer.language_recognized.connect(self.set_language)
-        self.analyzed.connect(self.main_widget.text_widget.show_output)
-        self.analyzed.connect(self.lower_changed_flag)
-        self.main_widget.opt_bar.description.stateChanged.connect(self.update_output)
-        self.main_widget.opt_bar.threshold.valueChanged.connect(self.update_output)
-        self.main_widget.opt_bar.state_changed.connect(self.raise_changed_flag)
-        self.module_manager.module_changed.connect(self.raise_changed_flag)
-
-        # Launch
-        self.showMaximized()
+    def invoke_info_widget(self):
+        self.main_window.display_info_window(self.analyzer)
 
     def read_file(self):
         filename = self.load_dialog.getOpenFileName()[0]
@@ -195,3 +200,15 @@ def show_splashscreen():
     while time.elapsed() <= 3000:
         pass
     splash.finish(None)
+
+
+if __name__ == '__main__':
+    from PyQt5.QtWidgets import QApplication
+    import sys
+    from configparser import ConfigParser
+
+    a = QApplication(sys.argv)
+    c = ConfigParser()
+    c.read("../config.ini")
+    g = GUI(config=c, analyzer=Analyzer(c))
+    a.exec()

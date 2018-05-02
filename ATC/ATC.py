@@ -38,7 +38,6 @@ class ATC:
             except Exception as e:
                 self.print_error("Error loading file {}:\n{}".format(filename, e))
                 sys.exit()
-            self.analyzer.load_modules(self.parameters, self.print_error)
             result = self.analyzer.analyze(text, self.parameters)
             if result is None:
                 self.print_error("Unable to define topics")

@@ -7,6 +7,7 @@ from gui.widgets.TextWidget import TextWidget
 from gui.widgets.ResultWidget import ResultWidget
 from gui.widgets.ToolBar import ToolBarWidget
 from gui.widgets.ConsoleWidget import ConsoleWidget
+from gui.widgets.ModuleInfoWidget import ModuleInfoWidget
 
 ###
 ### TODO: make this class the main widget inherited from QMainWindow
@@ -19,6 +20,7 @@ class MainWindow(qw.QMainWindow):
     error_occurred = pyqtSignal(str)
     analyze_request = pyqtSignal()
     export_request = pyqtSignal()
+    app_info_window_request = pyqtSignal()
 
     def __init__(self, config, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -37,12 +39,12 @@ class MainWindow(qw.QMainWindow):
         self.text_widget = TextWidget()
         layout.addWidget(self.text_widget, 0, 0, 3, 6)
         # Setting the toolbar
-        ### TODO: signals
         self.toolbar = ToolBarWidget(self)
         self.addToolBar(self.toolbar)
         self.toolbar.open_action.triggered.connect(self.load_file)
-        self.toolbar.analyze_action.connect()
+        self.toolbar.analyze_action.triggered.connect(self.analyze_request)
         self.toolbar.export_action.triggered.connect(self.export_request)
+        self.toolbar.modules_action.triggered.connect(self.app_info_window_request)
         # Creating the menu bar
         ### TODO: signals
         self.createMenu()
@@ -101,6 +103,12 @@ class MainWindow(qw.QMainWindow):
             self.text_widget.setText(content)
         except Exception as e:
             self.error_occurred.emit("Не удалось прочитать текст из файла!")
+
+    def display_info_window(self, analyzer):
+        try:
+            ModuleInfoWidget(analyzer).exec()
+        except Exception as e:
+            print(e)
 
 
 if __name__ == '__main__':

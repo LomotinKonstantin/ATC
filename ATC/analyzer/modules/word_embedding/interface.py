@@ -11,7 +11,7 @@ class WordEmbedding(Module):
         super().__init__(os.path.join(os.path.dirname(__file__), "metadata.json"))
         self.last_lang = None
         self.model = None
-        self.config = self.loadConfig()
+        self.config = self.loadConfig(__file__)
 
     # If lang == None, creates vector according to last set language.
     # If lang != None, checks if input language corresponds with model language 

@@ -108,14 +108,12 @@ class Preprocessor(Module):
                 "форм. обычн."     - арифметические операторы
                 "цифры"            - арабские цифры
         """
-
-    def __init__(self, title_factor=1, body_factor=1, kw_factor=1):
         super().__init__(os.path.join(os.path.dirname(__file__), "metadata.json"))
+        self.groups_to_save = groups_to_save
         self.title_factor = title_factor
         self.body_factor = body_factor
         self.kw_factor = kw_factor
         self.normalizer = None
-        self.path = "./modules/preprocessor/preproc_v1/"
         for lang, fn in self.sw_files.items():
             self.sw_files[lang] = os.path.join(os.path.dirname(__file__),
                                                "vocabulary",
@@ -176,16 +174,16 @@ class Preprocessor(Module):
             res[lang] = tuple(remove_empty_items(sw))
         return res
 
-    def __csv_to_df(self, text: str, delim="\t"):
-        rows = text.splitlines(keepends=False)
-        first_row = rows[0].split(delim)
-        if tuple(first_row) == self.MULTIDOC_COLUMNS:
-            index = 1
-        else:
-            index = 0
-        data = [i for i in [j.split(delim) for j in rows[index:]]]
-        result = pd.DataFrame(data, columns=self.MULTIDOC_COLUMNS)
-        return result.set_index("id")
+    # def __csv_to_df(self, text: str, delim="\t"):
+    #     rows = text.splitlines(keepends=False)
+    #     first_row = rows[0].split(delim)
+    #     if tuple(first_row) == self.MULTIDOC_COLUMNS:
+    #         index = 1
+    #     else:
+    #         index = 0
+    #     data = [i for i in [j.split(delim) for j in rows[index:]]]
+    #     result = pd.DataFrame(data, columns=self.MULTIDOC_COLUMNS)
+    #     return result.set_index("id")
 
     def recognize_language(self, text: str, default="none"):
         """
