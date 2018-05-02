@@ -1,4 +1,5 @@
 import os
+from configparser import ConfigParser
 
 import PyQt5.QtWidgets as qw
 import PyQt5.QtCore as qc
@@ -6,15 +7,14 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSignal
 from pandas import DataFrame
 
-from gui.widgets.MainWidget import MainWidget
-from gui.widgets.ControlWidget import ControlWidget
-from gui.widgets.ModuleManager import ModuleManager
+from gui.widgets.MainWindow import MainWindow
 from gui.widgets.LoadingWidget import LoadingWidget
+from analyzer.analyzer import Analyzer
 
 import resources.splashscreen
 
 
-class GUI(qw.QMainWindow):
+class GUI(qc.QObject):
 
     error_occurred = pyqtSignal(str)
     file_loaded = pyqtSignal(str, str, int)
@@ -26,21 +26,16 @@ class GUI(qw.QMainWindow):
     ### TODO: this class is not inherited from QMainWindow
     ###
 
-    def __init__(self):
-        super().__init__()
-        self.setMinimumSize(qc.QSize(800, 600))
-        self.setWindowTitle("ATC: Automatic Text Classifier v" + config.get(config.VERSION_OPTION))
-        self.setWindowIcon(QIcon("icon.ico"))
+    def __init__(self, config: ConfigParser, analyzer: Analyzer):
+        super(GUI, self).__init__()
+        # Initializing main window
+        self.main_window = MainWindow(config=config)
+        self.main_window.setWindowTitle("ATC: Automatic Text Classifier v{}".format(
+                                        config.get("App", "version")))
+        self.main_window.setWindowIcon(QIcon("icon.ico"))
         self.analyzer = analyzer
         self.config = config
-        self.status_label = qw.QLabel()
-        self.lang_label = qw.QLabel()
-        self.statusBar().addWidget(self.status_label)
-        self.statusBar().addWidget(self.lang_label)
-        self.changed = True
-        # File dialogs
-        self.load_dialog = qw.QFileDialog()
-        self.save_dialog = qw.QFileDialog()
+
         # Toolbar
         self.toolbar = ControlWidget()
         self.addToolBar(self.toolbar)

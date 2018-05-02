@@ -21,6 +21,9 @@ class MainWindow(qw.QMainWindow):
         super(MainWindow, self).__init__(parent)
         self.config = config
         central_widget = qw.QWidget(self)
+        # File dialogs
+        self.load_dialog = qw.QFileDialog()
+        self.save_dialog = qw.QFileDialog()
         # Setting the layout
         layout = qw.QGridLayout()
         central_widget.setLayout(layout)
@@ -53,6 +56,7 @@ class MainWindow(qw.QMainWindow):
         layout.addWidget(self.console, 4, 6, 2, 2)
         # Lets play with fonts!
         self.setFont(QFont(self.font_family))
+        #
         self.setCentralWidget(central_widget)
 
     def createMenu(self):
@@ -72,11 +76,10 @@ class MainWindow(qw.QMainWindow):
             font_menu.addAction(action)
             action.triggered.connect(self.font_size_selected)
 
-    ### TODO: signals in GUI class
     def set_font_size(self, size):
         """
         This slot changes the size of the window font.
-        :param size:
+        :param size: new font size
         """
         font = self.font()
         font.setPointSize(size)
