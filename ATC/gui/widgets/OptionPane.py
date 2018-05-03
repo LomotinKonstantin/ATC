@@ -1,10 +1,6 @@
 import PyQt5.QtWidgets as qw
 from PyQt5.QtCore import pyqtSignal
 
-###
-### TODO: refactor
-###
-
 
 class OptionPane(qw.QGroupBox):
 
@@ -49,7 +45,6 @@ class OptionPane(qw.QGroupBox):
         self.description.setMinimumSize(0, 50)
         self.description.stateChanged.connect(self.description_state_changed)
         layout.addRow("Расшифровка кодов", self.description)
-
 
     def options_to_dict(self):
         res = {}
