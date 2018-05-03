@@ -39,7 +39,7 @@ class GUI(qc.QObject):
         self.main_window.export_request.connect(self.export)
         # Connecting analyzer interface signals
         self.analyzer.language_recognized.connect(self.main_window.on_language_recognized)
-
+        self.analyzer.error_occurred.connect(self.main_window.console.printErrorMessage)
         # Shou da windu!
         self.main_window.showMaximized()
 

@@ -1,3 +1,6 @@
+import os
+from configparser import ConfigParser
+
 import PyQt5.QtWidgets as qw
 from PyQt5.Qt import QFont, QIcon
 from PyQt5.QtCore import pyqtSignal
@@ -16,13 +19,12 @@ from gui.widgets.ModuleInfoWidget import ModuleInfoWidget
 
 class MainWindow(qw.QMainWindow):
     font_family = "Segoe"
-    font_size_selected = pyqtSignal()
     error_occurred = pyqtSignal(str)
     analyze_request = pyqtSignal()
     export_request = pyqtSignal()
     app_info_window_request = pyqtSignal()
 
-    def __init__(self, config, parent=None):
+    def __init__(self, config: ConfigParser, parent=None):
         super(MainWindow, self).__init__(parent)
         self.config = config
         central_widget = qw.QWidget(self)
@@ -46,16 +48,15 @@ class MainWindow(qw.QMainWindow):
         self.toolbar.export_action.triggered.connect(self.export_request)
         self.toolbar.modules_action.triggered.connect(self.app_info_window_request)
         # Creating the menu bar
+        self.font_size = self.config.getint("GuiSettings", "font_size")
         self.createMenu()
         # Setting the status bar
         self.lang_label = qw.QLabel()
         self.statusBar().addWidget(self.lang_label)
         # Setting the result table
-        ### TODO: signals
         self.result_widget = ResultWidget()
         layout.addWidget(self.result_widget, 3, 0, 3, 6)
         # Setting the console widget
-        ### TODO: signals
         self.console = ConsoleWidget()
         layout.addWidget(self.console, 4, 6, 2, 2)
         self.error_occurred.connect(self.console.printErrorMessage)
@@ -63,6 +64,7 @@ class MainWindow(qw.QMainWindow):
         self.setFont(QFont(self.font_family))
         #
         self.setCentralWidget(central_widget)
+        self.set_font_size(self.font_size)
 
     def createMenu(self):
         menu = qw.QMenuBar()
@@ -75,11 +77,11 @@ class MainWindow(qw.QMainWindow):
         for i in range(8, 21):
             action = qw.QAction(QIcon(), str(i), self)
             action.setCheckable(True)
-            # if i == self.font_size:
-            #     action.setChecked(True)
+            if i == self.font_size:
+                action.setChecked(True)
             action.setActionGroup(group)
             font_menu.addAction(action)
-            action.triggered.connect(self.font_size_selected)
+            action.triggered.connect(self.on_font_size_selected)
 
     def set_font_size(self, size):
         """
@@ -89,6 +91,7 @@ class MainWindow(qw.QMainWindow):
         font = self.font()
         font.setPointSize(size)
         self.setFont(font)
+        self.font_size = size
 
     def load_file(self):
         filename = self.load_dialog.getOpenFileName()[0]
@@ -108,6 +111,13 @@ class MainWindow(qw.QMainWindow):
 
     def on_language_recognized(self, lang: str):
         self.lang_label.setText(lang)
+
+    def on_font_size_selected(self):
+        size = int(self.sender().text())
+        self.set_font_size(size)
+        self.config.set("GuiSettings", "font_size", str(size))
+        self.config.write(open(os.path.join(os.path.dirname(__file__),
+                                            "..", "..", "config.ini"), "w"))
 
 
 if __name__ == '__main__':
