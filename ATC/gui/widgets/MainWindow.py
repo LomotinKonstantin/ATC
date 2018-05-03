@@ -12,10 +12,6 @@ from gui.widgets.ToolBar import ToolBarWidget
 from gui.widgets.ConsoleWidget import ConsoleWidget
 from gui.widgets.ModuleInfoWidget import ModuleInfoWidget
 
-###
-### TODO: make this class the main widget inherited from QMainWindow
-###
-
 
 class MainWindow(qw.QMainWindow):
     font_family = "Segoe"
