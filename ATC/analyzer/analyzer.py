@@ -6,9 +6,14 @@ from analyzer.modules.word_embedding.interface import WordEmbedding
 from analyzer.modules.classifier.interface import Classifier
 from common.predict import Predict
 
+###
+### TODO: refactor
+###
 
 class Analyzer(QThread):
     error_occurred = pyqtSignal(str)
+    info_message = pyqtSignal(str)
+    warning_message = pyqtSignal(str)
     language_recognized = pyqtSignal(str)
     in_process = pyqtSignal(str)
     complete = pyqtSignal(Predict)
