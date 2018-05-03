@@ -36,6 +36,7 @@ class GUI(qc.QObject):
         self.analyzer = analyzer
         self.config = config
         self.main_window.app_info_window_request.connect(self.invoke_info_widget)
+        self.main_window.export_request.connect(self.export)
         self.main_window.showMaximized()
 
         # # Toolbar
@@ -159,14 +160,17 @@ class GUI(qc.QObject):
         self.config.save()
 
     def export(self):
-        result = self.main_widget.text_widget.get_output()
-        if result is None:
-            return
-        filename = self.save_dialog.getSaveFileName(filter="*.txt")[0]
-        if not filename:
-            return
-        self.params["threshold"] = self.main_widget.opt_bar.threshold.value()
-        self.analyzer.export(result, filename, self.params)
+        try:
+            result = self.main_window.result_widget.last_result
+            if result is None:
+                return
+            filename = self.main_window.save_dialog.getSaveFileName(filter="*.txt")[0]
+            if not filename:
+                return
+            threshold = self.main_window.opt_bar.threshold.value()
+            result.save_to_file(filename=filename, threshold=threshold)
+        except Exception as e:
+            print(e)
 
     def process_import_error(self, msg):
         self.main_widget.text_widget.indicate_error(msg)

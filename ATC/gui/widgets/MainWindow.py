@@ -56,8 +56,8 @@ class MainWindow(qw.QMainWindow):
         self.statusBar().addWidget(self.lang_label)
         # Setting the result table
         ### TODO: signals
-        self.predict_widget = ResultWidget()
-        layout.addWidget(self.predict_widget, 3, 0, 3, 6)
+        self.result_widget = ResultWidget()
+        layout.addWidget(self.result_widget, 3, 0, 3, 6)
         # Setting the console widget
         ### TODO: signals
         self.console = ConsoleWidget()
