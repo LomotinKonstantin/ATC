@@ -46,13 +46,9 @@ class MainWindow(qw.QMainWindow):
         self.toolbar.export_action.triggered.connect(self.export_request)
         self.toolbar.modules_action.triggered.connect(self.app_info_window_request)
         # Creating the menu bar
-        ### TODO: signals
         self.createMenu()
         # Setting the status bar
-        ### TODO: signals
-        self.status_label = qw.QLabel()
         self.lang_label = qw.QLabel()
-        self.statusBar().addWidget(self.status_label)
         self.statusBar().addWidget(self.lang_label)
         # Setting the result table
         ### TODO: signals
@@ -109,6 +105,9 @@ class MainWindow(qw.QMainWindow):
             ModuleInfoWidget(analyzer).exec()
         except Exception as e:
             print(e)
+
+    def on_language_recognized(self, lang: str):
+        self.lang_label.setText(lang)
 
 
 if __name__ == '__main__':

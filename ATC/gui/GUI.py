@@ -37,6 +37,10 @@ class GUI(qc.QObject):
         self.config = config
         self.main_window.app_info_window_request.connect(self.invoke_info_widget)
         self.main_window.export_request.connect(self.export)
+        # Connecting analyzer interface signals
+        self.analyzer.language_recognized.connect(self.main_window.on_language_recognized)
+
+        # Shou da windu!
         self.main_window.showMaximized()
 
         # # Toolbar

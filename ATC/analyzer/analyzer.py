@@ -9,7 +9,7 @@ from common.predict import Predict
 
 class Analyzer(QThread):
     error_occurred = pyqtSignal(str)
-    language_recognized = pyqtSignal(str, bool)
+    language_recognized = pyqtSignal(str)
     in_process = pyqtSignal(str)
     complete = pyqtSignal(Predict)
 
