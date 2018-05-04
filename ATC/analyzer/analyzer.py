@@ -15,7 +15,6 @@ class Analyzer(QThread):
     error_occurred = pyqtSignal(str)
     info_message = pyqtSignal(str)
     warning_message = pyqtSignal(str)
-    language_recognized = pyqtSignal(str)
     complete = pyqtSignal(Predict)
 
     config_section = "AvailableOptions"
@@ -44,7 +43,7 @@ class Analyzer(QThread):
         self.classifier = Classifier()
 
         self.preprocessor.error_occurred.connect(self.error_occurred)
-        self.vectorizer.error_occurred.conect(self.error_occurred)
+        self.vectorizer.error_occurred.connect(self.error_occurred)
         self.classifier.error_occurred.connect(self.error_occurred)
 
         self.eps = float(self.vectorizer.rejectThreshold())

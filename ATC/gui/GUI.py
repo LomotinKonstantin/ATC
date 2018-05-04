@@ -22,23 +22,21 @@ class GUI(qc.QObject):
 
     def __init__(self, config: ConfigParser, analyzer: Analyzer):
         super(GUI, self).__init__()
+        self.analyzer = analyzer
+        self.config = config
         # Initializing main window
         self.main_window = MainWindow(config=config)
         self.main_window.setWindowTitle("ATC: Automatic Text Classifier v{}".format(
                                         config.get("App", "version")))
         self.main_window.setWindowIcon(QIcon(":/icon.ico"))
-        self.analyzer = analyzer
-        self.config = config
         self.main_window.app_info_window_request.connect(self.invoke_info_widget)
         self.main_window.export_request.connect(self.export)
         # Connecting analyzer interface signals
-        self.analyzer.language_recognized.connect(self.main_window.on_language_recognized)
         self.analyzer.error_occurred.connect(self.main_window.console.printErrorMessage)
         self.analyzer.info_message.connect(self.main_window.console.printInfoMessage)
         self.analyzer.warning_message.connect(self.main_window.console.printWarningMessage)
         # Shou da windu!
         self.main_window.showMaximized()
-
 
     def invoke_info_widget(self):
         self.main_window.display_info_window(self.analyzer)

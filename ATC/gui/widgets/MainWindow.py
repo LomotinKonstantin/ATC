@@ -46,9 +46,10 @@ class MainWindow(qw.QMainWindow):
         # Creating the menu bar
         self.font_size = self.config.getint("GuiSettings", "font_size")
         self.createMenu()
-        # Setting the status bar
-        self.lang_label = qw.QLabel()
-        self.statusBar().addWidget(self.lang_label)
+        ### No need because of the console widget
+        # # Setting the status bar
+        # self.lang_label = qw.QLabel()
+        # self.statusBar().addWidget(self.lang_label)
         # Setting the result table
         self.result_widget = ResultWidget()
         layout.addWidget(self.result_widget, 3, 0, 3, 6)
@@ -104,9 +105,6 @@ class MainWindow(qw.QMainWindow):
             ModuleInfoWidget(analyzer).exec()
         except Exception as e:
             print(e)
-
-    def on_language_recognized(self, lang: str):
-        self.lang_label.setText(lang)
 
     def on_font_size_selected(self):
         size = int(self.sender().text())
