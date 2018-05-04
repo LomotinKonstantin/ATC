@@ -31,7 +31,7 @@ class MainWindow(qw.QMainWindow):
         layout = qw.QGridLayout()
         central_widget.setLayout(layout)
         # Setting the result table
-        self.result_widget = ResultWidget(central_widget)
+        self.result_widget = ResultWidget(parent=central_widget)
         layout.addWidget(self.result_widget, 3, 0, 3, 6)
         # Setting the side option bar
         self.opt_bar = OptionPane(config, parent=central_widget)
@@ -41,7 +41,7 @@ class MainWindow(qw.QMainWindow):
         self.text_widget = TextWidget(parent=central_widget)
         layout.addWidget(self.text_widget, 0, 0, 3, 6)
         # Setting the toolbar
-        self.toolbar = ToolBarWidget(self)
+        self.toolbar = ToolBarWidget(parent=central_widget)
         self.addToolBar(self.toolbar)
         self.toolbar.open_action.triggered.connect(self.load_file)
         self.toolbar.analyze_action.triggered.connect(self.analyze_request)
@@ -55,7 +55,7 @@ class MainWindow(qw.QMainWindow):
         # self.lang_label = qw.QLabel()
         # self.statusBar().addWidget(self.lang_label)
         # Setting the console widget
-        self.console = ConsoleWidget()
+        self.console = ConsoleWidget(parent=central_widget)
         layout.addWidget(self.console, 4, 6, 2, 2)
         self.error_occurred.connect(self.console.printErrorMessage)
         # Lets play with fonts!

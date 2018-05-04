@@ -121,7 +121,7 @@ class Preprocessor(Module):
                                                self.sw_files[lang])
         self.stopwords = self.__load_sw()
         self.viniti_md = self.__load_md()
-        self.DEBUG = False
+        self.DEBUG = True
 
     def __dense(self, text: str) -> str:
         return re.sub("\\s{2,}", " ", text)
@@ -175,16 +175,16 @@ class Preprocessor(Module):
             res[lang] = tuple(remove_empty_items(sw))
         return res
 
-    # def __csv_to_df(self, text: str, delim="\t"):
-    #     rows = text.splitlines(keepends=False)
-    #     first_row = rows[0].split(delim)
-    #     if tuple(first_row) == self.MULTIDOC_COLUMNS:
-    #         index = 1
-    #     else:
-    #         index = 0
-    #     data = [i for i in [j.split(delim) for j in rows[index:]]]
-    #     result = pd.DataFrame(data, columns=self.MULTIDOC_COLUMNS)
-    #     return result.set_index("id")
+    def __csv_to_df(self, text: str, delim="\t"):
+        rows = text.splitlines(keepends=False)
+        first_row = rows[0].split(delim)
+        if tuple(first_row) == self.MULTIDOC_COLUMNS:
+            index = 1
+        else:
+            index = 0
+        data = [i for i in [j.split(delim) for j in rows[index:]]]
+        result = pd.DataFrame(data, columns=self.MULTIDOC_COLUMNS)
+        return result.set_index("id")
 
     def recognize_language(self, text: str, default="none"):
         """
@@ -266,19 +266,27 @@ class Preprocessor(Module):
         lang = language
         if language == "auto":
             lang = self.recognize_language(text.lower(), default_lang)
+        self.debug("started")
         res = self.__remove_email(text)
+        self.debug("email removed")
         # Fix _ёvar blabla _ёEpsilon bla
         res = re.sub("\\w*_ё\\w+", " ", res)
+        self.debug("formulas removed")
         res = self.__remove_md(res)
+        self.debug("md removed")
         res = res.replace("ё", "е")
         if remove_stopwords:
             res = self.__dense(res)
             res = self.__remove_stopwords(res.lower(), lang)
+            self.debug("stopwords removed")
         res = self.__beautify(res)
+        self.debug("beautified x1")
         if normalization != "no":
             res = Normalizer(normalization, lang).normalize(res)
+            self.debug("normalized ({})".format(normalization))
         res = re.sub("\\s-\\s", "-", res)
         res = self.__beautify(res)
+        self.debug("beautified x2")
         return res
 
     def encode_format(self, text_format: str):
@@ -317,7 +325,6 @@ class Preprocessor(Module):
                 result = pd.DataFrame([processed_text], columns=["text"])
             elif checked_format == self.MULTIDOC:
                 df_to_process = self.__csv_to_df(text)
-                self.debug(df_to_process)
                 rows_list = []
                 for i in df_to_process.index:
                     rows_list.append(" ".join([
@@ -334,7 +341,7 @@ class Preprocessor(Module):
                 result_list = result_text.split(self.delim)
                 result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
         except Exception as e:
-            self.debug(e)
+            print(e)
             self.error_occurred.emit("Не удалось обработать файл в этом формате")
             result = pd.DataFrame([""], columns=["text"])
         return result

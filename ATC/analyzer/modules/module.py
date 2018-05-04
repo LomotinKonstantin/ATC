@@ -19,6 +19,7 @@ class Module(QObject):
         super().__init__()
         self.metadata = self.loadMetadata(filename)
         self.version = str(self.metadata["Версия"])
+        self.DEBUG = False
 
     def loadMetadata(self, filename):
         try:
@@ -37,3 +38,7 @@ class Module(QObject):
         else:
             self.error_occurred.emit("Can't find the configuration file.")
         return configParcer
+
+    def debug(self, message):
+        if self.DEBUG:
+            print(message)

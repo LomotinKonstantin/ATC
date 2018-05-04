@@ -80,7 +80,7 @@ class Analyzer(QThread):
         #     return None
         vector_list = []
         result_list = []
-        self.in_process.emit("Векторизация и классификация...")
+        self.info_message.emit("Векторизация и классификация...")
         for n, i in enumerate(processed_text.index):
             vector_i = self.vectorizer.vectorize(
                 processed_text.loc[i, "text"],
