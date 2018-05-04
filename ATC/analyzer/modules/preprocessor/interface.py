@@ -281,7 +281,7 @@ class Preprocessor(Module):
         res = self.__beautify(res)
         return res
 
-    def encodeFormat(self, text_format):
+    def encode_format(self, text_format: str):
         if text_format == "multidoc":
             return self.MULTIDOC
         elif text_format == "divided":
@@ -305,7 +305,7 @@ class Preprocessor(Module):
         if text_format == "auto":
             checked_format = self.recognize_format(text)
         else:
-            checked_format = self.encodeFormat(text_format)
+            checked_format = self.encode_format(text_format)
         result = ""
         # Plain & divided texts are processed the same way
         try:
