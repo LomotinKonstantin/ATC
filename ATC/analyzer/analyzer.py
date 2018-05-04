@@ -10,12 +10,12 @@ from common.predict import Predict
 ### TODO: refactor
 ###
 
+
 class Analyzer(QThread):
     error_occurred = pyqtSignal(str)
     info_message = pyqtSignal(str)
     warning_message = pyqtSignal(str)
     language_recognized = pyqtSignal(str)
-    in_process = pyqtSignal(str)
     complete = pyqtSignal(Predict)
 
     config_section = "AvailableOptions"
@@ -43,6 +43,10 @@ class Analyzer(QThread):
         self.vectorizer = WordEmbedding()
         self.classifier = Classifier()
 
+        self.preprocessor.error_occurred.connect(self.error_occurred)
+        self.vectorizer.error_occurred.conect(self.error_occurred)
+        self.classifier.error_occurred.connect(self.error_occurred)
+
         self.eps = float(self.vectorizer.rejectThreshold())
         version = ""
         version += "p" + self.preprocessor.version
@@ -50,20 +54,34 @@ class Analyzer(QThread):
         version += "c" + self.classifier.version
         self.version = self.config.get("App", "version") + version
 
-
     def analyze(self, text, params: dict):
-        lang = params["language"]
+        passed_lang = params["language"]
         rubr_id = params["rubr_id"]
-        self.in_process.emit("Preprocessing...")
-        processed_text, language, text_format = self.preprocessor.process(text, lang)
-        lang = language[:2]
-        if lang not in self.config.get(self.config_section, "languages"):
-            self.error_occurred.emit(
-                "Язык {} не поддерживается. Укажите язык текста на панели справа".format(language))
-            return None
+        passed_format = params["format"]
+        self.info_message.emit("Предобработка...")
+        if passed_lang == "auto":
+            language = self.preprocessor.recognize_language(text=text, default="none")
+            if language is None:
+                self.error_occurred.emit("Не удалось распознать язык")
+                return None
+            else:
+                self.info_message.emit("Автоопределенный язык: " + language)
+        else:
+            language = passed_lang
+        if passed_format == "auto":
+            text_format = self.preprocessor.recognize_format(text)
+            text_format = self.preprocessor.encode_format(text_format)
+        else:
+            text_format = passed_format
+        processed_text = self.preprocessor.process(text, language)
+        # lang = language[:2]
+        # if lang not in self.config.get(self.config_section, "languages"):
+        #     self.error_occurred.emit(
+        #         "Язык {} не поддерживается. Укажите язык текста на панели справа".format(language))
+        #     return None
         vector_list = []
         result_list = []
-        self.in_process.emit("Vectorizing and classifying...")
+        self.in_process.emit("Векторизация и классификация...")
         for n, i in enumerate(processed_text.index):
             vector_i = self.vectorizer.vectorize(
                 processed_text.loc[i, "text"],
@@ -74,13 +92,13 @@ class Analyzer(QThread):
                 vector_i = None
                 result_i = None
             else:
-                result_i = self.classifier.classify(vector_i, lang, rubr_id).round(3)
+                result_i = self.classifier.classify(vector_i, language, rubr_id).round(3)
             vector_list.append(vector_i)
             result_list.append(result_i)
         processed_text["vector"] = Series(vector_list, index=processed_text.index)
         processed_text["result"] = Series(result_list, index=processed_text.index)
         predict = Predict(processed_text,
-                          lang=lang,
+                          lang=language,
                           rubr_id=rubr_id,
                           version=self.version,
                           text_format=text_format)
@@ -102,7 +120,7 @@ class Analyzer(QThread):
         self.start()
 
     def isTextValid(self, text: str):
-        if not text:
+        if text is None:
             return False
         if text.strip() == "":
             return False
