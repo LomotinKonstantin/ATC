@@ -30,11 +30,15 @@ class MainWindow(qw.QMainWindow):
         # Setting the layout
         layout = qw.QGridLayout()
         central_widget.setLayout(layout)
+        # Setting the result table
+        self.result_widget = ResultWidget(central_widget)
+        layout.addWidget(self.result_widget, 3, 0, 3, 6)
         # Setting the side option bar
-        self.opt_bar = OptionPane(config, parent=self)
+        self.opt_bar = OptionPane(config, parent=central_widget)
+        self.opt_bar.display_option_changed.connect(self.result_widget.update_output)
         layout.addWidget(self.opt_bar, 0, 6, 4, 2)
         # Setting the text widget
-        self.text_widget = TextWidget()
+        self.text_widget = TextWidget(parent=central_widget)
         layout.addWidget(self.text_widget, 0, 0, 3, 6)
         # Setting the toolbar
         self.toolbar = ToolBarWidget(self)
@@ -50,9 +54,6 @@ class MainWindow(qw.QMainWindow):
         # # Setting the status bar
         # self.lang_label = qw.QLabel()
         # self.statusBar().addWidget(self.lang_label)
-        # Setting the result table
-        self.result_widget = ResultWidget()
-        layout.addWidget(self.result_widget, 3, 0, 3, 6)
         # Setting the console widget
         self.console = ConsoleWidget()
         layout.addWidget(self.console, 4, 6, 2, 2)

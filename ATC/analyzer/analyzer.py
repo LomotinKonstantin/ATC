@@ -105,7 +105,10 @@ class Analyzer(QThread):
         return predict
 
     def run(self):
-        self.analyze(self.text, self.params)
+        try:
+            self.analyze(self.text, self.params)
+        except Exception as e:
+            print(e)
 
     def analyzeInParallel(self, text, params: dict):
         """

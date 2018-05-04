@@ -8,7 +8,7 @@ import PyQt5.QtWidgets as qw
 class TextWidget(qw.QTextEdit):
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super(TextWidget, self).__init__(parent)
 
     def insertFromMimeData(self, md):
         if not (md.hasText() or md.hasHtml()):

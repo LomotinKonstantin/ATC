@@ -4,13 +4,14 @@ import PyQt5.QtWidgets as qw
 from pandas import DataFrame
 import pandas as pd
 
+from common.predict import Predict
+
 
 class ResultWidget(qw.QTextEdit):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super(ResultWidget, self).__init__(parent)
         self.current_output = None
         self.last_result = None
-        self.is_last_error = False
         # self.option_bar.threshold.valueChanged.connect(self.show_output)
         # Input widget
         # Output widget
@@ -22,17 +23,27 @@ class ResultWidget(qw.QTextEdit):
         self.ipv_df = self.loadTopicStrings("IPV.txt")
         self.extended_str = "{}\t<font color='#6c6874'>{}</font><br><br>"
 
-    def show_output(self, output, extension=""):
-        self.is_last_error = False
+    def show_output(self, output: Predict, params: dict):
+        """
+        Display the result of analysis
+        :param output: DataFrame containing the result
+        :param extension: either 'IPV' or 'SUBJ' (and maybe 'RGNTI' in future)
+        :return: None
+        """
         self.clear()
-        threshold = self.option_bar.threshold.value()
+        threshold = params["threshold"]
+        if params["topic_names_allowed"]:
+            extension = output.getRubrId()
+        else:
+            extension = ""
+        data = output.getPredict()
         self.last_result = output
         self.current_output = ""
         reject = "Не удалось определить рубрики"
         empty = "Нет рубрик с вероятностью больше заданного порога"
-        for i in output.index:
-            result = output.loc[i, "result"]
-            if output.index.name == "id":
+        for i in data.index:
+            result = data.loc[i, "result"]
+            if data.index.name == "id":
                 if result is None:
                     str_res = reject
                 else:
@@ -88,4 +99,7 @@ class ResultWidget(qw.QTextEdit):
                            sep="\t",
                            index_col=0,
                            names=["description"])
+
+    def update_output(self, params: dict):
+        self.show_output(self.last_result, params)
 

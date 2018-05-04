@@ -5,8 +5,7 @@ from PyQt5.QtCore import pyqtSignal
 class OptionPane(qw.QGroupBox):
 
     state_changed = pyqtSignal()
-    threshold_changed = pyqtSignal(float)
-    description_state_changed = pyqtSignal(int)
+    display_option_changed = pyqtSignal(dict)
 
     section = "AvailableOptions"
 
@@ -31,7 +30,7 @@ class OptionPane(qw.QGroupBox):
         self.threshold.setValue(0.0)
         self.threshold.setSingleStep(0.05)
         self.threshold.setMaximum(1.0)
-        self.threshold.valueChanged.connect(self.threshold_changed)
+        self.threshold.valueChanged.connect(self.on_display_option_changed)
         layout.addRow("Порог вероятности", self.threshold)
         # Format
         self.format = qw.QComboBox(self)
@@ -43,8 +42,11 @@ class OptionPane(qw.QGroupBox):
         self.description = qw.QCheckBox()
         self.description.setChecked(False)
         self.description.setMinimumSize(0, 50)
-        self.description.stateChanged.connect(self.description_state_changed)
+        self.description.stateChanged.connect(self.on_display_option_changed)
         layout.addRow("Расшифровка кодов", self.description)
+
+    def on_display_option_changed(self):
+        self.display_option_changed.emit(self.options_to_dict())
 
     def options_to_dict(self):
         res = {}
@@ -52,6 +54,7 @@ class OptionPane(qw.QGroupBox):
         res["language"] = self.lang_selector.currentText()
         res["threshold"] = self.threshold.value()
         res["format"] = self.format.currentText()
+        res["topic_names_allowed"] = self.is_description_allowed()
         return res
 
     def is_description_allowed(self):
