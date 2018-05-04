@@ -6,6 +6,7 @@ import pandas as pd
 from pymystem3.mystem import Mystem
 from nltk.stem.snowball import SnowballStemmer
 from nltk.stem import WordNetLemmatizer
+from PyQt5.QtCore import pyqtSignal
 
 
 from analyzer.modules.module import Module
@@ -214,7 +215,7 @@ class Preprocessor(Module):
             if default == "random":
                 res_lang = choice(tuple(self.stopwords.keys()))
             elif default == "error":
-                raise ValueError("Не удалось определить язык")
+                self.error_occurred.emit("Не удалось определить язык")
         return res_lang
 
     def recognize_format(self, text: str):
@@ -235,7 +236,7 @@ class Preprocessor(Module):
                    remove_stopwords: bool,
                    normalization: str,
                    language="auto",
-                   default_lang="error") -> str:
+                   default_lang="none") -> str:
 
         """
         Предобработка одного текста.
@@ -291,10 +292,14 @@ class Preprocessor(Module):
             return self.UNKNOWN
 
     def process(self, text, lang="auto", text_format="auto"):
+        result = pd.DataFrame([""], columns=["text"])
         if not text:
             return None
         if lang == "auto":
             language = self.recognize_language(text)
+            if language is None:
+                self.error_occurred.emit("Не удалось определить язык")
+                return result
         else:
             language = lang
         if text_format == "auto":
@@ -330,6 +335,6 @@ class Preprocessor(Module):
                 result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])
         except Exception as e:
             self.debug(e)
-            self.error_occurred.emit("Не удается обработать текст")
+            self.error_occurred.emit("Не удалось обработать файл в этом формате")
             result = pd.DataFrame([""], columns=["text"])
         return result
