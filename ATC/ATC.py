@@ -8,7 +8,7 @@ warnings.filterwarnings('ignore')
 
 from PyQt5.QtWidgets import QApplication
 
-from gui.GUI import GUI
+from gui.GUI import GUI, show_splashscreen
 from analyzer.analyzer import Analyzer
 
 
@@ -25,7 +25,7 @@ class ATC:
         # Selecting mode
         if len(sys.argv) > 1:
             self.parse_args()
-            self.analyzer.error_occurred.connect(self.print_error)
+            # self.analyzer.error_occurred.connect(self.print_error)
             filename = self.parameters["input"]
             if not os.path.exists(filename):
                 self.print_error("File {} does not exist".format(filename))
@@ -40,14 +40,13 @@ class ATC:
                 sys.exit()
             result = self.analyzer.analyze(text, self.parameters)
             if result is None:
-                self.print_error("Unable to define topics")
+                self.print_error("Unknown error occurred")
                 sys.exit()
-            self.analyzer.export(result[result > self.parameters["threshold"]],
-                                 self.parameters["output"], self.parameters)
+            result.saveToFile(self.parameters["output"], self.parameters["threshold"])
             sys.exit(0)
         else:
-            self.ui = GUI()
-            self.ui.start()
+            show_splashscreen()
+            self.ui = GUI(analyzer=self.analyzer, config=self.config)
 
     def parse_args(self):
         description = "Automated Text Classifier for VINITI. Чтобы запустить графический сеанс, " \

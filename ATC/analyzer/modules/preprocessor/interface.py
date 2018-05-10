@@ -121,7 +121,7 @@ class Preprocessor(Module):
                                                self.sw_files[lang])
         self.stopwords = self.__load_sw()
         self.viniti_md = self.__load_md()
-        self.DEBUG = True
+        self.DEBUG = False
 
     def __dense(self, text: str) -> str:
         return re.sub("\\s{2,}", " ", text)
