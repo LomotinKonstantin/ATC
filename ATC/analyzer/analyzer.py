@@ -53,7 +53,7 @@ class Analyzer(QThread):
         version += "c" + self.classifier.version
         self.version = self.config.get("App", "version") + version
 
-    def analyze(self, text, params: dict):
+    def analyze(self, text, params: dict) -> Predict:
         passed_lang = params["language"]
         rubr_id = params["rubr_id"]
         passed_format = params["format"]
