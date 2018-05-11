@@ -61,7 +61,6 @@ def remove_empty_items(lst):
     return list(filter(lambda x: not bool(re.fullmatch("\s*", x)), lst))
 
 
-
 class Preprocessor(Module):
     """
     Класс для выполнения предобработки однотипных данных.
@@ -223,7 +222,9 @@ class Preprocessor(Module):
         if "\n" in stripped:
             lines = stripped.count("\n") + 1
             tabs = stripped.count("\t")
+            self.debug("Lines: {}; Tabs: {}".format(lines, tabs))
             if tabs == lines * 4:
+                self.debug("Recognized MULTIDOC")
                 return self.MULTIDOC
         if re.match("((^|\t)[^\t]+){3,}", stripped):
             return self.DIVIDED
@@ -313,7 +314,11 @@ class Preprocessor(Module):
         if text_format == "auto":
             checked_format = self.recognize_format(text)
         else:
-            checked_format = self.encode_format(text_format)
+            if type(text_format) is str:
+                checked_format = self.encode_format(text_format)
+            else:
+                checked_format = text_format
+        self.debug("Checked format: {}".format(checked_format))
         result = ""
         # Plain & divided texts are processed the same way
         try:

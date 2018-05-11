@@ -69,7 +69,6 @@ class Analyzer(QThread):
             language = passed_lang
         if passed_format == "auto":
             text_format = self.preprocessor.recognize_format(text)
-            text_format = self.preprocessor.encode_format(text_format)
             self.info_message.emit("Автоопределенный формат: {}".format(text_format))
         else:
             text_format = passed_format
