@@ -55,7 +55,7 @@ class Analyzer(QThread):
 
     def analyze(self, text, params: dict) -> Predict:
         passed_lang = params["language"]
-        rubr_id = params["rubr_id"]
+        rubr_id = params["rubricator_id"]
         passed_format = params["format"]
         self.info_message.emit("Предобработка...")
         if passed_lang == "auto":
@@ -70,9 +70,10 @@ class Analyzer(QThread):
         if passed_format == "auto":
             text_format = self.preprocessor.recognize_format(text)
             text_format = self.preprocessor.encode_format(text_format)
+            self.info_message.emit("Автоопределенный формат: {}".format(text_format))
         else:
             text_format = passed_format
-        processed_text = self.preprocessor.process(text, language)
+        processed_text = self.preprocessor.process(text, language, text_format)
         # lang = language[:2]
         # if lang not in self.config.get(self.config_section, "languages"):
         #     self.error_occurred.emit(

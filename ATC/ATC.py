@@ -3,6 +3,8 @@ import sys
 import os
 import warnings
 from configparser import ConfigParser
+import codecs
+
 
 warnings.filterwarnings('ignore')
 
@@ -11,6 +13,9 @@ from PyQt5.QtWidgets import QApplication
 from gui.GUI import GUI, show_splashscreen
 from analyzer.analyzer import Analyzer
 
+
+def unescaped_str(arg_str):
+    return codecs.decode(str(arg_str), errors='backslashreplace')
 
 class ATC:
 
@@ -52,20 +57,26 @@ class ATC:
         description = "Automated Text Classifier for VINITI. Чтобы запустить графический сеанс, " \
                       "запустите программу без аргументов"
         argparser = ArgumentParser(prog="ATC", description=description)
-        argparser.add_argument("-i", "--input", help="полный путь к файлу с текстом", required=True)
+        ids = self.config.get(self.section, "ids").split(", ")
+        formats = self.config.get(self.section, "formats").split(", ")
+        languages = self.config.get(self.section, "languages").split(", ")
+        argparser.add_argument("-i", "--input",
+                               help="полный путь к файлу с текстом",
+                               required=True)
+        # type=unescaped_str
         argparser.add_argument("-o", "--output",
                                help="полный путь к файлу, в который будет записан результат",
                                required=True)
         argparser.add_argument("-id",
                                "--rubricator-id",
                                help="идентификатор рубрикатора",
-                               choices=self.config.get(self.section, "ids"),
+                               choices=ids,
                                required=True)
         argparser.add_argument("-f", "--format", help="формат входного файла",
-                               choices=self.config.get(self.section, "formats"),
+                               choices=formats,
                                required=False)
         argparser.add_argument("-l", "--language", help="язык входного текста",
-                               choices=self.config.get(self.section, "languages"),
+                               choices=languages,
                                required=True)
         argparser.add_argument("-t", "--threshold", help="пороговое значение вероятности. " +
                                                          "Ответы классификатора с вероятностью ниже " +

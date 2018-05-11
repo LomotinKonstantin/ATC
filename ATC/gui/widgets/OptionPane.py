@@ -50,7 +50,7 @@ class OptionPane(qw.QGroupBox):
 
     def options_to_dict(self):
         res = {}
-        res["rubr_id"] = self.id_selector.currentText()
+        res["rubricator_id"] = self.id_selector.currentText()
         res["language"] = self.lang_selector.currentText()
         res["threshold"] = self.threshold.value()
         res["format"] = self.format.currentText()
