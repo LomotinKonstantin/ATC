@@ -4,6 +4,7 @@ import os.path
 import pandas as pd
 from analyzer.modules.module import Module
 from sklearn.externals import joblib
+from sklearn.multiclass import OneVsRestClassifier
 
 
 class Classifier(Module):
@@ -13,6 +14,7 @@ class Classifier(Module):
         self.lang = lang
         self.config = self.loadConfig()
         self.loadClf()
+        #self.DEBUG = True
         
     # If lang == None, classifies vector according to last set language.
     # If lang != None, checks if input language corresponds with current language 
@@ -30,8 +32,15 @@ class Classifier(Module):
                 self.loadClf()
         if self.clf:
             if self.clf.coef_.T.shape[0] == len(vector):
-                result = pd.Series(self.clf.predict_proba([vector])[0], index=self.clf.classes_)
-                result = result.sort_values(ascending=False)
+                if type(self.clf) == OneVsRestClassifier:
+                    res = []
+                    for i in self.clf.estimators_:
+                        res.append((i.predict_proba(vector))[0][1])
+                    result = pd.Series(res, index=self.clf.classes_)
+                    result = result.sort_values(ascending=False)
+                else:
+                    result = pd.Series(self.clf.predict_proba([vector])[0], index=self.clf.classes_)
+                    result = result.sort_values(ascending=False)
                 # result = result.round(3)
                 # result = result[result!=0]
                 return result   
