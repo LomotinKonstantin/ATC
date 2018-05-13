@@ -27,7 +27,7 @@ class ResultWidget(qw.QTextEdit):
         """
         Display the result of analysis
         :param output: DataFrame containing the result
-        :param extension: either 'IPV' or 'SUBJ' (and maybe 'RGNTI' in future)
+        :param params: Dict with options
         :return: None
         """
         self.clear()
