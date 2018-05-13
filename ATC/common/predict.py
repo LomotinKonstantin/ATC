@@ -28,6 +28,14 @@ class Predict:
         """
         file = open(filename, "w", encoding="cp1251")
         data_to_save = self.data
+        # If data does not exist:
+        if data_to_save is None:
+            file.write("#\t{}\t{}\t{}\t{}{}".format(
+                self.params["rubr_id"], self.params["language"], threshold, self.params["version"],
+                os.linesep
+            ))
+            file.write("{}{}".format("REJECT", os.linesep))
+            return 
         # If result has 'multidoc' format
         threshold = round(threshold, 2)
         if data_to_save.index.name == "id":

@@ -62,7 +62,11 @@ class Analyzer(QThread):
             language = self.preprocessor.recognize_language(text=text, default="none")
             if language is None:
                 self.error_occurred.emit("Не удалось распознать язык")
-                return None
+                return Predict(None,
+                          lang="unknown",
+                          rubr_id=rubr_id,
+                          version=self.version,
+                          text_format=passed_format)
             else:
                 self.info_message.emit("Автоопределенный язык: " + language)
         else:
