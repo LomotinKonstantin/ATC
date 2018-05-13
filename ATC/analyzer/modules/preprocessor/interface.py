@@ -301,6 +301,16 @@ class Preprocessor(Module):
         else:
             return self.UNKNOWN
 
+    def decode_format(self, text_format: int):
+        if text_format == self.MULTIDOC:
+            return "MULTIDOC"
+        elif text_format == self.DIVIDED:
+            return "DIVIDED"
+        elif text_format == self.PLAIN:
+            return "PLAIN"
+        else:
+            return "UNKNOWN"
+
     def process(self, text, lang="auto", text_format="auto"):
         result = pd.DataFrame([""], columns=["text"])
         if not text:

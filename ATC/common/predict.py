@@ -18,7 +18,7 @@ class Predict:
         self.setPredict(predict, lang, text_format, rubr_id, version)
         return
 
-    def saveToFile(self, filename, threshold=0, n_digits=3):
+    def save_to_file(self, filename, threshold=0, n_digits=3):
         """
         Saves the predict to the provided file
         :param threshold: probability threshold. All answers with lower proba will be rejected

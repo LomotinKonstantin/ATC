@@ -47,7 +47,7 @@ class ATC:
             if result is None:
                 self.print_error("Unknown error occurred")
                 sys.exit()
-            result.saveToFile(self.parameters["output"], self.parameters["threshold"])
+            result.save_to_file(self.parameters["output"], self.parameters["threshold"])
             sys.exit(0)
         else:
             show_splashscreen()
