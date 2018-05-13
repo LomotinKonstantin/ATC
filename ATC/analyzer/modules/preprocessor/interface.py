@@ -219,6 +219,7 @@ class Preprocessor(Module):
 
     def recognize_format(self, text: str):
         stripped = text.strip()
+        self.debug("Recognizing format...")
         if "\n" in stripped:
             lines = stripped.count("\n") + 1
             tabs = stripped.count("\t")

@@ -21,8 +21,12 @@ class OptionPane(qw.QGroupBox):
         layout.addRow("Идентификатор рубрикатора", self.id_selector)
         # Language
         self.lang_selector = qw.QComboBox(self)
-        self.lang_selector.addItems(config.get(self.section, "languages").split(", "))
-        self.lang_selector.setCurrentIndex(0)
+        languages = config.get(self.section, "languages").split(", ")
+        self.lang_selector.addItems(languages)
+        if "auto" in languages:
+            self.lang_selector.setCurrentIndex(languages.index("auto"))
+        else:
+            self.lang_selector.setCurrentIndex(0)
         self.lang_selector.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Язык", self.lang_selector)
         # Threshold
@@ -34,8 +38,12 @@ class OptionPane(qw.QGroupBox):
         layout.addRow("Порог вероятности", self.threshold)
         # Format
         self.format = qw.QComboBox(self)
-        self.format.addItems(config.get(self.section, "formats").split(", "))
-        self.format.setCurrentIndex(0)
+        formats = config.get(self.section, "formats").split(", ")
+        self.format.addItems(formats)
+        if "auto" in formats:
+            self.format.setCurrentIndex(formats.index("auto"))
+        else:
+            self.format.setCurrentIndex(0)
         self.format.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Формат", self.format)
         # Code description
