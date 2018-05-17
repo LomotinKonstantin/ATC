@@ -91,7 +91,7 @@ class ATC:
 
     def loadConfig(self):
         parser = ConfigParser()
-        parser.read(["config.ini"], encoding="utf-8")
+        parser.read([os.path.join(os.path.dirname(__file__), "config.ini")], encoding="utf-8")
         return parser
 
 
