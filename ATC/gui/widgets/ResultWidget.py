@@ -101,5 +101,7 @@ class ResultWidget(qw.QTextEdit):
                            names=["description"])
 
     def update_output(self, params: dict):
+        if self.last_result is None:
+            return 
         self.show_output(self.last_result, params)
 
