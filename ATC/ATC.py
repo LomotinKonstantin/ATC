@@ -1,10 +1,9 @@
-﻿from argparse import ArgumentParser
+﻿from argparse import ArgumentParser, Action
 import sys
 import os
 import warnings
 from configparser import ConfigParser
 import codecs
-
 
 warnings.filterwarnings('ignore')
 
@@ -17,8 +16,65 @@ from analyzer.analyzer import Analyzer
 def unescaped_str(arg_str):
     return codecs.decode(str(arg_str), errors='backslashreplace')
 
-class ATC:
 
+class PrintModels(Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super(PrintModels, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        path = os.path.join(os.path.dirname(__file__),
+                            "analyzer",
+                            "modules",
+                            "classifier",
+                            "config.ini")
+        config = ConfigParser()
+        config.read(path)
+        for i in config.options("Settings"):
+            print(i, config.get("Settings", i))
+
+
+class SetModels(Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super(SetModels, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        path = os.path.join(os.path.dirname(__file__),
+                            "analyzer",
+                            "modules",
+                            "classifier",
+                            "config.ini")
+        config = ConfigParser()
+        config.read(path)
+        lang = ""
+        rubr = ""
+        if "ru" in values:
+            lang = "ru"
+        elif "en" in values:
+            lang = "en"
+        else:
+            print("Неверный формат имени файла")
+            exit()
+        if "grnti" in values:
+            rubr = "RGNTI"
+        elif "subj" in values:
+            rubr = "SUBJ"
+        elif "ipv" in values:
+            rubr = "IPV"
+        else:
+            print("Неверный формат имени файла")
+            exit()
+        option = "{}_{}".format(rubr, lang)
+        config.set("Settings", option, values)
+        with open(path, "w") as fp:
+            config.write(fp)
+        print("Done")
+
+
+class ATC:
     section = "AvailableOptions"
 
     def __init__(self):
@@ -84,6 +140,19 @@ class ATC:
                                default=0.0,
                                type=float,
                                required=False)
+        subparsers = argparser.add_subparsers(help="Commands")
+        get_parser = subparsers.add_parser("get",
+                                           help="Получить значение параметра")
+        get_parser.add_argument("type", help="параметр",
+                                choices=["plk"],
+                                action=PrintModels)
+        set_parser = subparsers.add_parser("set", help="установить значение параметра")
+        set_subs = set_parser.add_subparsers(help="Setters")
+        plk_setter = set_subs.add_parser("plk")
+        plk_setter.add_argument("file",
+                                help="имя файла модели классификатора (*.plk)",
+                                action=SetModels)
+
         self.parameters = vars(argparser.parse_args())
 
     def print_error(self, error_msg: str):
