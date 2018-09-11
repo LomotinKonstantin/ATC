@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QApplication
 
 from gui.GUI import GUI, show_splashscreen
 from analyzer.analyzer import Analyzer
+from shutil import copyfile
 
 
 def unescaped_str(arg_str):
@@ -71,6 +72,31 @@ class SetModels(Action):
         config.set("Settings", option, values)
         with open(path, "w") as fp:
             config.write(fp)
+        print("Done")
+
+
+class RestoreAction(Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super(RestoreAction, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        mapping = {
+            "classifier": "classifier",
+            "we": "word_embedding",
+            "preprocessor": "preprocessor"
+        }
+        if values not in mapping.keys():
+            print("Что-то сильно пошло не так. Разработчики будут не в восторге :\\")
+            exit()
+        src = os.path.join(os.path.dirname(__file__),
+                           "analyzer", "backup",
+                           "{}_config.ini".format(values))
+        dst = os.path.join(os.path.dirname(__file__),
+                           "analyzer", "modules",
+                           mapping[values], "config.ini")
+        copyfile(src, dst)
         print("Done")
 
 
@@ -140,6 +166,7 @@ class ATC:
                                default=0.0,
                                type=float,
                                required=False)
+        # Creating command CLI group
         subparsers = argparser.add_subparsers(help="Commands")
         get_parser = subparsers.add_parser("get",
                                            help="Получить значение параметра")
@@ -152,6 +179,11 @@ class ATC:
         plk_setter.add_argument("file",
                                 help="имя файла модели классификатора (*.plk)",
                                 action=SetModels)
+        restore_parser = subparsers.add_parser("restore")
+        restore_parser.add_argument("target",
+                                    help="какой файл конфигурации восстановить",
+                                    choices=["classifier"],
+                                    action=RestoreAction)
 
         self.parameters = vars(argparser.parse_args())
 
