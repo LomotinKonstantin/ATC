@@ -59,7 +59,7 @@ class SetModels(Action):
         else:
             print("Неверный формат имени файла")
             exit()
-        if "grnti" in values:
+        if "rgnti" in values:
             rubr = "RGNTI"
         elif "subj" in values:
             rubr = "SUBJ"
