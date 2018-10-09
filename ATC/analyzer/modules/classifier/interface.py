@@ -31,7 +31,7 @@ class Classifier(Module):
                 self.rubr_id = rubr_id
                 self.loadClf()
         if self.clf:
-            if self.clf.coef_.T.shape[0] == len(vector):
+            if (not hasattr(self.clf, 'coef_')) or (hasattr(self.clf, 'coef_') and self.clf.coef_.T.shape[0] == len(vector)):
                 if type(self.clf) == OneVsRestClassifier:
                     res = []
                     for i in self.clf.estimators_:
