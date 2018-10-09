@@ -35,7 +35,7 @@ class Classifier(Module):
                 if type(self.clf) == OneVsRestClassifier:
                     res = []
                     for i in self.clf.estimators_:
-                        res.append((i.predict_proba(vector))[0][1])
+                        res.append((i.predict_proba([vector]))[0][1])
                     result = pd.Series(res, index=self.clf.classes_)
                     result = result.sort_values(ascending=False)
                 else:
