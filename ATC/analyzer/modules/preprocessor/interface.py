@@ -12,11 +12,6 @@ from PyQt5.QtCore import pyqtSignal
 from analyzer.modules.module import Module
 
 
-###
-### TODO: make language recognition NLTK-independent
-###
-
-
 def expand_language(lang: str):
     if lang == "ru":
         return "russian"
@@ -331,12 +326,17 @@ class Preprocessor(Module):
                 checked_format = text_format
         self.debug("Checked format: {}".format(checked_format))
         result = ""
+        norm_type = ""
+        if language == "ru":
+            norm_type = "lemmatization"
+        elif language == "en":
+            norm_type = "no"
         # Plain & divided texts are processed the same way
         try:
             if checked_format in [self.PLAIN, self.DIVIDED, self.UNKNOWN]:
                 processed_text = self.preprocess(text=text,
                                          remove_stopwords=True,
-                                         normalization="lemmatization",
+                                         normalization=norm_type,
                                          language=language)
                 result = pd.DataFrame([processed_text], columns=["text"])
             elif checked_format == self.MULTIDOC:
@@ -352,7 +352,7 @@ class Preprocessor(Module):
                 str_repr = self.delim.join(rows_list)
                 result_text = self.preprocess(text=str_repr,
                                               remove_stopwords=True,
-                                              normalization="lemmatization",
+                                              normalization=norm_type,
                                               language=language)
                 result_list = result_text.split(self.delim)
                 result = pd.DataFrame(result_list, index=df_to_process.index, columns=["text"])

@@ -24,7 +24,7 @@ class WordEmbedding(Module):
         if lang:
             if self.lang != lang:
                 self.lang = lang
-                self.loadModel()            
+                self.loadModel()
         if self.model:
             tokens = text.split()
             features = [0]*self.length
