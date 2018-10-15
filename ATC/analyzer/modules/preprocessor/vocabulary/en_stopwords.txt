@@ -1,4 +1,3 @@
-aboard
 about
 above
 across
@@ -12,10 +11,8 @@ amongst
 around
 as
 aside
-aslant
 astride
 at
-athwart
 atop
 bar
 before
@@ -24,8 +21,6 @@ below
 beneath
 beside
 besides
-between
-beyond
 but
 by
 circa
@@ -34,7 +29,6 @@ down
 except
 for
 from
-given
 in
 inside
 into
@@ -51,8 +45,6 @@ opposite
 out
 outside
 over
-per
-plus
 post
 pro
 since
@@ -109,3 +101,9 @@ are
 each
 was
 were
+a
+an
+is
+we
+I
+be
