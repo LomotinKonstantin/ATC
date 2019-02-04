@@ -182,7 +182,7 @@ class ATC:
         restore_parser = subparsers.add_parser("restore")
         restore_parser.add_argument("target",
                                     help="какой файл конфигурации восстановить",
-                                    choices=["classifier"],
+                                    choices=["classifier", "we"],
                                     action=RestoreAction)
 
         self.parameters = vars(argparser.parse_args())
