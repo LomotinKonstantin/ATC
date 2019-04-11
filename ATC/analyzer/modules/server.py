@@ -2,6 +2,9 @@ import socket
 import json
 
 
+TIMEOUT = 10
+
+
 def is_valid_json(string: str) -> bool:
     try:
         json.loads(string)
@@ -54,25 +57,36 @@ def validate_request_data(json_data: dict, analyzer) -> str:
 
 def start_server(port: int, analyzer) -> None:
     server_address = ('localhost', port)
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(server_address)
-    server_socket.listen(10)
-    print("Server is running at port", port)
+    try:
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind(server_address)
+        server_socket.listen(10)
+        print("Server is running at port", port)
+        print("Press ctrl+c to terminate")
+    except OSError as e:
+        print("Failed to launch server at port {}. OS error occurred: {}".format(port,
+                                                                                 e.strerror))
+        return
     connection, address = server_socket.accept()
+    # 10-second timeout
+    connection.settimeout(TIMEOUT)
     print("Accepted connection from {}".format(address))
     while True:
         # Receiving data
         msg = ""
-        data = connection.recv(1024)
-        while not is_valid_json(msg):
-            msg += data.decode("utf-8")
+        try:
             data = connection.recv(1024)
+            while not is_valid_json(msg):
+                msg += data.decode("utf-8")
+                data = connection.recv(1024)
+        except TimeoutError:
+            print("Client request timeout ({}s)".format(TIMEOUT))
 
         # Validating data
         json_data = json.loads(msg, encoding="utf-8")
         err_msg = validate_request_data(json_data, analyzer)
         if err_msg:
-            connection.send(bytes(err_msg, encoding="utf-8"))
+            connection.sendall(bytes(err_msg, encoding="utf-8"))
             continue
 
         # Processing data
@@ -86,12 +100,12 @@ def start_server(port: int, analyzer) -> None:
         }
         result = analyzer.analyze(text, params)
         if not result:
-            connection.send(bytes("Unknown error occurred\0", encoding="utf-8"))
+            connection.sendall(bytes("Unknown error occurred\0", encoding="utf-8"))
             continue
         proba_series = result.loc[0, "result"]
         if proba_series is None:
-            connection.send(bytes("Classifier has rejected the text\0", encoding="utf-8"))
+            connection.sendall(bytes("Classifier has rejected the text\0", encoding="utf-8"))
             continue
         proba_dict = proba_series.to_dict()
         json_response_string = json.dumps(proba_dict)
-        connection.send(bytes(json_response_string, encoding="utf-8"))
+        connection.sendall(bytes(json_response_string, encoding="utf-8"))
