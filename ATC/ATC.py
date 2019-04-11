@@ -12,6 +12,10 @@ from PyQt5.QtWidgets import QApplication
 from gui.GUI import GUI, show_splashscreen
 from analyzer.analyzer import Analyzer
 from shutil import copyfile
+from analyzer.modules.server import start_server
+
+
+analyzer_global = None
 
 
 def unescaped_str(arg_str):
@@ -100,6 +104,29 @@ class RestoreAction(Action):
         print("Done")
 
 
+class LaunchServer(Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super(LaunchServer, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        port = -1
+        try:
+            port = int(values)
+        except ValueError:
+            print("Invalid port: '{}'".format(port))
+            exit(0)
+        if analyzer_global is None:
+            print("Internal app error (Global reference to 'analyzer' is not initialized)")
+            exit(0)
+        try:
+            start_server(port, analyzer_global)
+        except KeyboardInterrupt:
+            print("Server is stopped")
+            exit(0)
+
+
 class ATC:
     section = "AvailableOptions"
 
@@ -109,6 +136,8 @@ class ATC:
         # Loading config
         self.config = self.loadConfig()
         self.analyzer = Analyzer(self.config)
+        global analyzer_global
+        analyzer_global = self.analyzer
         # Selecting mode
         if len(sys.argv) > 1:
             self.parse_args()
@@ -179,11 +208,16 @@ class ATC:
         plk_setter.add_argument("file",
                                 help="имя файла модели классификатора (*.plk)",
                                 action=SetModels)
-        restore_parser = subparsers.add_parser("restore")
+        restore_parser = subparsers.add_parser("restore", help="восстановить файл конфигурации")
         restore_parser.add_argument("target",
                                     help="какой файл конфигурации восстановить",
                                     choices=["classifier", "we"],
                                     action=RestoreAction)
+        # Creating server command
+        server_parser = subparsers.add_parser("server", help="запустить режим сервера")
+        server_parser.add_argument("port", help="номер порта, на котором запустить сервер",
+                                action=LaunchServer,
+                                type=int)
 
         self.parameters = vars(argparser.parse_args())
 
