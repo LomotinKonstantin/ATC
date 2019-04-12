@@ -109,6 +109,8 @@ def start_server(port: int, analyzer) -> None:
                 continue
 
             # Processing data
+            if json_data["rubricator"] == "grnti":
+                json_data["rubricator"] = "rgnti"
             text = " ".join([json_data.get("title", ""),
                              " ".join(json_data.get("keywords", [])),
                              json_data["body"]])
