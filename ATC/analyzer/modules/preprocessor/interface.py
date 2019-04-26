@@ -281,6 +281,13 @@ class Preprocessor(Module):
         if normalization != "no":
             res = Normalizer(normalization, lang).normalize(res)
             self.debug("normalized ({})".format(normalization))
+            ### TODO ЗАПЛАТКА БАГА ###
+            # ☺☻ разбивается лемматизатором на ☺ ☻
+            # Возможно, стоит переработать лемматизацию русского языка
+            # Т.к. сейчас лемматизатор создается при каждом вызове
+            # Нужно профилирование
+            res = res.replace("☺ ☻", "☺☻")
+            ###
         res = re.sub("\\s-\\s", "-", res)
         res = self.__beautify(res)
         self.debug("beautified x2")
