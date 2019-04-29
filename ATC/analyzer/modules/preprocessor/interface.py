@@ -23,6 +23,19 @@ class Normalizer:
     def __init__(self, norm: str, language: str):
         self.norm = norm
         self.language = language
+        if self.norm == "lemmatization":
+            # PyMystem3 не поддерживает английский
+            # NLTK.WordNetLemmatizer не поддерживает русский
+            if self.language == "ru":
+                self.alg = Mystem()
+            elif self.language == "en":
+                self.alg = WordNetLemmatizer()
+        # Стемминг
+        elif self.norm == "stemming":
+            self.alg = SnowballStemmer(expand_language(self.language))
+        else:
+            raise ValueError("{} is not supported. "
+                             "Available options: 'lemmatization, 'stemming'".format(self.norm))
 
     def normalize(self, text: str, return_list=False):
         res = None
@@ -32,18 +45,12 @@ class Normalizer:
             # PyMystem3 не поддерживает английский
             # NLTK.WordNetLemmatizer не поддерживает русский
             if self.language == "ru":
-                alg = Mystem()
-                token_list = alg.lemmatize(text)
+                token_list = self.alg.lemmatize(text)
             elif self.language == "en":
-                alg = WordNetLemmatizer()
-                token_list = list(map(alg.lemmatize, text.split()))
+                token_list = list(map(self.alg.lemmatize, text.split()))
         # Стемминг
         elif self.norm == "stemming":
-            alg = SnowballStemmer(expand_language(self.language))
-            token_list = list(map(alg.stem, text.split()))
-        else:
-            raise ValueError("{} is not supported. "
-                             "Available options: 'lemmatization, 'stemming'".format(self.norm))
+            token_list = list(map(self.alg.stem, text.split()))
         # Выбор формата результата
         if not return_list:
             res = " ".join(remove_empty_items(token_list))
