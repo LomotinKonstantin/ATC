@@ -28,6 +28,7 @@ def null_terminate(err_gen_func):
 #     keywords: ["список", "ключевых", "слов"],
 #     rubricator: "одно из ipv, grnti или subj",
 #     language: "одно из en, ru или auto",
+#     threshold: 0 < число < 1
 # }
 
 
@@ -55,6 +56,21 @@ def validate_request_data(json_data: dict, analyzer) -> str:
     if "keywords" in json_data:
         if not json_data["keywords"] or type(json_data["keywords"]) != list:
             return "Invalid keyword list"
+    if "threshold" in json_data:
+        val = json_data["threshold"]
+        if isinstance(val, float):
+            if not (0 <= val <= 1):
+                return f"Invalid threshold value: {val}"
+        else:
+            try:
+                parsed = float(val)
+                if not (0 <= parsed <= 1):
+                    return f"Invalid threshold value: {parsed}"
+                json_data["threshold"] = parsed
+            except ValueError:
+                return f"Invalid threshold value: {val}"
+    else:
+        json_data["threshold"] = 0.0
     return ""
 
 
@@ -128,6 +144,7 @@ def start_server(port: int, analyzer) -> None:
             if proba_series is None:
                 connection.sendall(bytes("Classifier has rejected the text\0", encoding="utf-8"))
                 continue
+            proba_series = proba_series[proba_series > json_data["threshold"]]
             proba_dict = proba_series.to_dict()
             json_response_string = json.dumps(proba_dict)
             # print("Sending response")
