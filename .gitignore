@@ -3,3 +3,7 @@
 .git/
 *__pycache__*
 test/
+*.pkl
+*.plk
+*.model
+*.pyc
