@@ -3,6 +3,7 @@ import os
 import PyQt5.QtWidgets as qw
 from pandas import DataFrame
 import pandas as pd
+import numpy as np
 
 from common.predict import Predict
 
@@ -31,7 +32,8 @@ class ResultWidget(qw.QTextEdit):
         :return: None
         """
         self.clear()
-        threshold = params["threshold"]
+        n_digits = 5
+        threshold = round(params["threshold"], n_digits)
         if params["topic_names_allowed"]:
             extension = output.getRubrId()
         else:
@@ -47,7 +49,8 @@ class ResultWidget(qw.QTextEdit):
                 if result is None:
                     str_res = reject
                 else:
-                    result = result[result > threshold]
+                    result = np.round(result, n_digits)
+                    result = result[result >= threshold]
                     if len(result.index) == 0:
                         str_res = empty
                     else:
@@ -62,7 +65,8 @@ class ResultWidget(qw.QTextEdit):
                     row = reject
                     self.append(row)
                 else:
-                    result = result[result > threshold]
+                    result = np.round(result, n_digits)
+                    result = result[result >= threshold]
                     if len(result.index) == 0:
                         row = empty
                         self.append(row)
