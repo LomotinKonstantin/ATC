@@ -158,7 +158,7 @@ class ATC:
             if result is None:
                 self.print_error("Unknown error occurred")
                 sys.exit()
-            result.save_to_file(self.parameters["output"], self.parameters["threshold"])
+            result.save_to_file(self.parameters["output"], self.parameters["threshold"], n_digits=5)
             sys.exit(0)
         else:
             show_splashscreen()

@@ -67,7 +67,7 @@ class GUI(qc.QObject):
             if not filename:
                 return
             threshold = self.main_window.opt_bar.threshold.value()
-            result.save_to_file(filename=filename, threshold=threshold)
+            result.save_to_file(filename=filename, threshold=threshold, n_digits=5)
         except Exception as e:
             self.error_occurred.emit("Не удалось экспортировать результат")
 

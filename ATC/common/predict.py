@@ -1,5 +1,7 @@
 import os
 
+import numpy as np
+
 
 class Predict:
     """
@@ -28,6 +30,7 @@ class Predict:
         """
         file = open(filename, "w", encoding="cp1251")
         data_to_save = self.data
+        threshold = round(threshold, n_digits)
         # If data does not exist:
         if data_to_save is None:
             file.write("#\t{}\t{}\t{}\t{}{}".format(
@@ -37,7 +40,6 @@ class Predict:
             file.write("{}{}".format("REJECT", os.linesep))
             return 
         # If result has 'multidoc' format
-        threshold = round(threshold, 2)
         if data_to_save.index.name == "id":
             file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}{}".format(
                 "id", "result", "rubricator", "language", "threshold", "version", "correct",
@@ -46,7 +48,8 @@ class Predict:
             for i in data_to_save.index:
                 class_result = data_to_save.loc[i, "result"]
                 if class_result is not None:
-                    class_result = class_result[class_result > threshold]
+                    class_result = np.round(class_result, n_digits)
+                    class_result = class_result[class_result >= threshold]
                     if len(class_result.index) > 0:
                         result_str = "\\".join(
                             ["{}-{}".format(j, round(class_result.loc[j], n_digits))
@@ -71,13 +74,14 @@ class Predict:
             if result_series is None:
                 file.write("{}{}".format("REJECT", os.linesep))
             else:
-                result_series = result_series[result_series > threshold]
+                result_series = np.round(result_series, n_digits)
+                result_series = result_series[result_series >= threshold]
                 if len(result_series.index) == 0:
                     file.write("{}{}".format("EMPTY", os.linesep))
                 else:
                     for topic in result_series.index:
                         proba = round(result_series.loc[topic], n_digits)
-                        if proba > threshold:
+                        if proba >= threshold:
                             file.write("{}\t{}{}".format(topic, proba, os.linesep))
 
     def getPredict(self):

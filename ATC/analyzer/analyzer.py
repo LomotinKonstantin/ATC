@@ -96,7 +96,7 @@ class Analyzer(QThread):
                 vector_i = None
                 result_i = None
             else:
-                result_i = self.classifier.classify(vector_i, language, rubr_id).round(3)
+                result_i = self.classifier.classify(vector_i, language, rubr_id).round(5)
             vector_list.append(vector_i)
             result_list.append(result_i)
         processed_text["vector"] = Series(vector_list, index=processed_text.index)

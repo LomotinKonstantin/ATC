@@ -45,7 +45,7 @@ class Classifier(Module):
                 # result = result[result!=0]
                 return result   
             else:
-                self.error_occurred.emit('Vector has '+str(len(vector))+' elements. Model can work with vectors that have '+str(clf.coef_.T.shape[0])+'attibutes.')
+                self.error_occurred.emit('Vector has '+str(len(vector))+' elements. Model can work with vectors that have '+str(self.clf.coef_.T.shape[0])+'attibutes.')
                 return None
         else:
             return None   
