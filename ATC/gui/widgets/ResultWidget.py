@@ -75,11 +75,17 @@ class ResultWidget(qw.QTextEdit):
                             row = "{}\t{}\n".format(topic, proba)
                             self.current_output += row
                             if extension == "SUBJ":
-                                self.insertHtml(
-                                    self.extended_str.format(row, self.subj_df.loc[topic, "description"]))
+                                if topic in self.subj_df.index:
+                                    descr = self.subj_df.loc[topic, "description"]
+                                else:
+                                    descr = ""
+                                self.insertHtml(self.extended_str.format(row, descr))
                             elif extension == "IPV":
-                                self.insertHtml(
-                                    self.extended_str.format(row, self.ipv_df.loc[topic, "description"]))
+                                if topic in self.ipv_df.index:
+                                    descr = self.ipv_df.loc[topic, "description"]
+                                else:
+                                    descr = ""
+                                self.insertHtml(self.extended_str.format(row, descr))
                             else:
                                 self.append(row)
         self.verticalScrollBar().setValue(0)
