@@ -32,7 +32,8 @@ class OptionPane(qw.QGroupBox):
         # Threshold
         self.threshold = qw.QDoubleSpinBox(self)
         self.threshold.setValue(0.0)
-        self.threshold.setSingleStep(0.05)
+        self.threshold.setDecimals(5)
+        self.threshold.setSingleStep(0.00005)
         self.threshold.setMaximum(1.0)
         self.threshold.valueChanged.connect(self.on_display_option_changed)
         layout.addRow("Порог вероятности", self.threshold)
