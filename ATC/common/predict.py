@@ -63,9 +63,11 @@ class Predict:
                     class_result = class_result[class_result >= threshold]
                     if self.params["normalize"] == "all":
                         class_result = self.normalize_probas(class_result)
+                        class_result = np.round(class_result, n_digits)
                     elif self.params["normalize"] == "some":
                         if sum(class_result) > 1.:
                             class_result = self.normalize_probas(class_result)
+                            class_result = np.round(class_result, n_digits)
                     if len(class_result.index) > 0:
                         result_str = "\\".join(
                             ["{}-{}".format(j, round(class_result.loc[j], n_digits))
@@ -96,9 +98,11 @@ class Predict:
                 result_series = result_series[result_series >= threshold]
                 if self.params["normalize"] == "all":
                     result_series = self.normalize_probas(result_series)
+                    result_series = np.round(result_series, n_digits)
                 elif self.params["normalize"] == "some":
                     if sum(result_series) > 1.:
                         result_series = self.normalize_probas(result_series)
+                        result_series = np.round(result_series, n_digits)
                 if len(result_series.index) == 0:
                     file.write("{}{}".format("EMPTY", os.linesep))
                 else:

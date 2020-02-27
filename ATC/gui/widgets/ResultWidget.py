@@ -33,6 +33,7 @@ class ResultWidget(qw.QTextEdit):
         """
         self.clear()
         n_digits = 5
+        normalize = params["normalize"]
         threshold = round(params["threshold"], n_digits)
         if params["topic_names_allowed"]:
             extension = output.getRubrId()
@@ -51,6 +52,13 @@ class ResultWidget(qw.QTextEdit):
                 else:
                     result = np.round(result, n_digits)
                     result = result[result >= threshold]
+                    if normalize == "all":
+                        result = result / sum(result)
+                        result = np.round(result, n_digits)
+                    elif normalize == "some":
+                        if sum(result) > 1.:
+                            result = result / sum(result)
+                            result = np.round(result, n_digits)
                     if len(result.index) == 0:
                         str_res = empty
                     else:
@@ -67,6 +75,13 @@ class ResultWidget(qw.QTextEdit):
                 else:
                     result = np.round(result, n_digits)
                     result = result[result >= threshold]
+                    if normalize == "all":
+                        result = result / sum(result)
+                        result = np.round(result, n_digits)
+                    elif normalize == "some":
+                        if sum(result) > 1.:
+                            result = result / sum(result)
+                            result = np.round(result, n_digits)
                     if len(result.index) == 0:
                         row = empty
                         self.append(row)

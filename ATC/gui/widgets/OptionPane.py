@@ -3,7 +3,6 @@ from PyQt5.QtCore import pyqtSignal
 
 
 class OptionPane(qw.QGroupBox):
-
     state_changed = pyqtSignal()
     display_option_changed = pyqtSignal(dict)
 
@@ -47,6 +46,12 @@ class OptionPane(qw.QGroupBox):
             self.format.setCurrentIndex(0)
         self.format.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Формат", self.format)
+        # Normalization
+        norm_options = config.get(self.section, "norm_predict").split(", ")
+        self.normalization = qw.QComboBox(self)
+        self.normalization.addItems(norm_options)
+        self.normalization.currentIndexChanged.connect(self.on_display_option_changed)
+        layout.addRow("Нормализация", self.normalization)
         # Code description
         self.description = qw.QCheckBox()
         self.description.setChecked(False)
@@ -58,17 +63,18 @@ class OptionPane(qw.QGroupBox):
         self.display_option_changed.emit(self.options_to_dict())
 
     def options_to_dict(self):
-        res = {}
-        res["rubricator_id"] = self.id_selector.currentText()
-        res["language"] = self.lang_selector.currentText()
-        res["threshold"] = self.threshold.value()
-        res["format"] = self.format.currentText()
-        res["topic_names_allowed"] = self.is_description_allowed()
+        res = {
+            "rubricator_id": self.id_selector.currentText(),
+            "language": self.lang_selector.currentText(),
+            "threshold": self.threshold.value(),
+            "format": self.format.currentText(),
+            "topic_names_allowed": self.is_description_allowed(),
+            "normalize": self.normalization.currentText()
+        }
         return res
 
     def is_description_allowed(self):
         return self.description.isChecked()
-
 
 # if __name__ == '__main__':
 #     from PyQt5.QtWidgets import QApplication
