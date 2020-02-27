@@ -171,6 +171,7 @@ class ATC:
         ids = self.config.get(self.section, "ids").split(", ")
         formats = self.config.get(self.section, "formats").split(", ")
         languages = self.config.get(self.section, "languages").split(", ")
+        norm_options = self.config.get(self.section, "norm_predict").split(", ")
         argparser.add_argument("-i", "--input",
                                help="полный путь к файлу с текстом",
                                required=True)
@@ -195,6 +196,11 @@ class ATC:
                                default=0.0,
                                type=float,
                                required=False)
+        argparser.add_argument("-n", "--normalize_result",
+                               help="нормировать ли предсказание классификатора",
+                               choices=norm_options,
+                               required=False,
+                               default="not")
         # Creating command CLI group
         subparsers = argparser.add_subparsers(help="Commands")
         get_parser = subparsers.add_parser("get",
