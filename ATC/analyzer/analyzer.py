@@ -6,6 +6,7 @@ from analyzer.modules.word_embedding.interface import WordEmbedding
 from analyzer.modules.classifier.interface import Classifier
 from common.predict import Predict
 
+
 ###
 ### TODO: refactor
 ###
@@ -57,16 +58,18 @@ class Analyzer(QThread):
         passed_lang = params["language"]
         rubr_id = params["rubricator_id"]
         passed_format = params["format"]
+        norm_option = params["normalize"]
         self.info_message.emit("Предобработка...")
         if passed_lang == "auto":
             language = self.preprocessor.recognize_language(text=text, default="none")
             if language is None:
                 self.error_occurred.emit("Не удалось распознать язык")
                 return Predict(None,
-                          lang="unknown",
-                          rubr_id=rubr_id,
-                          version=self.version,
-                          text_format=passed_format)
+                               lang="unknown",
+                               rubr_id=rubr_id,
+                               version=self.version,
+                               text_format=passed_format,
+                               normalize=norm_option)
             else:
                 self.info_message.emit("Автоопределенный язык: " + language)
         else:
@@ -105,7 +108,8 @@ class Analyzer(QThread):
                           lang=language,
                           rubr_id=rubr_id,
                           version=self.version,
-                          text_format=text_format)
+                          text_format=text_format,
+                          normalize=norm_option)
         self.complete.emit(predict)
         return predict
 
@@ -132,4 +136,3 @@ class Analyzer(QThread):
         if text.strip() == "":
             return False
         return True
-

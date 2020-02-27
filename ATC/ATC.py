@@ -196,7 +196,7 @@ class ATC:
                                default=0.0,
                                type=float,
                                required=False)
-        argparser.add_argument("-n", "--normalize_result",
+        argparser.add_argument("-n", "--normalize",
                                help="нормировать ли предсказание классификатора",
                                choices=norm_options,
                                required=False,
