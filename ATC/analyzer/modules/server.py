@@ -71,6 +71,10 @@ def validate_request_data(json_data: dict, analyzer) -> str:
                 return f"Invalid threshold value: {val}"
     else:
         json_data["threshold"] = 0.0
+    if "normalize" in json_data:
+        supported = ["not", "some", "all"]
+        if json_data["normalize"] not in supported:
+            return f"Invalid normalization option: {json_data['normalize']}"
     return ""
 
 
@@ -134,7 +138,10 @@ def start_server(port: int, analyzer) -> None:
                 "language": json_data["language"],
                 "format": "auto",
                 "rubricator_id": json_data["rubricator"],
+                "normalize": "not",
             }
+            if "normalize" in json_data:
+                params["normalize"] = json_data["normalize"]
             # print("Starting analyzer")
             result = analyzer.analyze(text, params)
             if not result:
