@@ -39,10 +39,10 @@ class Predict:
         :return: None
         """
         file = open(filename, "w", encoding="cp1251")
-        data_to_save = self.data.copy()
+
         threshold = round(threshold, n_digits)
         # If data does not exist:
-        if data_to_save is None:
+        if self.data is None:
             file.write(f"#\t{self.params['rubr_id']}\t"
                        f"{self.params['language']}\t"
                        f"{threshold}\t{self.params['version']}\t"
@@ -51,6 +51,7 @@ class Predict:
             file.write("{}{}".format("REJECT", os.linesep))
             return 
         # If result has 'multidoc' format
+        data_to_save = self.data.copy()
         if data_to_save.index.name == "id":
             file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}{}".format(
                 "id", "result", "rubricator", "language", "threshold", "version", "normalize", "correct",
