@@ -49,7 +49,12 @@ class OptionPane(qw.QGroupBox):
         # Normalization
         norm_options = config.get(self.section, "norm_predict").split(", ")
         self.normalization = qw.QComboBox(self)
-        self.normalization.addItems(norm_options)
+        self.norm_mapping = {
+            "not": "нет",
+            "some": "да (если сумма > 1)",
+            "all": "да (для всех)",
+        }
+        self.normalization.addItems([self.norm_mapping[i] for i in norm_options])
         self.normalization.currentIndexChanged.connect(self.on_display_option_changed)
         layout.addRow("Нормализация", self.normalization)
         # Code description
@@ -62,14 +67,22 @@ class OptionPane(qw.QGroupBox):
     def on_display_option_changed(self):
         self.display_option_changed.emit(self.options_to_dict())
 
+    def norm_dict_lookup(self, value):
+        for k, v in self.norm_mapping.items():
+            if v == value:
+                return k
+        raise ValueError(value)
+
     def options_to_dict(self):
+        norm_text = self.normalization.currentText()
+        inner_norm_val = self.norm_dict_lookup(norm_text)
         res = {
             "rubricator_id": self.id_selector.currentText(),
             "language": self.lang_selector.currentText(),
             "threshold": self.threshold.value(),
             "format": self.format.currentText(),
             "topic_names_allowed": self.is_description_allowed(),
-            "normalize": self.normalization.currentText()
+            "normalize": inner_norm_val,
         }
         return res
 
