@@ -2,6 +2,7 @@ import socket
 import json
 import time
 
+import numpy as np
 
 TIMEOUT = 10
 BUFSIZE = 16384
@@ -152,6 +153,11 @@ def start_server(port: int, analyzer) -> None:
                 connection.sendall(bytes("Classifier has rejected the text\0", encoding="utf-8"))
                 continue
             proba_series = proba_series[proba_series > json_data["threshold"]]
+            if params["normalize"] == "all":
+                proba_series = proba_series / sum(proba_series)
+            elif params["normalize"] == "some":
+                if sum(proba_series) > 1.:
+                    proba_series = proba_series / sum(proba_series)
             proba_dict = proba_series.to_dict()
             json_response_string = json.dumps(proba_dict)
             # print("Sending response")
