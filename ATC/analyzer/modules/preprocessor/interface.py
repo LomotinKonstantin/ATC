@@ -320,7 +320,7 @@ class Preprocessor(Module):
         else:
             return "UNKNOWN"
 
-    def process(self, text, lang="auto", text_format="auto"):
+    def process(self, text, lang="auto", text_format="auto") -> pd.DataFrame:
         result = pd.DataFrame([""], columns=["text"])
         if not text:
             return None
@@ -339,7 +339,7 @@ class Preprocessor(Module):
             else:
                 checked_format = text_format
         self.debug("Checked format: {}".format(checked_format))
-        result = ""
+        result = pd.DataFrame([""], columns=["text"])
         norm_type = ""
         if language == "ru":
             norm_type = "lemmatization"

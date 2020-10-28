@@ -3,7 +3,7 @@ import sys
 import os.path
 import pandas as pd
 from analyzer.modules.module import Module
-from sklearn.externals import joblib
+import joblib
 from sklearn.multiclass import OneVsRestClassifier
 
 
