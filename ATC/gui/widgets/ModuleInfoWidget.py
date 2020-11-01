@@ -20,6 +20,15 @@ def format_dict(d: dict, sep="\n") -> str:
     return sep.join(f"{k}: {v}" for k, v in d.items())
 
 
+def bold(s: str) -> str:
+    return f"<b>{s}</b>"
+
+
+def wrap_in_cap(text: str, cap="-", length=80) -> str:
+    wrap = cap * length
+    return wrap + "<br>" + text + "<br>" + wrap
+
+
 class ModuleInfoWidget(qw.QDialog):
 
     module_changed = qc.pyqtSignal()
@@ -59,15 +68,22 @@ class ModuleInfoWidget(qw.QDialog):
         # Classifiers tab
         sa = self.createMetadataWidget()
         self.classifier_mdw = sa.widget()
-        classifier_metadata = analyzer.classifier.metadata
-        self.classifier_mdw.setText(self.md_dict_to_html(classifier_metadata))
-        self.tab_widget.addTab(sa, "Классификатор")
+        classifier_metadata = analyzer.classifier.all_metadata
+        self.classifier_mdw.setText(
+            "<br><br>".join(wrap_in_cap(bold(key)) + "<br>" + self.md_dict_to_html(
+                {k: v for k, v in md.items() if k != "settings"}
+            ) for key, md in classifier_metadata.items())
+        )
+        self.tab_widget.addTab(sa, "Классификаторы")
         # Experiment info tab
-        exp_metadata = analyzer.classifier.experiment_info
+        exp_metadata = classifier_metadata
         sa = self.createMetadataWidget()
         self.exp_mdw = sa.widget()
         if exp_metadata is not None:
-            self.exp_mdw.setText(self.md_dict_to_html(exp_metadata))
+            self.exp_mdw.setText(
+                "<br><br>".join(wrap_in_cap(bold(key)) + "<br>" +
+                                self.md_dict_to_html(md["settings"])
+                for key, md in exp_metadata.items()))
         else:
             self.exp_mdw.setText("Нет доступных метаданных")
         self.tab_widget.addTab(sa, "Эксперимент")
@@ -106,7 +122,7 @@ class ModuleInfoWidget(qw.QDialog):
         metadata_widget.setStyleSheet("QLabel { background-color : white; }")
         return sa
 
-    def md_dict_to_html(self, metadata: OrderedDict) -> str:
+    def md_dict_to_html(self, metadata: {OrderedDict, dict}) -> str:
         if metadata:
             metastring = ""
             for key, value in metadata.items():

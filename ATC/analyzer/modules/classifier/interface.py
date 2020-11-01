@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 import os.path
+from pathlib import Path
 import pandas as pd
 from analyzer.modules.module import Module
 import joblib
@@ -14,29 +15,40 @@ def read_model_and_md(path: str) -> tuple:
         try:
             md = joblib.load(f)
         except EOFError:
-            pass
+            print("\nERROR: Old classifier models are not supported anymore!\n")
+            exit(0)
     return model, md
+
+
+def read_md(path: str) -> tuple:
+    assert os.path.exists(path)
+    with open(path, "rb") as f:
+        # Пропускаем модель
+        joblib.load(f)
+        md = None
+        try:
+            md = joblib.load(f)
+        except EOFError:
+            print("\nERROR: Old classifier models are not supported anymore!\n")
+            exit(0)
+    return md
 
 
 class Classifier(Module):
     def __init__(self, rubr_id='SUBJ', lang='ru'):
         self.clf = None
-        self.clf_metadata = None
-        self.experiment_info = None
         super().__init__("")
         self.rubr_id = rubr_id
         self.lang = lang
         self.config = self.loadConfig()
         self.loadClf()
+        this_file = os.path.dirname(__file__)
+        sect = "Settings"
+        self.all_metadata = {
+            opt: read_md(os.path.join(this_file, self.config.get(sect, opt)))
+            for opt in self.config.options(sect)
+        }
         # self.DEBUG = True
-        # Сейчас загружена метадата модели, можем выводить ее пользователю
-        if self.clf_metadata is not None:
-            for k, v in self.clf_metadata.items():
-                if isinstance(v, dict):
-                    continue
-                self.metadata[k] = v
-            self.experiment_info = self.clf_metadata["settings"]
-
 
     # Если lang == None, использует последний установленный язык.
     # Иначе обновляет текущий язык.
@@ -80,7 +92,7 @@ class Classifier(Module):
     
     def loadClf(self):
         file = os.path.join(os.path.dirname(__file__),
-                            self.config.get('Settings', self.rubr_id+'_'+self.lang))
+                            self.config.get('Settings', self.rubr_id + '_' + self.lang))
         if os.path.exists(file):
             self.clf, self.clf_metadata = read_model_and_md(file)
         else:
