@@ -17,6 +17,11 @@ from analyzer.modules.server import start_server
 
 analyzer_global = None
 
+# Валидация версии (>= 3.7)
+if not (sys.version_info.major == 3 and sys.version_info.minor >= 7):
+    raise RuntimeError(f"Required Python version: >= 3.7, this one is {sys.version}")
+#
+
 
 def unescaped_str(arg_str):
     return codecs.decode(str(arg_str), errors='backslashreplace')
