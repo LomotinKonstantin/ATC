@@ -63,10 +63,13 @@ class ModuleInfoWidget(qw.QDialog):
         self.classifier_mdw.setText(self.md_dict_to_html(classifier_metadata))
         self.tab_widget.addTab(sa, "Классификатор")
         # Experiment info tab
+        exp_metadata = analyzer.classifier.experiment_info
         sa = self.createMetadataWidget()
         self.exp_mdw = sa.widget()
-        exp_metadata = analyzer.classifier.experiment_info
-        self.exp_mdw.setText(self.md_dict_to_html(exp_metadata))
+        if exp_metadata is not None:
+            self.exp_mdw.setText(self.md_dict_to_html(exp_metadata))
+        else:
+            self.exp_mdw.setText("Нет доступных метаданных")
         self.tab_widget.addTab(sa, "Эксперимент")
         # Environment tab
         self.module_info = get_env()

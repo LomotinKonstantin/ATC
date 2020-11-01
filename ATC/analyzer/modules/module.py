@@ -18,7 +18,7 @@ class Module(QObject):
     def __init__(self, filename="metadata.json"):
         super().__init__()
         self.metadata = self.loadMetadata(filename)
-        self.version = str(self.metadata["Версия"])
+        self.version = str(self.metadata.get("Версия", ""))
         self.DEBUG = False
 
     def loadMetadata(self, filename):
@@ -26,18 +26,17 @@ class Module(QObject):
             json_string = open(filename, encoding="utf-8").read()
             metadata = json.loads(json_string, object_pairs_hook=OrderedDict)
         except IOError:
-            self.error_occurred.emit("Error loading metadata")
             metadata = {}
         return metadata
 
     def loadConfig(self, base_path):
-        configParcer = ConfigParser()
+        config_parser = ConfigParser()
         file = os.path.join(os.path.dirname(base_path), 'config.ini')
         if os.path.exists(file):
-            configParcer.read(file)
+            config_parser.read(file)
         else:
             self.error_occurred.emit("Can't find the configuration file.")
-        return configParcer
+        return config_parser
 
     def debug(self, message):
         if self.DEBUG:

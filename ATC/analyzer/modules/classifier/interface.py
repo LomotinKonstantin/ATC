@@ -23,7 +23,7 @@ class Classifier(Module):
         self.clf = None
         self.clf_metadata = None
         self.experiment_info = None
-        super().__init__(os.path.dirname(__file__) + "\\metadata.json")
+        super().__init__("")
         self.rubr_id = rubr_id
         self.lang = lang
         self.config = self.loadConfig()
