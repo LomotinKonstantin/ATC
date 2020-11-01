@@ -3,10 +3,6 @@ import PyQt5.QtCore as qc
 
 from collections import OrderedDict
 
-###
-### TODO: change the widget totally according to the new functionality
-###
-
 
 def get_env() -> dict:
     """
@@ -18,6 +14,10 @@ def get_env() -> dict:
         return {i.key: i.version for i in working_set}
     except ImportError:
         return {}
+
+
+def format_dict(d: dict, sep="\n") -> str:
+    return sep.join(f"{k}: {v}" for k, v in d.items())
 
 
 class ModuleInfoWidget(qw.QDialog):
@@ -45,20 +45,29 @@ class ModuleInfoWidget(qw.QDialog):
         self.copy_button.setHidden(True)
         layout.addWidget(self.copy_button, 3, 0)
         # Preprocessors tab
-        self.preprocessor_mdw = self.createMetadataWidget()
+        sa = self.createMetadataWidget()
+        self.preprocessor_mdw = sa.widget()
         preprocessor_metadata = analyzer.preprocessor.metadata
         self.preprocessor_mdw.setText(self.md_dict_to_html(preprocessor_metadata))
-        self.tab_widget.addTab(self.preprocessor_mdw, "Предобработчик")
+        self.tab_widget.addTab(sa, "Предобработчик")
         # Vectorizers tab
-        self.vectorizer_mdw = self.createMetadataWidget()
+        sa = self.createMetadataWidget()
+        self.vectorizer_mdw = sa.widget()
         vectorizer_metadata = analyzer.vectorizer.metadata
         self.vectorizer_mdw.setText(self.md_dict_to_html(vectorizer_metadata))
-        self.tab_widget.addTab(self.vectorizer_mdw, "Векторизатор")
+        self.tab_widget.addTab(sa, "Векторизатор")
         # Classifiers tab
-        self.classifier_mdw = self.createMetadataWidget()
+        sa = self.createMetadataWidget()
+        self.classifier_mdw = sa.widget()
         classifier_metadata = analyzer.classifier.metadata
         self.classifier_mdw.setText(self.md_dict_to_html(classifier_metadata))
-        self.tab_widget.addTab(self.classifier_mdw, "Классификатор")
+        self.tab_widget.addTab(sa, "Классификатор")
+        # Experiment info tab
+        sa = self.createMetadataWidget()
+        self.exp_mdw = sa.widget()
+        exp_metadata = analyzer.classifier.experiment_info
+        self.exp_mdw.setText(self.md_dict_to_html(exp_metadata))
+        self.tab_widget.addTab(sa, "Эксперимент")
         # Environment tab
         self.module_info = get_env()
         if not self.module_info:
@@ -83,17 +92,25 @@ class ModuleInfoWidget(qw.QDialog):
         # Initializing metadata widget
         # self.on_tab_clicked(0)
 
-    def createMetadataWidget(self) -> qw.QLabel:
+    def createMetadataWidget(self) -> qw.QScrollArea:
         metadata_widget = qw.QLabel()
+        sa = qw.QScrollArea(self)
+        sa.setWidget(metadata_widget)
+        sa.setWidgetResizable(True)
+        sa.setBaseSize(self.baseSize())
         metadata_widget.setWordWrap(True)
         metadata_widget.setAlignment(qc.Qt.AlignTop)
-        return metadata_widget
+        metadata_widget.setStyleSheet("QLabel { background-color : white; }")
+        return sa
 
     def md_dict_to_html(self, metadata: OrderedDict) -> str:
         if metadata:
             metastring = ""
             for key, value in metadata.items():
-                metastring += "<b>{}</b>:  {}<br>".format(key, value)
+                if isinstance(value, dict):
+                    metastring += f"<b>{key}</b>:<br>" + format_dict(value, sep="<br>  ") + "<br>" * 2
+                else:
+                    metastring += f"<b>{key}</b>:  {value}<br>"
         else:
             metastring = "<b>Информация о модуле недоступна!</b>"
         return metastring
