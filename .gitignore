@@ -7,3 +7,4 @@ test/
 *.plk
 *.model
 *.pyc
+*.npy
