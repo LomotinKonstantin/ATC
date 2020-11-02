@@ -1,6 +1,3 @@
-###
-### TODO: implement parent class
-###
 import os
 import json
 from collections import OrderedDict
@@ -17,11 +14,12 @@ class Module(QObject):
     # Use self.metadata field to access OrderedDict with metadata
     def __init__(self, filename="metadata.json"):
         super().__init__()
-        self.metadata = self.loadMetadata(filename)
+        self.metadata = self.load_metadata(filename)
         self.version = str(self.metadata.get("Версия", ""))
         self.DEBUG = False
 
-    def loadMetadata(self, filename):
+    @staticmethod
+    def load_metadata(filename):
         try:
             json_string = open(filename, encoding="utf-8").read()
             metadata = json.loads(json_string, object_pairs_hook=OrderedDict)
