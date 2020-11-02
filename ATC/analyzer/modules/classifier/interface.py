@@ -14,7 +14,7 @@ def read_model_and_md(path: str) -> tuple:
             model = joblib.load(f)
             md = None
             md = joblib.load(f)
-        except EOFError:
+        except (EOFError, ModuleNotFoundError):
             print("\nERROR: Old classifier models are not supported anymore!\n")
             exit(0)
     return model, md
