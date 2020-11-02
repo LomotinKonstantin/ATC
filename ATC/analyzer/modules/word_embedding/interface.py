@@ -19,7 +19,7 @@ class WordEmbedding(Module):
     # before creating vectors. If it does not, set new model language and changes model.
     # Language can be set in constructor, vectorize(self, text, lang) function
     # or with setter.
-    def vectorize(self, text, lang=None):
+    def vectorize(self, text, convolution: str, lang=None):
         if lang:
             if self.lang != lang:
                 self.lang = lang
@@ -27,16 +27,16 @@ class WordEmbedding(Module):
         if self.model:
             tokens = text.split()
             features = [0]*self.length
-            if self.config.get('Settings', 'convolution') == 'sum':
+            if convolution == 'sum':
                 for t in tokens:
                     if t in self.model:
                         features += self.model[t]
-            elif self.config.get('Settings', 'convolution') in ['max', 'mean']:
+            elif convolution in ['max', 'mean']:
                 for t in tokens:
                     if t in self.model:
                         features = np.vstack((features, self.model[t]))
                 if features.shape[0] > 1:
-                    if self.config.get('Settings', 'convolution') == 'max':
+                    if convolution == 'max':
                         features = features.max(axis=0)
                     else:
                         features = features.mean(axis=0)

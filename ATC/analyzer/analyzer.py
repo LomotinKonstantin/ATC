@@ -89,9 +89,11 @@ class Analyzer(QThread):
         vector_list = []
         result_list = []
         self.info_message.emit("Векторизация и классификация...")
+        pooling = self.classifier.all_metadata[f"{rubr_id.lower()}_{language.lower()}"]["pooling"]
         for n, i in enumerate(processed_text.index):
             vector_i = self.vectorizer.vectorize(
                 processed_text.loc[i, "text"],
+                pooling,
                 language
             )
             # print(processed_text.loc[i, "text"], vector_i)
