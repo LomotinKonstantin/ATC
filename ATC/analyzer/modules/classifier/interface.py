@@ -10,9 +10,9 @@ from sklearn.multiclass import OneVsRestClassifier
 def read_model_and_md(path: str) -> tuple:
     assert os.path.exists(path)
     with open(path, "rb") as f:
-        model = joblib.load(f)
-        md = None
         try:
+            model = joblib.load(f)
+            md = None
             md = joblib.load(f)
         except EOFError:
             print("\nERROR: Old classifier models are not supported anymore!\n")
@@ -23,12 +23,12 @@ def read_model_and_md(path: str) -> tuple:
 def read_md(path: str) -> tuple:
     assert os.path.exists(path)
     with open(path, "rb") as f:
-        # Пропускаем модель
-        joblib.load(f)
-        md = None
         try:
+            # Пропускаем модель
+            joblib.load(f)
+            md = None
             md = joblib.load(f)
-        except EOFError:
+        except (EOFError, ModuleNotFoundError):
             print("\nERROR: Old classifier models are not supported anymore!\n")
             exit(0)
     return md
