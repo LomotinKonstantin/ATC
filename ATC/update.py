@@ -20,13 +20,17 @@ def push_path(p: str):
 
 
 def to_version() -> {str, None}:
+    msg = "Usage:\n\nUpdate to the latest version:\n$ python update.py\n"
+    msg += "\nUpdate to the specific version:\n$ python update.py v1.7.0\n"
     if len(sys.argv) > 2:
-        msg = "Usage:\n$ python update.py [version]\nExamples:\n$ python update.py\n"
-        msg += "$ python update.py v1.7.0"
         print(msg)
         exit(0)
     if len(sys.argv) == 2:
-        return sys.argv[1]
+        arg = sys.argv[1]
+        if arg in ("-h", "--help", "help"):
+            print(msg)
+            exit()
+        return arg
     return None
 
 
