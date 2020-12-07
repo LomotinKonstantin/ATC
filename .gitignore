@@ -7,3 +7,4 @@ test/
 *.model
 *.pyc
 *.npy
+*.ini
