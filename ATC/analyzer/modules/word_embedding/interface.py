@@ -62,10 +62,10 @@ class WordEmbedding(Module):
             self.error_occurred.emit("Can't find the configuration file.")
         return config_parser
 
-    def rejectThreshold(self):
-        return self.config.get("Settings", "reject_threshold")
+    def rejectThreshold(self, pooling: str):
+        return float(self.config.get("Settings", f"reject_threshold_{pooling}"))
     
-    # Language setter. Reloads model immediately.
+    # Language setter. Reloads the model immediately.
     def setLang(self, lang):
         self.lang = lang
         self.loadModel()

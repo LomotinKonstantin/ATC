@@ -8,7 +8,8 @@ from sklearn.multiclass import OneVsRestClassifier
 
 
 def read_model_and_md(path: str) -> tuple:
-    assert os.path.exists(path)
+    if not os.path.exists(path):
+        print(f"Model {path} does not exist")
     with open(path, "rb") as f:
         try:
             model = joblib.load(f)
@@ -20,8 +21,9 @@ def read_model_and_md(path: str) -> tuple:
     return model, md
 
 
-def read_md(path: str) -> tuple:
-    assert os.path.exists(path)
+def read_metadata(path: str) -> tuple:
+    if not os.path.exists(path):
+        print(f"Model {path} does not exist")
     with open(path, "rb") as f:
         try:
             # Пропускаем модель
@@ -35,6 +37,9 @@ def read_md(path: str) -> tuple:
 
 
 class Classifier(Module):
+
+    all_metadata = None
+
     def __init__(self, rubr_id='SUBJ', lang='ru'):
         self.clf = None
         super().__init__("")
@@ -44,11 +49,12 @@ class Classifier(Module):
         self.loadClf()
         this_file = os.path.dirname(__file__)
         sect = "Settings"
-        self.all_metadata = {
-            opt: read_md(os.path.join(this_file, self.config.get(sect, opt)))
-            for opt in self.config.options(sect)
-        }
-        # self.DEBUG = True
+        if self.all_metadata is None:
+            self.all_metadata = {
+                opt: read_metadata(os.path.join(this_file, self.config.get(sect, opt)))
+                for opt in self.config.options(sect)
+            }
+        self.DEBUG = False
 
     # Если lang == None, использует последний установленный язык.
     # Иначе обновляет текущий язык.
@@ -105,4 +111,13 @@ class Classifier(Module):
         self.loadClf()
         
     def getLang(self):
-        return self.lang    
+        return self.lang
+
+    def pooling_type(self, rubr_id: str, lang: str) -> str:
+        """
+        Тип пулинга матрицы текста, использовавшийся при обучении модели.
+        Одно из mean, max, sum
+        :return:
+        """
+        settings = self.all_metadata[f"{rubr_id}_{lang}"]
+        return settings["pooling"]

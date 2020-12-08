@@ -27,7 +27,6 @@ class Analyzer(QThread):
         self.vectorizer = None
         self.classifier = None
         self.version = ""
-        self.eps = 0
         self.last_language = None
         self.load_modules()
         self.text = None
@@ -47,7 +46,6 @@ class Analyzer(QThread):
         self.vectorizer.error_occurred.connect(self.error_occurred)
         self.classifier.error_occurred.connect(self.error_occurred)
 
-        self.eps = float(self.vectorizer.rejectThreshold())
         version = ""
         version += "p" + self.preprocessor.version
         version += "v" + self.vectorizer.version
@@ -89,15 +87,16 @@ class Analyzer(QThread):
         vector_list = []
         result_list = []
         self.info_message.emit("Векторизация и классификация...")
-        pooling = self.classifier.all_metadata[f"{rubr_id.lower()}_{language.lower()}"]["pooling"]
+        pooling = self.classifier.pooling_type(rubr_id=rubr_id.lower(),
+                                               lang=language.lower())
+        reject_threshold = self.vectorizer.rejectThreshold(pooling)
         for n, i in enumerate(processed_text.index):
             vector_i = self.vectorizer.vectorize(
-                processed_text.loc[i, "text"],
-                pooling,
-                language
+                text=processed_text.loc[i, "text"],
+                convolution=pooling,
+                lang=language
             )
-            # print(processed_text.loc[i, "text"], vector_i)
-            if all(abs(i) < self.eps for i in vector_i):
+            if all(abs(i) < reject_threshold for i in vector_i):
                 vector_i = None
                 result_i = None
             else:
