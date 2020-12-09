@@ -1,5 +1,4 @@
 from configparser import ConfigParser
-import os.path
 from pathlib import Path
 import pandas as pd
 from analyzer.modules.module import Module
@@ -7,8 +6,8 @@ import joblib
 from sklearn.multiclass import OneVsRestClassifier
 
 
-def read_model_and_md(path: str) -> tuple:
-    if not os.path.exists(path):
+def read_model_and_md(path: Path) -> tuple:
+    if not path.exists():
         print(f"Model {path} does not exist")
     with open(path, "rb") as f:
         try:
@@ -21,18 +20,8 @@ def read_model_and_md(path: str) -> tuple:
     return model, md
 
 
-def read_metadata(path: str) -> tuple:
-    if not os.path.exists(path):
-        print(f"Model {path} does not exist")
-    with open(path, "rb") as f:
-        try:
-            # Пропускаем модель
-            joblib.load(f)
-            md = None
-            md = joblib.load(f)
-        except (EOFError, ModuleNotFoundError):
-            print("\nERROR: Old classifier models are not supported anymore!\n")
-            exit(0)
+def read_metadata(path: Path) -> dict:
+    _, md = read_model_and_md(path)
     return md
 
 
@@ -46,15 +35,32 @@ class Classifier(Module):
         self.rubr_id = rubr_id
         self.lang = lang
         self.config = self.loadConfig()
-        self.loadClf()
-        this_file = os.path.dirname(__file__)
-        sect = "Settings"
+        # При первой загрузке будет происходить инициализация
         if self.all_metadata is None:
-            self.all_metadata = {
-                opt: read_metadata(os.path.join(this_file, self.config.get(sect, opt)))
-                for opt in self.config.options(sect)
-            }
-        self.DEBUG = False
+            self._init_all_metadata(self.config)
+        self.clf_metadata = None
+        self.loadClf()
+
+    def _init_all_metadata(self, config: ConfigParser):
+        self.all_metadata = {}
+        for section in config.sections():
+            if not section.startswith("Rubr"):
+                continue
+            code = config.get(section, "code", fallback="")
+            if not code:
+                continue
+            for model_lang in ("ru", "en"):
+                model_option = f"{model_lang}_model"
+                if model_option not in config.options(section):
+                    continue
+                model_file = config.get(section, model_option, fallback="")
+                if not model_file:
+                    continue
+                key = f"{code}_{model_lang}".lower()
+                model_file = Path(__file__).parent / model_file
+                self.all_metadata[key] = read_metadata(model_file)
+                self.all_metadata[key]["model_fname"] = str(model_file.absolute())
+                self.all_metadata[key]["display_name"] = config.get(section, "name", fallback=code)
 
     # Если lang == None, использует последний установленный язык.
     # Иначе обновляет текущий язык.
@@ -89,17 +95,18 @@ class Classifier(Module):
 
     def loadConfig(self): 
         config_parser = ConfigParser()
-        file = os.path.dirname(__file__) + '/config.ini'
-        if os.path.exists(file):
-            config_parser.read(file)
+        file = Path(__file__).parent / 'config.ini'
+        if file.exists():
+            config_parser.read(str(file))
         else:
             self.error_occurred.emit("Can't find the configuration file")
         return config_parser
     
     def loadClf(self):
-        file = os.path.join(os.path.dirname(__file__),
-                            self.config.get('Settings', self.rubr_id + '_' + self.lang))
-        if os.path.exists(file):
+        assert self.all_metadata is not None
+        key = f"{self.rubr_id}_{self.lang}".lower()
+        file = Path(self.all_metadata[key]["model_fname"])
+        if file.exists():
             self.clf, self.clf_metadata = read_model_and_md(file)
         else:
             self.error_occurred.emit("The classifier does not exist.")
@@ -121,3 +128,6 @@ class Classifier(Module):
         """
         settings = self.all_metadata[f"{rubr_id}_{lang}"]
         return settings["pooling"]
+
+    def is_model_exist(self, rubr_id: str, lang: str) -> bool:
+        return f"{rubr_id}_{lang}".lower() in self.all_metadata

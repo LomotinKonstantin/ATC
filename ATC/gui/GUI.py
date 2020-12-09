@@ -28,7 +28,7 @@ class GUI(qc.QObject):
         self.analyzer = analyzer
         self.config = config
         # Initializing main window
-        self.main_window = MainWindow(config=config)
+        self.main_window = MainWindow(config=config, analyzer=analyzer)
         self.main_window.setWindowTitle("ATC: Automatic Text Classifier v{}".format(
                                         config.get("App", "version")))
         self.main_window.setWindowIcon(QIcon(":/icon.ico"))

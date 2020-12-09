@@ -72,6 +72,16 @@ class Analyzer(QThread):
                 self.info_message.emit("Автоопределенный язык: " + language)
         else:
             language = passed_lang
+        if not self.classifier.is_model_exist(rubr_id=rubr_id, lang=language):
+            self.error_occurred.emit(
+                f"Файл модели для языка \"{language}\" и рубрикатора \"{rubr_id}\" не найден"
+            )
+            return Predict(None,
+                           lang=language,
+                           rubr_id=rubr_id,
+                           version=self.version,
+                           text_format=passed_format,
+                           normalize=norm_option)
         if passed_format == "auto":
             text_format = self.preprocessor.recognize_format(text)
             self.info_message.emit("Автоопределенный формат: {}".format(

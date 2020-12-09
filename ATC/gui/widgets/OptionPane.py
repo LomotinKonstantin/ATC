@@ -8,14 +8,18 @@ class OptionPane(qw.QGroupBox):
 
     section = "AvailableOptions"
 
-    def __init__(self, config, parent=None):
+    def __init__(self, config, clf_metadata, parent=None):
         super().__init__("Параметры", parent=parent)
         # Setting up form layout for parameter specifying
         layout = qw.QFormLayout()
         self.setLayout(layout)
+        self.clf_md = clf_metadata
         # Rubricator id
+        # Имена рубрикаторов грузятся классификатором
+        ids = {"_".join(model.split("_")[:-1]) for model in clf_metadata}
+        ids = sorted(list(ids))
         self.id_selector = qw.QComboBox(self)
-        self.id_selector.addItems(config.get(self.section, "ids").split(", "))
+        self.id_selector.addItems(ids)
         self.id_selector.currentIndexChanged.connect(self.state_changed)
         layout.addRow("Идентификатор рубрикатора", self.id_selector)
         # Language

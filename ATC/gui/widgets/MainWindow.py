@@ -11,6 +11,7 @@ from gui.widgets.ResultWidget import ResultWidget
 from gui.widgets.ToolBar import ToolBarWidget
 from gui.widgets.ConsoleWidget import ConsoleWidget
 from gui.widgets.ModuleInfoWidget import ModuleInfoWidget
+from analyzer.analyzer import Analyzer
 
 
 class MainWindow(qw.QMainWindow):
@@ -20,7 +21,7 @@ class MainWindow(qw.QMainWindow):
     export_request = pyqtSignal()
     app_info_window_request = pyqtSignal()
 
-    def __init__(self, config: ConfigParser, parent=None):
+    def __init__(self, config: ConfigParser, analyzer: Analyzer, parent=None):
         super(MainWindow, self).__init__(parent)
         self.config = config
         central_widget = qw.QWidget(self)
@@ -34,7 +35,10 @@ class MainWindow(qw.QMainWindow):
         self.result_widget = ResultWidget(parent=central_widget)
         layout.addWidget(self.result_widget, 3, 0, 3, 6)
         # Setting the side option bar
-        self.opt_bar = OptionPane(config, parent=central_widget)
+        clf_metadata = analyzer.classifier.all_metadata
+        assert clf_metadata is not None
+        self.opt_bar = OptionPane(config, parent=central_widget,
+                                  clf_metadata=clf_metadata)
         self.opt_bar.display_option_changed.connect(self.result_widget.update_output)
         layout.addWidget(self.opt_bar, 0, 6, 4, 2)
         # Setting the text widget

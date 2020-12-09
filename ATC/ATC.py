@@ -146,7 +146,7 @@ class ATC:
         # Selecting mode
         if len(sys.argv) > 1:
             self.parse_args()
-            # self.analyzer.error_occurred.connect(self.print_error)
+            self.analyzer.error_occurred.connect(self.print_error)
             filename = self.parameters["input"]
             if not os.path.exists(filename):
                 self.print_error("File {} does not exist".format(filename))
@@ -173,7 +173,6 @@ class ATC:
         description = "Automated Text Classifier for VINITI. Чтобы запустить графический сеанс, " \
                       "запустите программу без аргументов"
         argparser = ArgumentParser(prog="ATC", description=description)
-        ids = self.config.get(self.section, "ids").split(", ")
         formats = self.config.get(self.section, "formats").split(", ")
         languages = self.config.get(self.section, "languages").split(", ")
         norm_options = self.config.get(self.section, "norm_predict").split(", ")
@@ -187,7 +186,6 @@ class ATC:
         argparser.add_argument("-id",
                                "--rubricator-id",
                                help="идентификатор рубрикатора",
-                               choices=ids,
                                required=True)
         argparser.add_argument("-f", "--format", help="формат входного файла",
                                choices=formats,
@@ -206,24 +204,7 @@ class ATC:
                                choices=norm_options,
                                required=False,
                                default="not")
-        # Creating command CLI group
         subparsers = argparser.add_subparsers(help="Commands")
-        get_parser = subparsers.add_parser("get",
-                                           help="Получить значение параметра")
-        get_parser.add_argument("type", help="параметр",
-                                choices=["plk"],
-                                action=PrintModels)
-        set_parser = subparsers.add_parser("set", help="установить значение параметра")
-        set_subs = set_parser.add_subparsers(help="Setters")
-        plk_setter = set_subs.add_parser("plk")
-        plk_setter.add_argument("file",
-                                help="имя файла модели классификатора (*.plk)",
-                                action=SetModels)
-        restore_parser = subparsers.add_parser("restore", help="восстановить файл конфигурации")
-        restore_parser.add_argument("target",
-                                    help="какой файл конфигурации восстановить",
-                                    choices=["classifier", "we"],
-                                    action=RestoreAction)
         # Creating server command
         server_parser = subparsers.add_parser("server", help="запустить режим сервера")
         server_parser.add_argument("port", help="номер порта, на котором запустить сервер",
@@ -232,10 +213,12 @@ class ATC:
 
         self.parameters = vars(argparser.parse_args())
 
-    def print_error(self, error_msg: str):
+    @staticmethod
+    def print_error(error_msg: str):
         print(error_msg, file=sys.stderr)
 
-    def loadConfig(self):
+    @staticmethod
+    def loadConfig():
         parser = ConfigParser()
         parser.read([os.path.join(os.path.dirname(__file__), "config.ini")], encoding="utf-8")
         return parser

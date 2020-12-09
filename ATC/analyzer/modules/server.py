@@ -46,10 +46,13 @@ def validate_request_data(json_data: dict, analyzer) -> str:
             return "Missing '{}' field".format(k)
     if not analyzer.isTextValid(json_data["body"]):
         return "Invalid text"
-    if json_data["rubricator"] not in ["ipv", "subj", "grnti"]:
-        return "Invalid rubricator: {}".format(json_data["rubricator"])
     if json_data["language"] not in ["en", "ru", "auto"]:
         return "Invalid language: {}".format(json_data["language"])
+    if json_data["language"] != "auto":
+        lang = json_data["language"]
+        rubr_id = json_data["rubricator"]
+        if analyzer.classifier.is_model_exist(rubr_id=rubr_id, lang=lang):
+            return "Invalid rubricator: {}".format(json_data["rubricator"])
     # Validating optional fields
     for k in ["id", "title"]:
         if k in json_data and not json_data[k]:
@@ -145,13 +148,23 @@ def start_server(port: int, analyzer) -> None:
                 params["normalize"] = json_data["normalize"]
             # print("Starting analyzer")
             result = analyzer.analyze(text, params)
-            if not result:
+            rubr_id = result.getRubrId()
+            lang = result.getLanguage()
+            # Пост-фактум проверка. Криво, но тут уж как есть.
+            if not analyzer.classifier.is_model_exist(rubr_id=rubr_id, lang=lang):
+                connection.sendall(bytes(
+                    f"Model for '{rubr_id}' rubricator and '{lang}' language is not found",
+                    encoding="utf-8"
+                ))
+                continue
+            if result is None:
                 connection.sendall(bytes("Unknown error occurred\0", encoding="utf-8"))
                 continue
-            proba_series = result.getPredict().loc[0, "result"]
-            if proba_series is None:
+            predict = result.getPredict()
+            if predict is None:
                 connection.sendall(bytes("Classifier has rejected the text\0", encoding="utf-8"))
                 continue
+            proba_series = predict.loc[0, "result"]
             proba_series = proba_series[proba_series > json_data["threshold"]]
             if params["normalize"] == "all":
                 proba_series = proba_series / sum(proba_series)
