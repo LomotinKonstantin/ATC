@@ -7,3 +7,5 @@ test/
 *.model
 *.pyc
 *.npy
+*/analyzer/modules/classifier/config.ini
+*/analyzer/modules/word_embedding/config.ini
