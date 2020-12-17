@@ -39,6 +39,7 @@ class ResultWidget(qw.QTextEdit):
             extension = output.getRubrId()
         else:
             extension = ""
+        extension = extension.lower()
         data = output.getPredict()
         self.last_result = output
         self.current_output = ""
@@ -89,13 +90,13 @@ class ResultWidget(qw.QTextEdit):
                         for topic, proba in result.iteritems():
                             row = "{}\t{}\n".format(topic, proba)
                             self.current_output += row
-                            if extension == "SUBJ":
+                            if extension == "subj":
                                 if topic in self.subj_df.index:
                                     descr = self.subj_df.loc[topic, "description"]
                                 else:
                                     descr = ""
                                 self.insertHtml(self.extended_str.format(row, descr))
-                            elif extension == "IPV":
+                            elif extension == "ipv":
                                 if topic in self.ipv_df.index:
                                     descr = self.ipv_df.loc[topic, "description"]
                                 else:
