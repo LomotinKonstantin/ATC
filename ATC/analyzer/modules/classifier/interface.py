@@ -130,4 +130,12 @@ class Classifier(Module):
         return settings["pooling"]
 
     def is_model_exist(self, rubr_id: str, lang: str) -> bool:
-        return f"{rubr_id}_{lang}".lower() in self.all_metadata
+        if lang is not None and lang != "auto":
+            ret = f"{rubr_id}_{lang}".lower() in self.all_metadata
+        else:
+            ret = rubr_id.lower() in self.installed_rubricators()
+        return ret
+
+    def installed_rubricators(self) -> list:
+        ids = ("_".join(k.split("_")[:-1]) for k in self.all_metadata)
+        return list(set(ids))

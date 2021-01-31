@@ -1,5 +1,7 @@
 import socket
 import json
+from pathlib import Path
+import select
 import time
 
 import numpy as np
@@ -32,6 +34,13 @@ def null_terminate(err_gen_func):
 #     threshold: 0 < число < 1
 # }
 
+def nonblocking_accept(socket, timeout: int) -> tuple or None:
+    ready_to_read, _, _ = select.select([socket], [], [], timeout)
+    for s in ready_to_read:
+        if s is socket:
+            return socket.accept()
+    return None
+
 
 @null_terminate
 def validate_request_data(json_data: dict, analyzer) -> str:
@@ -48,11 +57,12 @@ def validate_request_data(json_data: dict, analyzer) -> str:
         return "Invalid text"
     if json_data["language"] not in ["en", "ru", "auto"]:
         return "Invalid language: {}".format(json_data["language"])
-    if json_data["language"] != "auto":
-        lang = json_data["language"]
-        rubr_id = json_data["rubricator"]
-        if analyzer.classifier.is_model_exist(rubr_id=rubr_id, lang=lang):
-            return "Invalid rubricator: {}".format(json_data["rubricator"])
+    lang = json_data["language"]
+    rubr_id = json_data["rubricator"]
+    if not analyzer.classifier.is_model_exist(rubr_id=rubr_id, lang=lang):
+        installed = analyzer.classifier.installed_rubricators()
+        curr_rubr = json_data["rubricator"]
+        return f"Invalid rubricator: {curr_rubr}. Available options: {', '.join(installed)}"
     # Validating optional fields
     for k in ["id", "title"]:
         if k in json_data and not json_data[k]:
@@ -83,23 +93,34 @@ def validate_request_data(json_data: dict, analyzer) -> str:
 
 
 def start_server(port: int, analyzer) -> None:
+    stop_file = Path(__file__).parent / ".." / ".." / "stop_server.txt"
+    if stop_file.exists():
+        print("Cannot start server: signal file 'ATC/stop_server.txt' exists")
+        exit()
     server_address = ('localhost', port)
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind(server_address)
         server_socket.listen(10)
         print("Server is running at port", port)
-        print("Press ctrl+c to terminate")
+        print("Press Ctrl+C or create the signal file 'ATC/stop_server.txt' to terminate")
     except OSError as e:
         print("Failed to launch server at port {}. OS error occurred: {}".format(port,
                                                                                  e.strerror))
         return
-    connection, address = server_socket.accept()
-    # 10-second timeout
-    # connection.settimeout(TIMEOUT)
-    print("Accepted connection from {}".format(address))
+    connection = None
     while True:
         try:
+            if stop_file.exists():
+                print("Signal file 'ATC/stop_server.txt' exists. Terminating")
+                exit()
+            if connection is None:
+                accept_ret = nonblocking_accept(server_socket, 1)
+                if accept_ret is None:
+                    continue
+                connection, address = accept_ret
+                ip_addr, port = address
+                print(f"Accepted connection from {ip_addr}:{port}")
             continue_flag = False
             # Receiving data
             msg = connection.recv(BUFSIZE)
@@ -108,9 +129,8 @@ def start_server(port: int, analyzer) -> None:
                 data = connection.recv(BUFSIZE)
                 if not data:
                     print("Connection closed, listening for new connection")
-                    connection, address = server_socket.accept()
-                    print("Accepted connection from {}".format(address))
                     continue_flag = True
+                    connection = None
                     break
                 msg += data
                 duration = time.time() - t
@@ -122,16 +142,12 @@ def start_server(port: int, analyzer) -> None:
             if continue_flag:
                 continue
             msg = msg.decode()
-            # print("Received")
             # Validating data
             json_data = json.loads(msg, encoding="utf-8")
             err_msg = validate_request_data(json_data, analyzer)
             if err_msg != "\0":
-                # print("Error occurred:", err_msg)
-                # print("Sending error message")
                 connection.sendall(err_msg.encode("utf-8"))
                 continue
-
             # Processing data
             if json_data["rubricator"] == "grnti":
                 json_data["rubricator"] = "rgnti"
@@ -146,7 +162,6 @@ def start_server(port: int, analyzer) -> None:
             }
             if "normalize" in json_data:
                 params["normalize"] = json_data["normalize"]
-            # print("Starting analyzer")
             result = analyzer.analyze(text, params)
             rubr_id = result.getRubrId()
             lang = result.getLanguage()
@@ -173,10 +188,11 @@ def start_server(port: int, analyzer) -> None:
                     proba_series = proba_series / sum(proba_series)
             proba_dict = proba_series.to_dict()
             json_response_string = json.dumps(proba_dict)
-            # print("Sending response")
-            # print(json_response_string)
             connection.sendall(json_response_string.encode("utf-8"))
-            # print("Cycle done")
         except ConnectionError:
             print("Connection aborted, listening for new connection")
-            connection, address = server_socket.accept()
+            connection = None
+            continue
+        except KeyboardInterrupt:
+            print("Terminating")
+            exit()
